@@ -129,7 +129,7 @@ const CoursePage = () => {
     useEffect(() => {
         // Update the document title when courseInfo changes
         if (courseInfo.nameofcourse) {
-            document.title = `${courseInfo.nameofcourse} - منصة والتر وايت `;
+            document.title = `${courseInfo.nameofcourse} - منصة شهد هاني `;
         }
     }, [courseInfo]);
 
@@ -197,7 +197,7 @@ const CoursePage = () => {
         return (
             <>
                 <Head>
-                    <title>جاري التحميل... - والتر وايت</title>
+                    <title>جاري التحميل... - شهد هاني</title>
                 </Head>
                 <div dir='rtl' className="min-h-screen bg-[#0A1121] text-white font-arabicUI3">
                     <div className="fixed inset-0 pointer-events-none">
@@ -215,7 +215,7 @@ const CoursePage = () => {
     return (
         <>
             <Head>
-                <title>{courseInfo.nameofcourse ? `${courseInfo.nameofcourse} - منصة والتر وايت ` : 'منصة والتر وايت '}</title>
+                <title>{courseInfo.nameofcourse ? `${courseInfo.nameofcourse} - منصة شهد هاني ` : 'منصة شهد هاني '}</title>
             </Head>
             <div dir='rtl' className="min-h-screen bg-[#0A1121] text-white font-arabicUI3">
                 {/* Animated Background */}
@@ -245,7 +245,7 @@ const CoursePage = () => {
                                             className="w-10 h-10 rounded-full border-2 border-blue-500" />
                                         <div>
                                             <p className="text-white">أ/ {courseInfo.instructor}</p>
-                                            <p className="text-sm text-gray-400">دكتور الكيمياء</p>
+                                            <p className="text-sm text-gray-400">دكتورة الكيمياء</p>
                                         </div>
                                     </div>
                                 </div>

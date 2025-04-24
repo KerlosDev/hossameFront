@@ -8,6 +8,7 @@ import { GiMolecule } from "react-icons/gi";
 import 'react-toastify/dist/ReactToastify.css';
 import Link from 'next/link';
 import GlobalApi from '../../api/GlobalApi';
+import { encrypt, decrypt } from '../../utils/encryption';
 
 const Page = ({ params }) => {
     const { idpay } = React.use(params);
@@ -64,10 +65,10 @@ const Page = ({ params }) => {
                     let numbers = [];
 
                     try {
-                        numbers = JSON.parse(data.whatsappdata?.whatsappnumber || '[]');
-                        // Ensure numbers is an array
-                        if (!Array.isArray(numbers)) {
-                            numbers = [];
+                        const whatsappData = data.whatsappdata?.whatsappnumber;
+                        if (whatsappData) {
+                            // The data is already decrypted in GlobalApi
+                            numbers = Array.isArray(whatsappData) ? whatsappData : [];
                         }
                     } catch (e) {
                         console.error('Error parsing WhatsApp data:', e);
@@ -102,16 +103,26 @@ const Page = ({ params }) => {
         }
 
         try {
+            if (!user?.primaryEmailAddress?.emailAddress) {
+                toast.error("يرجى تسجيل الدخول أولا");
+                return;
+            }
+
+            setLoading(true);
             await GlobalApi.saveWhatsAppData({
-                email: user.primaryEmailAddress?.emailAddress,
+                email: user.primaryEmailAddress.emailAddress,
                 studentPhone,
                 parentPhone
             });
+
             setHasSubmittedPhones(true);
             setShowPhoneForm(false);
             toast.success("تم حفظ الأرقام بنجاح");
         } catch (error) {
+            console.error('Error saving phone numbers:', error);
             toast.error("حدث خطأ في حفظ الأرقام");
+        } finally {
+            setLoading(false);
         }
     };
 

@@ -12,6 +12,8 @@ import { HiOutlineAcademicCap } from "react-icons/hi";
 import { BiTime } from "react-icons/bi";
 import { BsBookmarkStar } from "react-icons/bs";
 import ChemBackground from './ChemBackground';
+const { encrypt, decrypt } = require('../utils/encryption');
+const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'default-key';
 
 const Subs = () => {
     const { user, isLoaded } = useUser();
@@ -32,16 +34,36 @@ const Subs = () => {
         setIsLoading(true);
         try {
             const allCourses = await GlobalApi.getAllCourseList();
-            const checkedCourses = await Promise.all(
-                allCourses.courses.map(async (course) => {
-                    const isEnrolled = await GlobalApi.checkUserEnrollment(
-                        user.primaryEmailAddress.emailAddress,
-                        course.nicknameforcourse
-                    );
-                    return isEnrolled ? course : null;
-                })
-            );
-            setEnrolledCourses(checkedCourses.filter(Boolean));
+            const activationData = await GlobalApi.getActivationData();
+
+            // Get and decrypt activations data
+            let activations = [];
+            if (activationData?.actvition?.activit) {
+                try {
+                    // If data is string (encrypted), decrypt it
+                    if (typeof activationData.actvition.activit === 'string') {
+                        const decrypted = decrypt(activationData.actvition.activit);
+                        activations = JSON.parse(decrypted);
+                    } else {
+                        // If data is already an array
+                        activations = activationData.actvition.activit;
+                    }
+                } catch (error) {
+                    console.error('Decryption error:', error);
+                    activations = [];
+                }
+            }
+
+            // Filter enrolled courses
+            const checkedCourses = allCourses.courses.filter(course => {
+                return activations.some(activation =>
+                    activation.userEmail === user.primaryEmailAddress.emailAddress &&
+                    activation.courseId === course.nicknameforcourse &&
+                    activation.status === 'approved'
+                );
+            });
+
+            setEnrolledCourses(checkedCourses);
         } catch (error) {
             console.error('Error checking enrollments:', error);
             setEnrolledCourses([]);

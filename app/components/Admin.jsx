@@ -23,8 +23,9 @@ import { IoBookSharp } from "react-icons/io5";
 import BooksManager from './BooksManager';
 import AdminBooks from './AdminBooks';
 import LessonAnalytics from './LessonAnalytics';
-import RevenueAnalytics from './RevenueAnalytics'; 
-
+import RevenueAnalytics from './RevenueAnalytics';
+const { decrypt } = require('../utils/encryption');
+const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'default-key';
 
 const Admin = () => {
     const [numOfStu, setnumOFStu] = useState([]);
@@ -159,11 +160,27 @@ const Admin = () => {
     const dataAdmin = async () => {
         try {
             const activationResult = await GlobalApi.getActivationData();
-            const activations = JSON.parse(activationResult.actvition?.activit || '[]');
+            let activations = [];
 
-            // Extract unique student emails first
+            if (activationResult?.actvition?.activit) {
+                try {
+                    // Handle encrypted data
+                    if (typeof activationResult.actvition.activit === 'string') {
+                        const decryptedData = decrypt(activationResult.actvition.activit);
+                        activations = JSON.parse(decryptedData);
+                    } else {
+                        // If already parsed
+                        activations = activationResult.actvition.activit;
+                    }
+                } catch (decryptError) {
+                    console.error('Error decrypting activation data:', decryptError);
+                    activations = [];
+                }
+            }
+
+            // Extract unique student emails
             const uniqueStudents = [...new Set(activations
-                .filter(a => a.userEmail) // Filter out entries without email
+                .filter(a => a.userEmail)
                 .map(a => a.userEmail))];
             setnumOFStu(uniqueStudents);
 
@@ -176,8 +193,8 @@ const Admin = () => {
             });
 
         } catch (error) {
-            console.error('Error fetching activation data:', error);
-            setnumOFStu([]); // Set empty array on error
+            console.error('Error in dataAdmin:', error);
+            setnumOFStu([]);
             setAnalyticsData([]);
             setMonthlyStats({
                 total: 0,
@@ -507,12 +524,12 @@ const Admin = () => {
                                     <span className="font-arabicUI3">تقارير المبيعات</span>
                                 </button>
 
-                              
 
-                                
 
-                           
- 
+
+
+
+
 
                             </nav>
                         </div>
@@ -579,8 +596,8 @@ const Admin = () => {
                             ) : activeSection === 'lessonAnalytics' ? (
                                 <LessonAnalytics />
                             ) : activeSection === 'revenue' ? (
-                                <RevenueAnalytics /> 
-                            )  : null}
+                                <RevenueAnalytics />
+                            ) : null}
                         </div>
                     </div>
 

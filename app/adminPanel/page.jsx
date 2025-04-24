@@ -45,7 +45,7 @@ const Page = () => {
       </div>
     )
   }
-
+ 
   return (
     <div>
       <Admin />

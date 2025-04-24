@@ -6,6 +6,10 @@ import { FaUsers, FaCheckCircle, FaClock, FaTimesCircle, FaPlus, FaFilter, FaSea
 import { motion, AnimatePresence } from 'framer-motion';
 import 'react-toastify/dist/ReactToastify.css';
 import * as XLSX from 'xlsx';
+const { encrypt, decrypt } = require('../utils/encryption');
+
+// Add encryption key
+const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'default-key';
 
 const useActivationData = () => {
     const [activations, setActivations] = useState([]);
@@ -16,10 +20,34 @@ const useActivationData = () => {
         setLoading(true);
         try {
             const result = await GlobalApi.getActivationData();
-            const data = JSON.parse(result.actvition?.activit || '[]');
-            setActivations(data);
-            setError(null);
+            if (result?.actvition?.activit) {
+                // Handle potentially encrypted data
+                if (typeof result.actvition.activit === 'string') {
+                    try {
+                        // Try to decrypt if it's encrypted
+                        const decryptedData = decrypt(result.actvition.activit);
+                        const parsedData = JSON.parse(decryptedData);
+                        setActivations(Array.isArray(parsedData) ? parsedData : []);
+                    } catch (decryptError) {
+                        // If decryption fails, try parsing as unencrypted JSON
+                        try {
+                            const parsedData = JSON.parse(result.actvition.activit);
+                            setActivations(Array.isArray(parsedData) ? parsedData : []);
+                        } catch (parseError) {
+                            console.error('Data parsing error:', parseError);
+                            setActivations([]);
+                        }
+                    }
+                } else {
+                    // Handle case where data is already an object/array
+                    setActivations(Array.isArray(result.actvition.activit) ? result.actvition.activit : []);
+                }
+                setError(null);
+            } else {
+                setActivations([]);
+            }
         } catch (error) {
+            console.error('Fetch error:', error);
             setError('Failed to fetch activations');
             toast.error('حدث خطأ في تحميل البيانات');
         }
@@ -295,31 +323,13 @@ const StudentActivation = () => {
             // Update activation status
             await GlobalApi.updateActivationStatus(activationId, newStatus);
 
-            // If approving and we have an enrollmentId, update the enrollment
-            if (newStatus === 'approved' && activation.enrollmentId) {
-                try {
-
-                } catch (enrollError) {
-                    console.error('Error updating enrollment:', enrollError);
-                    // Continue with success message since activation was updated
-                }
-            }
-
             toast.success('تم تحديث الحالة بنجاح');
-            await fetchActivations(); // Refresh the list
+            await fetchActivations(); // Refresh the list after update
         } catch (error) {
             console.error('Error in handleStatusChange:', error);
-            // Even if there's an error, check if the update actually succeeded
+            toast.error('فشل تحديث الحالة');
+            // Refresh the list to ensure we have the latest state
             await fetchActivations();
-            const updatedActivation = (await GlobalApi.getActivationData())
-                .actvition?.activit
-                .find(a => a.id === activationId);
-                
-            if (updatedActivation?.status === newStatus) {
-                toast.success('تم تحديث الحالة بنجاح');
-            } else {
-                toast.error('فشل تحديث الحالة');
-            }
         }
     };
 
@@ -350,10 +360,10 @@ const StudentActivation = () => {
                 return;
             }
 
-           
+
 
             // Then create and save the activation with approved status
-            await GlobalApi.saveNewActivation({ 
+            await GlobalApi.saveNewActivation({
                 userEmail: newActivation.userEmail,
                 userName: newActivation.userEmail.split('@')[0],
                 phoneNumber: newActivation.phoneNumber,
@@ -364,7 +374,7 @@ const StudentActivation = () => {
             });
 
             // Activate the enrollment
- 
+
             toast.success('تم إضافة وتفعيل الطالب بنجاح');
             setIsModalOpen(false);
             setNewActivation({
@@ -412,7 +422,7 @@ const StudentActivation = () => {
             >
                 <FaFileExport /> <span className="hidden sm:inline">تصدير Excel</span>
             </button>
-            
+
             <button
                 onClick={handleDownloadJson}
                 className="flex items-center justify-center gap-2 px-4 lg:px-6 py-2 lg:py-3 text-sm lg:text-base bg-blue-500/20 text-blue-400 rounded-xl"
@@ -435,8 +445,8 @@ const StudentActivation = () => {
                     <FaUpload /> <span className="hidden sm:inline">رفع التفعيلات </span>
                 </label>
             </div>
-            
-            
+
+
 
             <button
                 onClick={() => setIsModalOpen(true)}
@@ -993,7 +1003,7 @@ const ActionButton = ({ activation, onStatusChange }) => {
             >
                 {buttonText}
             </button>
-         
+
 
             {showConfirmDelete && (
                 <div className="fixed inset-0  bg-black/50 flex items-center justify-center backdrop-blur-sm p-4 z-50">

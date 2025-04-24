@@ -265,8 +265,20 @@ const RevenueAnalytics = () => {
                 setLoading(true);
                 setError(null);
                 const result = await GlobalApi.getActivationData();
-                const parsedData = JSON.parse(result.actvition.activit || '[]');
-                const approvedEnrollments = parsedData.filter(e => e.status === 'approved');
+                let activations = [];
+
+                try {
+                    // Get decrypted data from the API - it's already decrypted in getActivationData
+                    activations = result.actvition?.activit || [];
+                    if (!Array.isArray(activations)) {
+                        throw new Error('Invalid data format');
+                    }
+                } catch (e) {
+                    console.error('Error processing activation data:', e);
+                    activations = [];
+                }
+
+                const approvedEnrollments = activations.filter(e => e.status === 'approved');
                 setParsedEnrollments(approvedEnrollments);
 
                 // Calculate current and previous month's revenue

@@ -1,6 +1,7 @@
 import request, { gql } from "graphql-request"
+const { encrypt, decrypt, encryptObject, decryptObject, encryptArray, decryptArray } = require('../utils/encryption');
 
-const MASTER_URL = "https://ap-south-1.cdn.hygraph.com/content/cm482x6a502j207w6ujty7gg4/master"
+const MASTER_URL = "https://ap-south-1.cdn.hygraph.com/content/cm9upm3c400m806uws4ee9kcn/master"
 
 const getAllCourseList = async () => {
   const query = gql`
@@ -332,16 +333,61 @@ const getActivationData = async () => {
       }
     }
   `;
-  const result = await request(MASTER_URL, query);
-  return result;
+
+  try {
+    const result = await request(MASTER_URL, query);
+
+    if (!result?.actvition?.activit) {
+      return { actvition: { activit: [] } };
+    }
+
+    // Handle already parsed data
+    if (Array.isArray(result.actvition.activit)) {
+      return result;
+    }
+
+    try {
+      // First try parsing as JSON
+      let parsedData = JSON.parse(result.actvition.activit);
+      return {
+        ...result,
+        actvition: {
+          ...result.actvition,
+          activit: Array.isArray(parsedData) ? parsedData : []
+        }
+      };
+    } catch (parseError) {
+      // If parsing fails, try decrypting
+      try {
+        const decryptedData = decrypt(result.actvition.activit);
+        const parsedData = JSON.parse(decryptedData);
+        return {
+          ...result,
+          actvition: {
+            ...result.actvition,
+            activit: Array.isArray(parsedData) ? parsedData : []
+          }
+        };
+      } catch (decryptError) {
+        console.error('Failed to parse/decrypt activation data:', decryptError);
+        return { actvition: { activit: [] } };
+      }
+    }
+  } catch (error) {
+    console.error('API Error:', error);
+    return { actvition: { activit: [] } };
+  }
 };
 
 const updateActivationData = async (newData) => {
+  // Encrypt the entire array
+  const encryptedData = encrypt(JSON.stringify(newData));
+
   const mutation = gql`
     mutation UpdateActivation {
       updateActvition(
         where: { id: "cm9ebuavq1dxx07pmynhukjm7" }
-        data: { activit: """${JSON.stringify(newData)}""" }
+        data: { activit: "${encryptedData}" }
       ) {
         id
       }
@@ -356,18 +402,12 @@ const updateActivationData = async (newData) => {
 const saveNewActivation = async (userData) => {
   try {
     const existingData = await getActivationData();
-    let activations = [];
-
-    try {
-      activations = JSON.parse(existingData.actvition?.activit || '[]');
-    } catch (e) {
-      activations = [];
-    }
+    let activations = existingData?.actvition?.activit || [];
 
     const newActivation = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date().toISOString(),
-      ...userData,
+      ...userData
     };
 
     activations.push(newActivation);
@@ -382,15 +422,51 @@ const saveNewActivation = async (userData) => {
 const updateActivationStatus = async (activationId, newStatus) => {
   try {
     const existingData = await getActivationData();
-    let activations = JSON.parse(existingData.actvition?.activit || '[]');
 
-    const updatedActivations = activations.map(activation =>
-      activation.id === activationId
-        ? { ...activation, status: newStatus, updatedAt: new Date().toISOString() }
-        : activation
-    );
+    // Ensure activations is an array
+    const activations = Array.isArray(existingData.actvition?.activit)
+      ? existingData.actvition.activit
+      : [];
 
-    await updateActivationData(updatedActivations);
+    // Clean the data before updating
+    const updatedActivations = activations.map(activation => {
+      if (activation.id === activationId) {
+        return {
+          ...activation,
+          status: newStatus,
+          updatedAt: new Date().toISOString(),
+          // Ensure all required fields exist
+          timestamp: activation.timestamp || new Date().toISOString(),
+          courseId: activation.courseId || '',
+          courseName: activation.courseName || '',
+          userEmail: activation.userEmail || '',
+          phoneNumber: activation.phoneNumber || '',
+          price: Number(activation.price) || 0
+        };
+      }
+      return activation;
+    });
+
+    // Stringify the array properly
+    const stringData = JSON.stringify(updatedActivations);
+    // Encrypt the stringified data
+    const encryptedData = encrypt(stringData);
+
+    const mutation = gql`
+      mutation UpdateActivation {
+        updateActvition(
+          where: { id: "cm9ebuavq1dxx07pmynhukjm7" }
+          data: { activit: "${encryptedData}" }
+        ) {
+          id
+        }
+        publishActvition(where: { id: "cm9ebuavq1dxx07pmynhukjm7" }) {
+          id
+        }
+      }
+    `;
+
+    await request(MASTER_URL, mutation);
     return true;
   } catch (error) {
     console.error('Error updating activation status:', error);
@@ -400,25 +476,37 @@ const updateActivationStatus = async (activationId, newStatus) => {
 
 const checkUserEnrollment = async (userEmail, courseId) => {
   try {
-    // First get activation data
     const activationData = await getActivationData();
     if (!activationData?.actvition?.activit) {
       console.log('No activation data found');
       return false;
     }
 
-    const activations = JSON.parse(activationData.actvition.activit || '[]');
+    let activations = [];
+    try {
+      // Handle encrypted data
+      if (typeof activationData.actvition.activit === 'string') {
+        const decryptedData = decrypt(activationData.actvition.activit);
+        activations = JSON.parse(decryptedData);
+      } else {
+        // If data is already parsed
+        activations = activationData.actvition.activit;
+      }
 
-    // Check if user has an approved activation for this course
-    const hasApprovedActivation = activations.some(
-      activation =>
-        activation.userEmail === userEmail &&
-        activation.courseId === courseId &&
-        activation.status === 'approved'
-    );
+      // Check enrollment status
+      const hasApprovedActivation = activations.some(
+        activation =>
+          activation.userEmail === userEmail &&
+          activation.courseId === courseId &&
+          activation.status === 'approved'
+      );
 
-    console.log('Enrollment check:', { userEmail, courseId, hasAccess: hasApprovedActivation });
-    return hasApprovedActivation;
+      console.log('Enrollment check:', { userEmail, courseId, hasAccess: hasApprovedActivation });
+      return hasApprovedActivation;
+    } catch (decryptError) {
+      console.error('Error decrypting/parsing activation data:', decryptError);
+      return false;
+    }
   } catch (error) {
     console.error('Error checking enrollment:', error);
     return false;
@@ -1307,55 +1395,60 @@ const getWhatsAppData = async () => {
   `;
 
   const result = await request(MASTER_URL, query);
-  return result;
+
+  try {
+    if (result?.whatsappdata?.whatsappnumber) {
+      const decryptedText = decrypt(result.whatsappdata.whatsappnumber);
+      const numbers = JSON.parse(decryptedText || '[]');
+      return { ...result, whatsappdata: { ...result.whatsappdata, whatsappnumber: numbers } };
+    }
+  } catch (e) {
+    console.error('Error decrypting WhatsApp data:', e);
+  }
+
+  return { ...result, whatsappdata: { ...result.whatsappdata, whatsappnumber: [] } };
 };
 
 const saveWhatsAppData = async (userData) => {
   try {
     const existingData = await getWhatsAppData();
-    let whatsappNumbers = [];
+    let whatsappNumbers = existingData?.whatsappdata?.whatsappnumber || [];
 
-    try {
-      // Parse existing data
-      whatsappNumbers = JSON.parse(existingData.whatsappdata?.whatsappnumber || '[]');
-      if (!Array.isArray(whatsappNumbers)) {
-        whatsappNumbers = [];
-      }
-    } catch (e) {
-      console.error('Error parsing WhatsApp data:', e);
+    if (!Array.isArray(whatsappNumbers)) {
       whatsappNumbers = [];
     }
 
-    // Check if email already exists
-    const existingUserIndex = whatsappNumbers.findIndex(
-      entry => entry.userEmail === userData.email
-    );
+    const newData = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userEmail: userData.email,
+      studentWhatsApp: userData.studentPhone,
+      parentWhatsApp: userData.parentPhone,
+      createdAt: new Date().toISOString()
+    };
 
-    if (existingUserIndex !== -1) {
-      // Email exists - update existing entry
-      whatsappNumbers[existingUserIndex] = {
-        ...whatsappNumbers[existingUserIndex],
-        studentWhatsApp: userData.studentPhone,
-        parentWhatsApp: userData.parentPhone,
+    // Find existing user entry
+    const existingIndex = whatsappNumbers.findIndex(entry => entry.userEmail === userData.email);
+
+    if (existingIndex !== -1) {
+      // Update existing entry
+      whatsappNumbers[existingIndex] = {
+        ...whatsappNumbers[existingIndex],
+        ...newData,
         updatedAt: new Date().toISOString()
       };
     } else {
-      // Email doesn't exist - add new entry
-      whatsappNumbers.push({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        userEmail: userData.email,
-        studentWhatsApp: userData.studentPhone,
-        parentWhatsApp: userData.parentPhone,
-        createdAt: new Date().toISOString()
-      });
+      // Add new entry
+      whatsappNumbers.push(newData);
     }
 
-    // Save the updated array
+    // Encrypt the array
+    const encryptedArray = encryptArray(whatsappNumbers);
+
     const mutation = gql`
       mutation UpdateWhatsAppData {
         updateWhatsappdata(
           where: { id: "cm9psso2z2wyd08o9lmwg3xev" }
-          data: { whatsappnumber: ${JSON.stringify(JSON.stringify(whatsappNumbers))} }
+          data: { whatsappnumber: "${encryptedArray}" }
         ) {
           id
         }

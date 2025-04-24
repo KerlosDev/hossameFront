@@ -13,6 +13,8 @@ import {
 import { Bar, Line } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
 import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+const { decrypt } = require('../utils/encryption');
+const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'default-key';
 
 // Register ChartJS components
 ChartJS.register(
@@ -73,22 +75,41 @@ const LessonAnalytics = () => {
         try {
             const result = await GlobalApi.getWhatsAppData();
             if (result?.whatsappdata?.whatsappnumber) {
-                // Parse the WhatsApp data array
-                const whatsappArray = JSON.parse(result.whatsappdata.whatsappnumber);
-                
-                // Convert array to object with userEmail as key
-                const whatsappObject = whatsappArray.reduce((acc, item) => {
-                    acc[item.userEmail] = {
-                        studentWhatsApp: item.studentWhatsApp,
-                        parentWhatsApp: item.parentWhatsApp
-                    };
-                    return acc;
-                }, {});
-    
-                setWhatsappNumbers(whatsappObject);
+                try {
+                    // Handle encrypted data
+                    if (typeof result.whatsappdata.whatsappnumber === 'string') {
+                        const decryptedData = decrypt(result.whatsappdata.whatsappnumber);
+                        const parsedData = JSON.parse(decryptedData);
+
+                        // Convert array to object with userEmail as key
+                        const whatsappObject = (Array.isArray(parsedData) ? parsedData : []).reduce((acc, item) => {
+                            acc[item.userEmail] = {
+                                studentWhatsApp: item.studentWhatsApp,
+                                parentWhatsApp: item.parentWhatsApp
+                            };
+                            return acc;
+                        }, {});
+
+                        setWhatsappNumbers(whatsappObject);
+                    } else {
+                        // Handle already parsed data
+                        const whatsappObject = result.whatsappdata.whatsappnumber.reduce((acc, item) => {
+                            acc[item.userEmail] = {
+                                studentWhatsApp: item.studentWhatsApp,
+                                parentWhatsApp: item.parentWhatsApp
+                            };
+                            return acc;
+                        }, {});
+                        setWhatsappNumbers(whatsappObject);
+                    }
+                } catch (decryptError) {
+                    console.error('Error decrypting WhatsApp data:', decryptError);
+                    setWhatsappNumbers({});
+                }
             }
         } catch (error) {
             console.error('Error fetching WhatsApp numbers:', error);
+            setWhatsappNumbers({});
         }
     };
 
@@ -446,8 +467,8 @@ const LessonAnalytics = () => {
                     return (
                         <div key={index}
                             className={`p-4 rounded-xl border ${isCompleted
-                                    ? 'bg-green-500/10 border-green-500/20'
-                                    : 'bg-white/5 border-white/10'
+                                ? 'bg-green-500/10 border-green-500/20'
+                                : 'bg-white/5 border-white/10'
                                 }`}
                         >
                             <div className="flex justify-between items-start">
@@ -456,7 +477,7 @@ const LessonAnalytics = () => {
                                         {exam.title}
                                     </h4>
                                     <div className="flex flex-col gap-1">
-                                        
+
                                         {isCompleted && (
                                             <div className="flex items-center gap-2">
                                                 <FaClock className="text-purple-400" />
@@ -839,7 +860,7 @@ const LessonAnalytics = () => {
                                     ))}
                                 </div>
 
-                               v
+                                v
                                 {/* Add this before Recent Activity Chart */}
                                 <ExamSection />
 
