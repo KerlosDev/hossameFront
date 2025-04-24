@@ -75,6 +75,23 @@ const getQuizResults = async () => {
   }
 };
 
+const updateQuizResults = async (userEmail, userName, quizResult) => {
+  const mutation = gql`
+  mutation UpdateQuizResults {
+    updateQuizresult(
+      where: { id: "cm9e95c4x1c7j07o3v11kjod3" }
+      data: { jsonReslut: """${JSON.stringify(quizResult)}""" }
+    ) {
+      id
+    }
+    publishQuizresult(where: { id: "cm9e95c4x1c7j07o3v11kjod3" }) {
+      id
+    }
+  }
+  `;
+
+  return await request(MASTER_URL, mutation);
+};
 const SaveGradesOfQuiz = async (userEmail, userName, userGrade, quizname, numofqus, jsonResult = null) => {
   try {
     // Get existing results first
@@ -111,6 +128,7 @@ const SaveGradesOfQuiz = async (userEmail, userName, userGrade, quizname, numofq
     throw new Error('Failed to save quiz results');
   }
 };
+
 
 const getQuizJsonResult = async (email) => {
   try {
@@ -1503,6 +1521,7 @@ export default {
   saveWhatsAppData,
   sendExamData,
   sendquiz,
+  updateQuizResults,
   updateActivationData,
   updateActivationStatus,
   updateAllCourses,

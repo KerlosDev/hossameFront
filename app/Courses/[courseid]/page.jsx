@@ -244,8 +244,8 @@ const CoursePage = () => {
                                         <img src="/prof.jpg"
                                             className="w-10 h-10 rounded-full border-2 border-blue-500" />
                                         <div>
-                                            <p className="text-white">أ/ {courseInfo.instructor}</p>
-                                            <p className="text-sm text-gray-400">دكتورة الكيمياء</p>
+                                            <p className="text-white">أ/ والتر وايت</p>
+                                            <p className="text-sm text-gray-400">دكتور الكيمياء</p>
                                         </div>
                                     </div>
                                 </div>

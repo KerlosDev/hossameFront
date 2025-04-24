@@ -275,7 +275,7 @@ const Page = ({ params }) => {
                         {/*                                                     <img src="/vod.png" alt="Vodafone Cash" className="h-16 mx-auto" />
  */}                                                    <div className="space-y-2">
                             <p className="text-lg sm:text-xl">حول على رقم فودافون كاش</p>
-                            <p className="text-2xl sm:text-4xl font-bold tracking-wider">01004365906</p>
+                            <p className="text-2xl sm:text-4xl font-bold tracking-wider">01080506463</p>
                         </div>
                     </div>
                 </div>

@@ -148,7 +148,9 @@ const QuizData = ({ params }) => {
             return {
                 question: q.qus,
                 userAnswer: selectedAnswers[index],
+                userAnswerText: q[`opation${selectedAnswers[index]}`],
                 correctAnswer: q.trueChoisevip,
+                correctAnswerText: q[`opation${q.trueChoisevip}`],
                 isCorrect
             };
         });
@@ -306,17 +308,16 @@ const QuizData = ({ params }) => {
                                                 <div className="flex-1">
                                                     <h3 className="text-lg font-medium mb-3">{result.question}</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div className={`p-4 rounded-lg ${result.isCorrect ? 'bg-emerald-500/10' : 'bg-red-500/10'
-                                                            }`}>
+                                                        <div className={`p-4 rounded-lg ${result.isCorrect ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
                                                             <p className="text-sm text-slate-400 mb-1">إجابتك</p>
                                                             <p className={result.isCorrect ? 'text-emerald-400' : 'text-red-400'}>
-                                                                {result.userAnswer}
+                                                                {result.userAnswerText}
                                                             </p>
                                                         </div>
                                                         {!result.isCorrect && (
                                                             <div className="p-4 rounded-lg bg-emerald-500/10">
                                                                 <p className="text-sm text-slate-400 mb-1">الإجابة الصحيحة</p>
-                                                                <p className="text-emerald-400">{result.correctAnswer}</p>
+                                                                <p className="text-emerald-400">{result.correctAnswerText}</p>
                                                             </div>
                                                         )}
                                                     </div>
