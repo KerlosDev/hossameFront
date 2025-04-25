@@ -607,15 +607,15 @@ const addQuiz = async (courseData) => {
 };
 
 const createCourse = async (courseData) => {
-  // Escape strings to prevent GraphQL syntax errors
-  const escapedTitle = courseData.nameofcourse.replace(/"/g, '\\"');
-  const escapedDesc = courseData.description.replace(/"/g, '\\"');
-  const escapedNickname = courseData.nicknameforcourse.replace(/"/g, '\\"');
+  // Add null checks and default values for strings
+  const escapedTitle = courseData.nameofcourse?.replace(/"/g, '\\"') || '';
+  const escapedDesc = (courseData.description || '')?.replace(/"/g, '\\"');
+  const escapedNickname = courseData.nicknameforcourse?.replace(/"/g, '\\"') || '';
 
-  // Create chapters array for mutation
-  const chaptersData = courseData.chapters.map(ch => ({
-    nameofchapter: ch.nameofchapter.replace(/"/g, '\\"'),
-    linkOfVideo: ch.linkOfVideo.replace(/"/g, '\\"')
+  // Create chapters array for mutation with null checks
+  const chaptersData = (courseData.chapters || []).map(ch => ({
+    nameofchapter: (ch.nameofchapter || '')?.replace(/"/g, '\\"'),
+    linkOfVideo: (ch.linkOfVideo || '')?.replace(/"/g, '\\"')
   }));
 
   // Build the mutation string
@@ -625,12 +625,11 @@ const createCourse = async (courseData) => {
         data: {
           nameofcourse: "${escapedTitle}"
           description: "${escapedDesc}"
-          price: ${courseData.price}
-          isfree: ${courseData.isfree}
-          dataofcourse: "${courseData.dataofcourse}"
+          price: ${Number(courseData.price) || 0}
+          isfree: ${Boolean(courseData.isfree)}
+          dataofcourse: "${courseData.dataofcourse || new Date().toISOString()}"
           nicknameforcourse: "${escapedNickname}"
-          isDraft: ${courseData.isDraft || false}
-        
+          isDraft: ${Boolean(courseData.isDraft)}
         }
       ) {
         id
@@ -651,7 +650,11 @@ const createCourse = async (courseData) => {
           }
         }
       `);
-      await addChaptersForCourse(courseData.nicknameforcourse, courseData.chapters);
+
+      // Only add chapters if they exist
+      if (courseData.chapters?.length > 0) {
+        await addChaptersForCourse(courseData.nicknameforcourse, courseData.chapters);
+      }
     }
 
     return result;
@@ -665,48 +668,48 @@ const updateCourse = async (courseId, courseData) => {
   try {
     if (!courseId) throw new Error('Course ID is required');
 
-    // Escape special characters in strings
-    const escapedTitle = courseData.nameofcourse?.replace(/"/g, '\\"') || '';
-    const escapedDesc = courseData.description?.replace(/"/g, '\\"') || '';
-    const escapedNickname = courseData.nicknameforcourse?.replace(/"/g, '\\"') || '';
+    // Add null checks and default values for strings
+    const escapedTitle = (courseData.nameofcourse || '')?.replace(/"/g, '\\"');
+    const escapedDesc = (courseData.description || '')?.replace(/"/g, '\\"');
+    const escapedNickname = (courseData.nicknameforcourse || '')?.replace(/"/g, '\\"');
 
     const mutation = gql`
-            mutation UpdateCourse {
-                updateCourse(
-                    where: { id: "${courseId}" }
-                    data: {
-                        nameofcourse: "${escapedTitle}"
-                        description: "${escapedDesc}"
-                        price: ${Number(courseData.price) || 0}
-                        isfree: ${Boolean(courseData.isfree)}
-                        isDraft: ${Boolean(courseData.isDraft)}
-                        nicknameforcourse: "${escapedNickname}"
-                        dataofcourse: "${courseData.dataofcourse || new Date().toISOString().split('T')[0]}"
-                    }
-                ) {
-                    id
-                    nameofcourse
-                    description
-                    price
-                    isfree
-                    isDraft
-                    nicknameforcourse
-                    dataofcourse
-                }
-            }
-        `;
+      mutation UpdateCourse {
+        updateCourse(
+          where: { id: "${courseId}" }
+          data: {
+            nameofcourse: "${escapedTitle}"
+            description: "${escapedDesc}"
+            price: ${Number(courseData.price) || 0}
+            isfree: ${Boolean(courseData.isfree)}
+            isDraft: ${Boolean(courseData.isDraft)}
+            nicknameforcourse: "${escapedNickname}"
+            dataofcourse: "${courseData.dataofcourse || new Date().toISOString()}"
+          }
+        ) {
+          id
+          nameofcourse
+          description
+          price
+          isfree
+          isDraft
+          nicknameforcourse
+          dataofcourse
+        }
+      }
+    `;
 
     const result = await request(MASTER_URL, mutation);
 
     // Publish the updated course
     if (result?.updateCourse?.id) {
       await request(MASTER_URL, gql`
-                mutation PublishCourse {
-                    publishCourse(where: { id: "${courseId}" }) {
-                        id
-                    }
-                }
-            `);
+        mutation PublishCourse {
+          publishCourse(where: { id: "${courseId}" }) {
+            id
+          }
+        }
+      `);
     }
 
     return result;
