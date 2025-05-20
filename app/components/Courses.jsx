@@ -29,7 +29,7 @@ const Courses = () => {
             enrollmentMap[courseId] = true;
         });
         setEnrollmentStatus(enrollmentMap);
-        
+
         getAllCourses();
     }, []);
 
@@ -44,22 +44,22 @@ const Courses = () => {
             // Filter out draft courses
             const courses = (data.courses || []).filter(course => !course.isDraft);
             setDatacourse(courses);
-    
+
             // ✅ Check enrollment status for all courses
-          /*   const token = Cookies.get('token');
-            if (token) {
-                for (const course of courses) {
-                    try {
-                        const res = await fetch(`http://localhost:9000/active/${course._id}`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        const result = await res.json();
-                        setEnrollmentStatus(prev => ({ ...prev, [course._id]: result.isHeEnrolled }));
-                    } catch (err) {
-                        console.error('Error checking enrollment:', err);
-                    }
-                }
-            } */
+            /*   const token = Cookies.get('token');
+              if (token) {
+                  for (const course of courses) {
+                      try {
+                          const res = await fetch(`http://localhost:9000/active/${course._id}`, {
+                              headers: { 'Authorization': `Bearer ${token}` }
+                          });
+                          const result = await res.json();
+                          setEnrollmentStatus(prev => ({ ...prev, [course._id]: result.isHeEnrolled }));
+                      } catch (err) {
+                          console.error('Error checking enrollment:', err);
+                      }
+                  }
+              } */
         } catch (error) {
             console.error('Error fetching courses:', error);
             setError(error.message);
@@ -67,11 +67,11 @@ const Courses = () => {
             setLoading(false);
         }
     };
-    
 
-    
+
+
     const handleSubscribe = async (courseId) => {
-         
+
 
         const course = datacourse.find(c => c._id === courseId);
 
@@ -118,10 +118,80 @@ const Courses = () => {
     const filterCoursesByLevel = (courses) => {
         if (activeLevel === 'all') return courses;
         return courses.filter(course => course.level === activeLevel);
-    };
+    }; if (loading) {
+        return (
+            <div dir="rtl" className="relative min-h-screen bg-gradient-to-br  
+                        from-blue-950 via-slate-900 to-slate-950 py-8 sm:py-12 px-2 sm:px-4 overflow-hidden">
+                {/* Background Elements */}
+                <div className="absolute inset-0 overflow-hidden opacity-50">
+                    <div className="absolute top-20 right-10 w-40 h-40 bg-blue-500/10 backdrop-blur-3xl rounded-full animate-float">
+                        <div className="w-full h-full animate-spin-slow"></div>
+                    </div>
+                    <div className="absolute top-40 left-20 w-48 h-48 bg-red-500/10 backdrop-blur-3xl rounded-full animate-float-delayed"></div>
+                    <div className="absolute left-10 bottom-10 w-48 h-48 bg-green-500/10 backdrop-blur-3xl rounded-full animate-float-delayed"></div>
+                </div>
 
-    if (loading) {
-        return <div>Loading...</div>;
+                <div className="max-w-7xl mx-auto relative z-10">
+                    {/* Header Section Skeleton */}
+                    <div className="text-center mb-8 sm:mb-16">
+                        <div className="inline-flex items-center gap-2 sm:gap-4 px-4 sm:px-8 py-2 sm:py-4 bg-white/30 dark:bg-slate-800/30 backdrop-blur-xl rounded-2xl
+                                    border border-blue-500/20 mb-6 animate-pulse">
+                            <div className="h-10 w-32 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                        </div>
+                        <div className="h-6 w-64 mx-auto bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse mt-4"></div>
+                    </div>
+
+                    {/* Level Selection Skeleton */}
+                    <div className="mb-12 px-4">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="flex flex-wrap justify-center gap-3 p-2 bg-white/10 dark:bg-slate-800/10 backdrop-blur-xl rounded-2xl">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="h-12 w-32 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Course Grid Skeleton */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 rtl-grid">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div key={i} className="animate-pulse bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-xl overflow-hidden">
+                                {/* Image Skeleton */}
+                                <div className="h-48 bg-slate-200 dark:bg-slate-700"></div>
+
+                                {/* Content Skeleton */}
+                                <div className="p-4 space-y-4">
+                                    <div className="h-8 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                                    <div className="space-y-2">
+                                        <div className="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                        <div className="h-4 w-5/6 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                    </div>
+
+                                    {/* Features Grid Skeleton */}
+                                    <div className="grid grid-cols-3 gap-2 my-4">
+                                        {[1, 2, 3].map((j) => (
+                                            <div key={j} className="h-16 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                                        ))}
+                                    </div>
+
+                                    {/* Timeline Skeleton */}
+                                    <div className="space-y-2">
+                                        <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                                        <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                                    </div>
+
+                                    {/* Buttons Skeleton */}
+                                    <div className="flex gap-3 mt-6">
+                                        <div className="h-12 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                                        <div className="h-12 w-1/3 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
@@ -371,61 +441,55 @@ const Courses = () => {
                                     </Link>
                                     {/* Subscribe Button - Takes 1/3 width */}
                                     {!item.isFree && (
-                                      <button
-                                      onClick={() => handleSubscribe(item?._id)}
-                                      disabled={enrollmentChecking}
-                                      className="flex-1 relative group"
-                                    >
-                                      {/* Neumorphic base - changes color based on enrollment status */}
-                                      <div className={`absolute border-2 group-hover:border-none ${
-                                        enrollmentStatus[item._id] ? 'border-green-400' : 'border-green-400'
-                                      } inset-0 rounded-2xl ${
-                                        enrollmentStatus[item._id] 
-                                          ? 'bg-gradient-to-br from-green-100 to-green-50 dark:from-green-700/90 dark:to-green-800/40'
-                                          : 'bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-slate-800 dark:to-slate-900'
-                                      } shadow-[6px_6px_12px_rgba(0,0,0,0.15),-6px_-6px_12px_rgba(255,255,255,0.8)]
+                                        <button
+                                            onClick={() => handleSubscribe(item?._id)}
+                                            disabled={enrollmentChecking}
+                                            className="flex-1 relative group"
+                                        >
+                                            {/* Neumorphic base - changes color based on enrollment status */}
+                                            <div className={`absolute border-2 group-hover:border-none ${enrollmentStatus[item._id] ? 'border-green-400' : 'border-green-400'
+                                                } inset-0 rounded-2xl ${enrollmentStatus[item._id]
+                                                    ? 'bg-gradient-to-br from-green-100 to-green-50 dark:from-green-700/90 dark:to-green-800/40'
+                                                    : 'bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-slate-800 dark:to-slate-900'
+                                                } shadow-[6px_6px_12px_rgba(0,0,0,0.15),-6px_-6px_12px_rgba(255,255,255,0.8)]
                                         dark:shadow-[6px_6px_12px_rgba(0,0,0,0.3),-6px_-6px_12px_rgba(30,41,59,0.5)]
                                         transform group-hover:scale-[0.98] group-active:scale-95 transition-all duration-300`}></div>
-                                      
-                                      {/* Gradient overlay - changes color based on enrollment status */}
-                                      <div className={`absolute inset-[2px] rounded-2xl ${
-                                        enrollmentStatus[item._id]
-                                          ? 'bg-gradient-to-br from-green-500/20 to-indigo-500/20 dark:from-green-400/10 dark:to-indigo-400/10'
-                                          : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-400/10 dark:to-teal-400/10'
-                                      } opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm`}></div>
-                                      
-                                      {/* Content container */}
-                                      <div className="relative flex items-center justify-center gap-3 px-6 py-3.5">
-                                        <span className={`font-arabicUI2 text-lg ${
-                                          enrollmentStatus[item._id]
-                                            ? 'text-green-700 dark:text-blue-200 group-hover:text-green-600 dark:group-hover:text-green-300'
-                                            : 'text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
-                                        } transition-colors duration-300`}>
-                                          {enrollmentStatus[item._id] ? 'مشترك بالفعل' : 'اشترك الآن'}
-                                        </span>
-                                        
-                                        <div className="relative">
-                                          {enrollmentStatus[item._id] ? (
-                                            <GiCheckMark className={`text-xl ${
-                                                enrollmentStatus[item._id]
-                                                ? 'text-green-500 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300'
-                                                : 'text-emerald-500 dark:text-emerald-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-300'
-                                            } transform group-hover:-translate-y-1 group-hover:scale-110 transition-all duration-300`} />
-                                          ) : (
-                                            <GiTakeMyMoney className="text-xl text-emerald-500 dark:text-emerald-400 
+
+                                            {/* Gradient overlay - changes color based on enrollment status */}
+                                            <div className={`absolute inset-[2px] rounded-2xl ${enrollmentStatus[item._id]
+                                                    ? 'bg-gradient-to-br from-green-500/20 to-indigo-500/20 dark:from-green-400/10 dark:to-indigo-400/10'
+                                                    : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-400/10 dark:to-teal-400/10'
+                                                } opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm`}></div>
+
+                                            {/* Content container */}
+                                            <div className="relative flex items-center justify-center gap-3 px-6 py-3.5">
+                                                <span className={`font-arabicUI2 text-lg ${enrollmentStatus[item._id]
+                                                        ? 'text-green-700 dark:text-blue-200 group-hover:text-green-600 dark:group-hover:text-green-300'
+                                                        : 'text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
+                                                    } transition-colors duration-300`}>
+                                                    {enrollmentStatus[item._id] ? 'مشترك بالفعل' : 'اشترك الآن'}
+                                                </span>
+
+                                                <div className="relative">
+                                                    {enrollmentStatus[item._id] ? (
+                                                        <GiCheckMark className={`text-xl ${enrollmentStatus[item._id]
+                                                                ? 'text-green-500 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300'
+                                                                : 'text-emerald-500 dark:text-emerald-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-300'
+                                                            } transform group-hover:-translate-y-1 group-hover:scale-110 transition-all duration-300`} />
+                                                    ) : (
+                                                        <GiTakeMyMoney className="text-xl text-emerald-500 dark:text-emerald-400 
                                                                   group-hover:text-emerald-600 dark:group-hover:text-emerald-300 
                                                                   transform group-hover:-translate-y-1 group-hover:scale-110 
                                                                   transition-all duration-300" />
-                                          )}
-                                          
-                                          <div className={`absolute inset-0 blur-sm ${
-                                            enrollmentStatus[item._id]
-                                              ? 'bg-green-400/30 dark:bg-green-300/30'
-                                              : 'bg-emerald-400/30 dark:bg-emerald-300/30'
-                                          } opacity-0 group-hover:opacity-100 scale-150 transition-all duration-300`}></div>
-                                        </div>
-                                      </div>
-                                    </button>
+                                                    )}
+
+                                                    <div className={`absolute inset-0 blur-sm ${enrollmentStatus[item._id]
+                                                            ? 'bg-green-400/30 dark:bg-green-300/30'
+                                                            : 'bg-emerald-400/30 dark:bg-emerald-300/30'
+                                                        } opacity-0 group-hover:opacity-100 scale-150 transition-all duration-300`}></div>
+                                                </div>
+                                            </div>
+                                        </button>
                                     )}
                                 </div>
                             </div>

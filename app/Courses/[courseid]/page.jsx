@@ -54,77 +54,79 @@ const CoursePage = () => {
         const fetchCourseData = async () => {
             setLoading(true);
             try {
-                // Get course data
+                // Get basic course data first
                 const courseResponse = await axios.get(`http://localhost:9000/course/${courseid}`);
+                let courseData = courseResponse.data;
 
-                if (courseResponse.data) {
-                    const courseData = courseResponse.data;
-
-                    // Set course info
-                    setCourseInfo({
-                        nameofcourse: courseData.name,
-                        description: courseData.description,
-                        price: courseData.price,
-                        isFree: courseData.isFree,
-                        level: courseData.level,
-                        nicknameforcourse: courseid
-                    });
-
-                    console.log(courseData.chapters)
-                    // Process chapters directly from the response
-                    if (courseData.chapters && courseData.chapters.length > 0) {
-                        // Set chapter details as they come from the API now
-                        setChapterDetails(courseData.chapters);
-                        // Transform chapter data to match the expected format
-                        const formattedChapters = courseData.chapters.map(chapter => ({
-                            id: chapter._id,
-                            nameofchapter: chapter.title,
-                            lessons: chapter.lessons.map(lesson => ({
-                                id: lesson._id,
-                                name: lesson.title,
-                                link: lesson.videoUrl
-                            }))
-                        }));
-
-                        setCourseVideoChapters(formattedChapters);
-                    }
-
-                    // Set exams directly from the response
-                    if (courseData.exams && courseData.exams.length > 0) {
-                        const examData = courseData.exams.map(exam => ({
-                            id: exam._id,
-                            title: exam.title
-                        }));
-
-                        setExams(examData);
-                    }
-                }
+                // Set basic course info
+                setCourseInfo({
+                    nameofcourse: courseData.name,
+                    description: courseData.description,
+                    price: courseData.price,
+                    isFree: courseData.isFree,
+                    level: courseData.level,
+                    nicknameforcourse: courseid
+                });
 
                 // Check if user is logged in by getting token from cookies
                 const token = Cookies.get('token');
+                let chaptersData = courseData.chapters || [];
+                let enrollmentStatus = false;
 
                 if (token) {
                     setUser({ token });
-                    const link = `http://localhost:9000/active/${courseid}`;
+                    try {
+                        // Check enrollment status
+                        const enrollmentResponse = await axios.get(`http://localhost:9000/active/${courseid}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
 
-                    // Check if user is enrolled in the course
-                    const enrollmentResponse = await axios.get(link, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
+                        if (enrollmentResponse.data) {
+                            enrollmentStatus = enrollmentResponse.data.isHeEnrolled;
+                            setIsEnrolled(enrollmentStatus);
+                            setEnrollmentMessage(enrollmentResponse.data.message);
 
-                    if (enrollmentResponse.data) {
-                        // Check for enrollment status and message
-                        if (enrollmentResponse.data.message === "الطالب مشترك في هذا الكورس" ||
-                            (enrollmentResponse.data.data && enrollmentResponse.data.data.isHeEnrolled)) {
-                            setIsEnrolled(true);
-                            setEnrollmentMessage("الطالب مشترك في هذا الكورس");
-                        } else if (enrollmentResponse.data.data) {
-                            setIsEnrolled(enrollmentResponse.data.data.isHeEnrolled);
+                            // If enrolled, use the detailed chapter data from enrollment response
+                            if (enrollmentStatus && enrollmentResponse.data.enrollment?.courseId?.chapters) {
+                                chaptersData = enrollmentResponse.data.enrollment.courseId.chapters;
+                            }
                         }
+                    } catch (error) {
+                        console.error("Error checking enrollment:", error);
+                        setIsEnrolled(false);
                     }
+                }                // Process chapters
+                if (chaptersData.length > 0) {
+                    setChapterDetails(chaptersData);
+                    const formattedChapters = chaptersData.map(chapter => ({
+                        id: chapter._id,
+                        nameofchapter: chapter.title,
+                        lessons: enrollmentStatus ? (chapter.lessons?.map(lesson => ({
+                            id: lesson._id,
+                            name: lesson.title,
+                            link: lesson.videoUrl
+                        })) || []) : [
+                            // Add default locked lessons for non-enrolled users
+                            { id: '1', name: 'الدرس الأول', locked: true },
+                            { id: '2', name: 'الدرس الثاني', locked: true },
+                            { id: '3', name: 'الدرس الثالث', locked: true },
+                            { id: '4', name: 'الدرس الرابع', locked: true }
+                        ]
+                    }));
+                    setCourseVideoChapters(formattedChapters);
                 }
+
+                // Set exams
+                if (courseData.exams && courseData.exams.length > 0) {
+                    const examData = courseData.exams.map(exam => ({
+                        id: exam._id,
+                        title: exam.title
+                    }));
+                    setExams(examData);
+                }
+
             } catch (error) {
                 console.error("Error fetching course data:", error);
             } finally {
@@ -159,21 +161,21 @@ const CoursePage = () => {
         setActiveIndex2(index);
         setActiveIndex(1000);
     };
- 
+
 
     const handleLessonClick = async (chapterIndex, lessonIndex) => {
         // ✅ لو نفس الدرس اللي شغال، بلاش تبعت تاني
         if (activeChapter === chapterIndex && activeLesson === lessonIndex) return;
-    
+
         setActiveChapter(chapterIndex);
         setActiveLesson(lessonIndex);
         setActiveIndex2(100); // Reset exam selection
-    
+
         const selectedLesson = courseVideoChapters[chapterIndex]?.lessons[lessonIndex];
         const selectedChapter = chapterDetails[chapterIndex];
-    
+
         if (!selectedLesson || !selectedChapter || !courseid || !user?.token) return;
-    
+
         try {
             await axios.post(
                 'http://localhost:9000/watchHistory',
@@ -189,15 +191,15 @@ const CoursePage = () => {
                     }
                 }
             );
-        
+
             console.log('✅ تم تسجيل المشاهدة');
         } catch (error) {
             console.error('❌ خطأ في تسجيل المشاهدة:', error);
         }
-        
+
     };
-    
-    
+
+
     // Show locked content if no user or not enrolled
     const isContentLocked = !user || !isEnrolled;
 
@@ -309,165 +311,164 @@ const CoursePage = () => {
 
                                     <VideoPlayer
                                         videoUrl={currentVideoUrl}
-                                         
+
                                     ></VideoPlayer>
-                            ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="text-center">
-                                    <FaLock className="text-4xl text-gray-600 mx-auto mb-4" />
-                                    <p className="text-gray-400">
-                                        {!user ? "قم بتسجيل الدخول للوصول إلى المحتوى" :
-                                            !isEnrolled ? "اشترك في الكورس للوصول إلى المحتوى" :
-                                                courseVideoChapters.length === 0 ? "لا يوجد دروس متاحة حالياً" :
-                                                    "اختر درساً للمشاهدة"}
-                                    </p>
-                                </div>
-                            </div>
-                                )}
-                        </div>
-
-                        {/* Chapter and Lesson Info */}
-                        <div className="bg-gray-800/50 rounded-xl p-6">
-                            <h2 className="text-xl font-bold text-white mb-2">
-                                {courseVideoChapters.length > 0 ? courseVideoChapters[activeChapter]?.nameofchapter : "المحتوى مقفل"}
-                            </h2>
-                            <h3 className="text-lg text-gray-200 mb-4">
-                                {courseVideoChapters.length > 0 && courseVideoChapters[activeChapter]?.lessons.length > 0
-                                    ? courseVideoChapters[activeChapter]?.lessons[activeLesson]?.name
-                                    : "قم بالاشتراك لعرض المحتوى"}
-                            </h3>
-                        </div>
-                    </div>
-
-                    {/* Chapters List */}
-                    <div className="bg-gray-800/50 rounded-xl h-fit">
-                        <div className="p-4 border-b border-gray-700">
-                            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                                </svg>
-                                محتويات الكورس
-                            </h3>
-                        </div>
-                        <div className="divide-y divide-gray-700/50 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-700">
-                            {courseVideoChapters.length > 0 ? (
-                                courseVideoChapters.map((chapter, chapterIndex) => (
-                                    <div key={chapter.id} className="p-4 hover:bg-gray-700/30 transition-colors">
-                                        <div className="mb-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                                    <span className="text-blue-400 font-medium">{chapterIndex + 1}</span>
-                                                </div>
-                                                <h4 className="text-white font-medium">{chapter.nameofchapter}</h4>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2 pr-4">
-                                            {chapter.lessons.map((lesson, lessonIndex) => (
-                                                <button
-                                                    key={lesson.id}
-                                                    onClick={() => isEnrolled && handleLessonClick(chapterIndex, lessonIndex)}
-                                                    className={`w-full p-3 flex items-center gap-3 rounded-lg transition-all duration-200 
-                                                            ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                            ? 'bg-blue-500/20 shadow-lg shadow-blue-500/10'
-                                                            : 'hover:bg-gray-700/30'}`}
-                                                    disabled={!isEnrolled}
-                                                >
-                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors
-                                                            ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                            ? 'bg-blue-500'
-                                                            : 'bg-gray-700'}`}
-                                                    >
-                                                        {isEnrolled ? (
-                                                            <FaPlay className={`${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                                ? 'text-white'
-                                                                : 'text-gray-400'
-                                                                } text-xs`} />
-                                                        ) : (
-                                                            <FaLock className="text-gray-400 text-xs" />
-                                                        )}
-                                                    </div>
-                                                    <div className="text-right flex-1">
-                                                        <p className={`text-sm transition-colors ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                            ? 'text-blue-400 font-medium'
-                                                            : 'text-gray-300'
-                                                            }`}>
-                                                            {lesson.name}
-                                                        </p>
-                                                    </div>
-                                                </button>
-                                            ))}
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="text-center">
+                                            <FaLock className="text-4xl text-gray-600 mx-auto mb-4" />
+                                            <p className="text-gray-400">
+                                                {!user ? "قم بتسجيل الدخول للوصول إلى المحتوى" :
+                                                    !isEnrolled ? "اشترك في الكورس للوصول إلى المحتوى" :
+                                                        courseVideoChapters.length === 0 ? "لا يوجد دروس متاحة حالياً" :
+                                                            "اختر درساً للمشاهدة"}
+                                            </p>
                                         </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="p-4 text-center text-gray-400">
-                                    {isEnrolled ? "لا يوجد دروس متاحة حالياً" : "محتويات الكورس مقفلة - يرجى الاشتراك لعرض المحتوى"}
-                                </div>
-                            )}
+                                )}
+                            </div>
+
+                            {/* Chapter and Lesson Info */}
+                            <div className="bg-gray-800/50 rounded-xl p-6">
+                                <h2 className="text-xl font-bold text-white mb-2">
+                                    {courseVideoChapters.length > 0 ? courseVideoChapters[activeChapter]?.nameofchapter : "المحتوى مقفل"}
+                                </h2>
+                                <h3 className="text-lg text-gray-200 mb-4">
+                                    {courseVideoChapters.length > 0 && courseVideoChapters[activeChapter]?.lessons.length > 0
+                                        ? courseVideoChapters[activeChapter]?.lessons[activeLesson]?.name
+                                        : "قم بالاشتراك لعرض المحتوى"}
+                                </h3>
+                            </div>
                         </div>
 
-                        {/* Quiz Section */}
-                        <div className="border-t border-gray-700">
+                        {/* Chapters List */}
+                        <div className="bg-gray-800/50 rounded-xl h-fit">
                             <div className="p-4 border-b border-gray-700">
-                                <h3 className="text-lg font-medium text-white">الاختبارات</h3>
+                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                    محتويات الكورس
+                                </h3>
                             </div>
-                            <div className="divide-y divide-gray-700">
-                                {exams?.length > 0 ? (
-                                    exams.map((quiz, index) => (
-                                        <Link
-                                            href={isEnrolled ? `/quiz/${quiz.id}` : '#'}
-                                            key={index}
-                                            className={`w-full p-4 flex items-center gap-4 hover:bg-gray-700/50 transition
-                                                ${activeIndex2 === index ? 'bg-blue-500/20' : ''}
-                                                ${!isEnrolled ? 'pointer-events-none opacity-50' : ''}`}
-                                        >
-                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center
-                                                ${activeIndex2 === index ? 'bg-blue-500' : 'bg-gray-700'}`}>
-                                                {isEnrolled ? <BiSolidPencil className="text-white" /> : <FaLock className="text-gray-400" />}
+                            <div className="divide-y divide-gray-700/50 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-700">
+                                {courseVideoChapters.length > 0 ? (
+                                    courseVideoChapters.map((chapter, chapterIndex) => (
+                                        <div key={chapter.id} className="p-4 hover:bg-gray-700/30 transition-colors">
+                                            <div className="mb-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                                        <span className="text-blue-400 font-medium">{chapterIndex + 1}</span>
+                                                    </div>
+                                                    <h4 className="text-white font-medium">{chapter.nameofchapter}</h4>
+                                                </div>
+                                            </div>                                            <div className="space-y-2 pr-4">
+                                                {chapter.lessons.map((lesson, lessonIndex) => (
+                                                    <button
+                                                        key={lesson.id}
+                                                        onClick={() => isEnrolled && handleLessonClick(chapterIndex, lessonIndex)}
+                                                        className={`w-full p-3 flex items-center gap-3 rounded-lg transition-all duration-200 
+                                                            ${activeChapter === chapterIndex && activeLesson === lessonIndex
+                                                                ? 'bg-blue-500/20 shadow-lg shadow-blue-500/10'
+                                                                : 'hover:bg-gray-700/30'}`}
+                                                        disabled={!isEnrolled || lesson.locked}
+                                                    >
+                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors
+                                                            ${activeChapter === chapterIndex && activeLesson === lessonIndex
+                                                                ? 'bg-blue-500'
+                                                                : 'bg-gray-700'}`}
+                                                        >
+                                                            {!isEnrolled || lesson.locked ? (
+                                                                <FaLock className="text-gray-400 text-xs" />
+                                                            ) : (
+                                                                <FaPlay className={`${activeChapter === chapterIndex && activeLesson === lessonIndex
+                                                                    ? 'text-white'
+                                                                    : 'text-gray-400'
+                                                                    } text-xs`} />
+                                                            )}
+                                                        </div>
+                                                        <div className="text-right flex-1">
+                                                            <p className={`text-sm transition-colors ${activeChapter === chapterIndex && activeLesson === lessonIndex
+                                                                ? 'text-blue-400 font-medium'
+                                                                : lesson.locked ? 'text-gray-500' : 'text-gray-300'
+                                                                }`}>
+                                                                {lesson.name}
+                                                            </p>
+                                                        </div>
+                                                    </button>
+                                                ))}
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-white font-medium">{quiz.title}</p>
-                                                <p className="text-sm text-gray-400">اختبار تفاعلي</p>
-                                            </div>
-                                        </Link>
+                                        </div>
                                     ))
                                 ) : (
                                     <div className="p-4 text-center text-gray-400">
-                                        لا يوجد اختبارات متاحة حالياً
+                                        {isEnrolled ? "لا يوجد دروس متاحة حالياً" : "محتويات الكورس مقفلة - يرجى الاشتراك لعرض المحتوى"}
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Quiz Section */}
+                            <div className="border-t border-gray-700">
+                                <div className="p-4 border-b border-gray-700">
+                                    <h3 className="text-lg font-medium text-white">الاختبارات</h3>
+                                </div>
+                                <div className="divide-y divide-gray-700">
+                                    {exams?.length > 0 ? (
+                                        exams.map((quiz, index) => (
+                                            <Link
+                                                href={isEnrolled ? `/quiz/${quiz.id}` : '#'}
+                                                key={index}
+                                                className={`w-full p-4 flex items-center gap-4 hover:bg-gray-700/50 transition
+                                                ${activeIndex2 === index ? 'bg-blue-500/20' : ''}
+                                                ${!isEnrolled ? 'pointer-events-none opacity-50' : ''}`}
+                                            >
+                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center
+                                                ${activeIndex2 === index ? 'bg-blue-500' : 'bg-gray-700'}`}>
+                                                    {isEnrolled ? <BiSolidPencil className="text-white" /> : <FaLock className="text-gray-400" />}
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-white font-medium">{quiz.title}</p>
+                                                    <p className="text-sm text-gray-400">اختبار تفاعلي</p>
+                                                </div>
+                                            </Link>
+                                        ))
+                                    ) : (
+                                        <div className="p-4 text-center text-gray-400">
+                                            لا يوجد اختبارات متاحة حالياً
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Show login prompt if no user */}
-            {!user && !loading && (
-                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 text-center p-8 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-md w-full">
-                    <h2 className="text-2xl font-bold mb-4">يرجى تسجيل الدخول</h2>
-                    <p className="text-gray-400 mb-4">قم بتسجيل الدخول للوصول إلى محتوى الكورس</p>
-                    <Link href="/sign-in">
-                        <button className="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-xl">
-                            تسجيل الدخول
-                        </button>
-                    </Link>
-                </div>
-            )}
+                {/* Show login prompt if no user */}
+                {!user && !loading && (
+                    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 text-center p-8 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-md w-full">
+                        <h2 className="text-2xl font-bold mb-4">يرجى تسجيل الدخول</h2>
+                        <p className="text-gray-400 mb-4">قم بتسجيل الدخول للوصول إلى محتوى الكورس</p>
+                        <Link href="/sign-in">
+                            <button className="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-xl">
+                                تسجيل الدخول
+                            </button>
+                        </Link>
+                    </div>
+                )}
 
-            {/* Show enrollment prompt if user is logged in but not enrolled */}
-            {user && !isEnrolled && !loading && (
-                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 text-center p-8 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-md w-full">
-                    <h2 className="text-2xl font-bold mb-4">لم يتم تفعيل الكورس بعد</h2>
-                    <p className="text-gray-400 mb-4">يرجى الاشتراك للحصول على كامل المحتوى</p>
-                    <Link href={`/payment/${courseInfo.nicknameforcourse || courseid}`}>
-                        <button className="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-xl">
-                            الذهاب لصفحة الدفع
-                        </button>
-                    </Link>
-                </div>
-            )}
-        </div >
+                {/* Show enrollment prompt if user is logged in but not enrolled */}
+                {user && !isEnrolled && !loading && (
+                    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 text-center p-8 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-md w-full">
+                        <h2 className="text-2xl font-bold mb-4">لم يتم تفعيل الكورس بعد</h2>
+                        <p className="text-gray-400 mb-4">يرجى الاشتراك للحصول على كامل المحتوى</p>
+                        <Link href={`/payment/${courseInfo.nicknameforcourse || courseid}`}>
+                            <button className="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-xl">
+                                الذهاب لصفحة الدفع
+                            </button>
+                        </Link>
+                    </div>
+                )}
+            </div >
         </>
     );
 };
