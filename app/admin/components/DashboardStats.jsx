@@ -72,7 +72,7 @@ export default function DashboardStats() {
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 font-arabicUI3 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {/* Total Students */}
             <div className="group bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/40 transition-all duration-500 hover:transform hover:scale-105">
                 <div className="relative w-full aspect-square flex items-center justify-center">
@@ -81,7 +81,7 @@ export default function DashboardStats() {
                         <div className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3 transform group-hover:scale-110 transition-transform duration-500">
                             <Users className="text-blue-400" size={24} />
                         </div>
-                        <span className="text-3xl font-bold text-blue-400 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
+                        <span className="text-3xl  font-arabicUI3 text-blue-400 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
                             {stats.newStudents}
                         </span>
                         <span className="text-sm text-white/60 mt-1">طالب جديد</span>
@@ -98,7 +98,7 @@ export default function DashboardStats() {
                         <div className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3 transform group-hover:scale-110 transition-transform duration-500">
                             <CheckCircle className="text-green-400" size={24} />
                         </div>
-                        <span className="text-3xl font-bold text-green-400 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
+                        <span className="text-3xl  font-arabicUI3 text-green-400 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
                             {stats.completionRate}%
                         </span>
                         <span className="text-sm text-white/60 mt-1">معدل الإكمال</span>
@@ -115,7 +115,7 @@ export default function DashboardStats() {
                         <div className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3 transform group-hover:scale-110 transition-transform duration-500">
                             <CreditCard className="text-purple-400" size={24} />
                         </div>
-                        <span className="text-3xl font-bold text-purple-400 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
+                        <span className="text-3xl  font-arabicUI3 text-purple-400 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
                             {stats.totalRevenue} ج.م
                         </span>
                         <span className="text-sm text-white/60 mt-1">الإيرادات</span>
@@ -132,7 +132,7 @@ export default function DashboardStats() {
                         <div className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3 transform group-hover:scale-110 transition-transform duration-500">
                             <AlertTriangle className="text-amber-400" size={24} />
                         </div>
-                        <span className="text-3xl font-bold text-amber-400 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
+                        <span className="text-3xl  font-arabicUI3 text-amber-400 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
                             {stats.pendingEnrollments}
                         </span>
                         <span className="text-sm text-white/60 mt-1">طلب معلق</span>

@@ -26,10 +26,9 @@ const Page = () => {
         if (token) {
             router.replace("/"); // أو "/dashboard"
         }
-    }, []);
-
-    const [loading, setLoading] = useState(false);
+    }, []); const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1); // For multi-step form
+    const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -44,11 +43,84 @@ const Page = () => {
         setStep(step - 1);
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+
+        // Name validation
+        if (!formData.name || formData.name.length < 3) {
+            newErrors.name = 'الاسم يجب أن يكون 3 أحرف على الأقل';
+        }
+
+        // Email validation (Gmail only)
+        if (!formData.email) {
+            newErrors.email = 'البريد الإلكتروني مطلوب';
+        } else if (!/^[\w-\.]+@gmail\.com$/.test(formData.email)) {
+            newErrors.email = 'يجب استخدام بريد Gmail فقط';
+        }
+
+        // Phone validation
+        const phoneRegex = /^01[0125][0-9]{8}$/;
+        if (!formData.phoneNumber) {
+            newErrors.phoneNumber = 'رقم الهاتف مطلوب';
+        } else if (!phoneRegex.test(formData.phoneNumber)) {
+            newErrors.phoneNumber = 'رقم الهاتف غير صحيح';
+        }
+
+        // Parent phone validation
+        if (!formData.parentPhone) {
+            newErrors.parentPhone = 'رقم هاتف ولي الأمر مطلوب';
+        } else if (!phoneRegex.test(formData.parentPhone)) {
+            newErrors.parentPhone = 'رقم الهاتف غير صحيح';
+        } else if (formData.parentPhone === formData.phoneNumber) {
+            newErrors.parentPhone = 'رقم هاتف ولي الأمر يجب أن يكون مختلف عن رقم هاتف الطالب';
+        }
+
+        // Password validation
+        if (!formData.password) {
+            newErrors.password = 'كلمة المرور مطلوبة';
+        } else if (formData.password.length < 8) {
+            newErrors.password = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+        } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(formData.password)) {
+            newErrors.password = 'كلمة المرور يجب أن تحتوي على أحرف وأرقام';
+        }
+
+        // Confirm Password validation
+        if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = 'كلمة المرور وتأكيدها غير متطابقين';
+        }
+
+        // Gender validation
+        if (!formData.gender) {
+            newErrors.gender = 'النوع مطلوب';
+        } else if (!['ذكر', 'انثي'].includes(formData.gender)) {
+            newErrors.gender = 'النوع يجب أن يكون ذكر أو انثي';
+        }
+
+        // Level validation
+        if (!formData.level) {
+            newErrors.level = 'المرحلة مطلوبة';
+        } else if (!["الصف الثالث الثانوي", "الصف الثاني الثانوي", "الصف الأول الثانوي"].includes(formData.level)) {
+            newErrors.level = 'المرحلة غير صحيحة';
+        }
+
+        // Government validation
+        if (!formData.government) {
+            newErrors.government = 'المحافظة مطلوبة';
+        } else if (!egyptGovernments.includes(formData.government)) {
+            newErrors.government = 'المحافظة غير مدرجة';
+        }
+
+        return newErrors;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (formData.password !== formData.confirmPassword) {
-            alert('كلمة المرور وتأكيدها غير متطابقين!');
+        const errors = validateForm();
+        if (Object.keys(errors).length > 0) {
+            // هنا ممكن تضيف كود لعرض الأخطاء للمستخدم
+            // زي استخدام useState لتخزين الأخطاء وعرضها جنب الحقول
+            alert('من فضلك صحح الأخطاء في النموذج');
             return;
         }
 
@@ -78,7 +150,7 @@ const Page = () => {
                 // Save token and username in cookies
                 Cookies.set("token", data.token, { expires: 30 });
                 Cookies.set("username", data.user.name, { expires: 30 });
-              
+
                 Cookies.set("username", encodeURIComponent(data.user.name), {
                     expires: 30
                 });
@@ -221,16 +293,18 @@ const Page = () => {
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                             <FaEnvelope className="text-blue-300 group-focus-within:text-white transition-colors" />
-                                        </div>
-                                        <input
+                                        </div>                                        <input
                                             type="email"
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
                                             placeholder="البريد الإلكتروني"
-                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            className={`pr-10 w-full py-3 bg-white/10 border ${errors.email ? 'border-red-400' : 'border-white/20'} rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all`}
                                             required
                                         />
+                                        {errors.email && (
+                                            <p className="mt-1 text-red-400 text-sm font-arabicUI2">{errors.email}</p>
+                                        )}
                                     </div>
 
                                     <div className="relative group">
@@ -391,31 +465,35 @@ const Page = () => {
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                             <FaLock className="text-blue-300 group-focus-within:text-white transition-colors" />
-                                        </div>
-                                        <input
+                                        </div>                                        <input
                                             type="password"
                                             name="password"
                                             value={formData.password}
                                             onChange={handleChange}
                                             placeholder="كلمة المرور"
-                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI2 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            className={`pr-10 w-full py-3 bg-white/10 border ${errors.password ? 'border-red-400' : 'border-white/20'} rounded-xl placeholder-white/50 text-white font-arabicUI2 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all`}
                                             required
                                         />
+                                        {errors.password && (
+                                            <p className="mt-1 text-red-400 text-sm font-arabicUI2">{errors.password}</p>
+                                        )}
                                     </div>
 
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                             <FaLock className="text-blue-300 group-focus-within:text-white transition-colors" />
-                                        </div>
-                                        <input
+                                        </div>                                        <input
                                             type="password"
                                             name="confirmPassword"
                                             value={formData.confirmPassword}
                                             onChange={handleChange}
                                             placeholder="تأكيد كلمة المرور"
-                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI2 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            className={`pr-10 w-full py-3 bg-white/10 border ${errors.confirmPassword ? 'border-red-400' : 'border-white/20'} rounded-xl placeholder-white/50 text-white font-arabicUI2 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all`}
                                             required
                                         />
+                                        {errors.confirmPassword && (
+                                            <p className="mt-1 text-red-400 text-sm font-arabicUI2">{errors.confirmPassword}</p>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center">

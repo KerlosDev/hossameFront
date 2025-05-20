@@ -59,6 +59,7 @@ const CourseManager = () => {
         totalExams: 0
     });
     const [examPageSize] = useState(10);
+
     const totalSteps = 3;
 
     const handleImageChange = async (e) => {
@@ -482,7 +483,7 @@ const CourseManager = () => {
                             )}
                         </div>
                         <div>
-                            <h3 className="text-lg font-medium text-white">
+                            <h3 className="text-lg font-arabicUI3 text-white">
                                 {processingStatus.step === 4 ? 'اكتمل' : 'جاري المعالجة'}
                             </h3>
                             <p className="text-gray-400 text-sm">{processingStatus.message}</p>
@@ -515,7 +516,7 @@ const CourseManager = () => {
                 </div>
             </div>
             <div className="ml-3">
-                <p className={`text-sm font-medium ${isActive ? 'text-white' : 'text-gray-400'}`}>
+                <p className={`text-sm font-arabicUI3 ${isActive ? 'text-white' : 'text-gray-400'}`}>
                     {label}
                 </p>
             </div>
@@ -605,10 +606,10 @@ const CourseManager = () => {
     );
 
     return (
-        <div className="p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-lg min-h-screen">
+        <div className="p-6 bg-gradient-to-br  font-arabicUI3 from-gray-900 to-gray-800 rounded-lg shadow-lg min-h-screen">
             {/* Header Section */}
             <div className="flex justify-between items-center mb-6 bg-gradient-to-r from-gray-800/80 to-gray-900/90 p-4 rounded-xl border border-white/10">
-                <h2 className="text-2xl font-bold text-white font-arabicUI3">إدارة الكورسات</h2>
+                <h2 className="text-2xl font-arabicUI3 text-white  ">إدارة الكورسات</h2>
                 <button
                     onClick={() => setShowForm(true)}
                     className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300"
@@ -667,7 +668,7 @@ const CourseManager = () => {
                                 <stat.icon className="text-2xl" />
                             </div>
                             <div>
-                                <p className="text-gray-400 text-sm font-medium">{stat.label}</p>
+                                <p className="text-gray-400 text-sm font-arabicUI3">{stat.label}</p>
                                 <h3 className="text-3xl font-arabicUI3 text-white mt-1">
                                     {stat.value}
                                 </h3>
@@ -725,7 +726,7 @@ const CourseManager = () => {
 
                             {/* Status Badge */}
                             <div className="absolute top-4 left-4 z-20 transform group-hover:-translate-x-1 transition-transform duration-300">
-                                <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-2
+                                <div className={`px-3 py-1.5 rounded-full text-xs font-arabicUI3 flex items-center gap-2
                                     backdrop-blur-md shadow-lg border transition-colors duration-300
                                     ${course.isDraft ?
                                         'bg-yellow-500/20 text-yellow-300 border-yellow-400/30 group-hover:bg-yellow-500/30' :
@@ -738,7 +739,7 @@ const CourseManager = () => {
                             {/* Price Badge */}
                             {!course.isFree && (
                                 <div className="absolute top-4 right-4 z-20 transform group-hover:translate-x-1 transition-transform duration-300">
-                                    <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r 
+                                    <div className="px-3 py-1.5 rounded-full text-xs font-arabicUI3 bg-gradient-to-r 
                                                   from-amber-500/90 to-amber-600/90 text-white shadow-lg backdrop-blur-sm border border-amber-400/30
                                                   group-hover:from-amber-600/90 group-hover:to-amber-700/90 transition-all duration-300
                                                   flex items-center gap-2">
@@ -752,13 +753,13 @@ const CourseManager = () => {
                             <div className="absolute bottom-4 left-4 right-4 z-20 flex justify-between transform translate-y-0 
                                           group-hover:translate-y-1 transition-transform duration-300">
                                 <div className="flex gap-2">
-                                    <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 backdrop-blur-md
+                                    <div className="px-3 py-1.5 rounded-full text-xs font-arabicUI3 bg-white/10 backdrop-blur-md
                                                  text-white border border-white/20 group-hover:bg-white/20 transition-colors duration-300
                                                  flex items-center gap-2">
                                         <FaVideo className="text-blue-400" size={12} />
                                         <span>{course.chapters?.length || 0} فصول</span>
                                     </div>
-                                    <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 backdrop-blur-md
+                                    <div className="px-3 py-1.5 rounded-full text-xs font-arabicUI3 bg-white/10 backdrop-blur-md
                                                  text-white border border-white/20 group-hover:bg-white/20 transition-colors duration-300
                                                  flex items-center gap-2">
                                         <FaQuestionCircle className="text-purple-400" size={12} />
@@ -873,7 +874,7 @@ const CourseManager = () => {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             {/* Course Title */}
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium text-gray-400">عنوان الكورس</label>
+                                                <label className="text-sm font-arabicUI3 text-gray-400">عنوان الكورس</label>
                                                 <input
                                                     type="text"
                                                     value={newCourse.name}
@@ -887,7 +888,7 @@ const CourseManager = () => {
 
                                             {/* Course Level */}
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium text-gray-400">المستوى الدراسي</label>
+                                                <label className="text-sm font-arabicUI3 text-gray-400">المستوى الدراسي</label>
                                                 <select
                                                     value={newCourse.level}
                                                     onChange={(e) => setNewCourse({ ...newCourse, level: e.target.value })}
@@ -904,7 +905,7 @@ const CourseManager = () => {
 
                                             {/* Course Description */}
                                             <div className="md:col-span-2 space-y-2">
-                                                <label className="text-sm font-medium text-gray-400">وصف الكورس</label>
+                                                <label className="text-sm font-arabicUI3 text-gray-400">وصف الكورس</label>
                                                 <textarea
                                                     value={newCourse.description}
                                                     onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
@@ -918,7 +919,7 @@ const CourseManager = () => {
 
                                             {/* Course Image */}
                                             <div className="md:col-span-2 space-y-2">
-                                                <label className="text-sm font-medium text-gray-400">صورة الكورس</label>
+                                                <label className="text-sm font-arabicUI3 text-gray-400">صورة الكورس</label>
                                                 <div className="flex gap-6 items-start">
                                                     {newCourse.imageUrl && (
                                                         <div className="relative w-32 h-32 rounded-xl overflow-hidden">
@@ -969,93 +970,110 @@ const CourseManager = () => {
                                     </div>
                                 )}
 
-                                {/* Step 2: Chapters and Content */}
-                                {currentStep === 2 && editingCourse && (
+                                {currentStep === 2 && (
                                     <div className="space-y-6">
-                                        {/* Add chapter controls here */}
-                                        <div className="flex justify-between items-center">
-                                            <h4 className="text-lg font-medium text-white flex items-center gap-2">
-                                                <FaBook className="text-blue-400" />
-                                                فصول الكورس
-                                            </h4>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowChapterModal(true)}
-                                                className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 
-                                                         rounded-xl transition-all duration-300 flex items-center gap-2"
-                                            >
-                                                <FaPlus size={14} />
-                                                إضافة فصل جديد
-                                            </button>
-                                        </div>
+                                        {!editingCourse ? (
+                                            // Show message when adding new course
+                                            <div className="text-center py-12">
+                                                <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <FaBook className="text-blue-400 text-2xl" />
+                                                </div>
+                                                <h4 className="text-white text-lg font-arabicUI3 mb-2">
+                                                    يجب حفظ الكورس أولاً
+                                                </h4>
+                                                <p className="text-gray-400">
+                                                    قم بإكمال المعلومات الأساسية وحفظ الكورس قبل إضافة الفصول
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* Existing chapter management UI */}
+                                                <div className="flex justify-between items-center">
+                                                    <h4 className="text-lg font-arabicUI3 text-white flex items-center gap-2">
+                                                        <FaBook className="text-blue-400" />
+                                                        فصول الكورس
+                                                    </h4>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowChapterModal(true)}
+                                                        className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 
+                                 rounded-xl transition-all duration-300 flex items-center gap-2"
+                                                    >
+                                                        <FaPlus size={14} />
+                                                        إضافة فصل جديد
+                                                    </button>
+                                                </div>
 
-                                        {/* Chapters grid */}
-                                        <div className="grid md:grid-cols-2 gap-4">
-                                            {/* Existing chapters mapping */}
-                                            {courseChapters.map((chapter, index) => (
-                                                <div key={chapter._id || `temp-chapter-${index}`} className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-4">
-                                                    <div className="flex justify-between items-center">
-                                                        <h5 className="text-white font-medium flex items-center gap-2">
-                                                            <span className="text-blue-400">#{index + 1}</span>
-                                                            {chapter.title}
-                                                        </h5>
-                                                        <div className="flex items-center gap-2">
-                                                            <button type="button" onClick={() => setEditingChapter(chapter)} className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors">
-                                                                <FaEdit size={14} />
-                                                            </button>
-                                                            <button type="button" onClick={() => handleDeleteChapter(chapter._id)} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
-                                                                <FaTrash size={14} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
 
-                                                    {/* Lessons List */}
-                                                    <div className="pl-6 border-r border-white/10 space-y-3">
-                                                        {chapter.lessons?.map((lesson, lessonIndex) => (
-                                                            <div key={lesson._id || `temp-lesson-${chapter._id}-${lessonIndex}`} className="flex justify-between items-center">
-                                                                <span className="text-gray-400 flex items-center gap-2">
-                                                                    <FaVideo size={12} />
-                                                                    {lesson.title}
-                                                                </span>
+                                                {/* Chapters grid */}
+                                                <div className="grid md:grid-cols-2 gap-4">
+                                                    {/* Existing chapters mapping */}
+                                                    {courseChapters.map((chapter, index) => (
+                                                        <div key={chapter._id || `temp-chapter-${index}`} className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-4">
+                                                            <div className="flex justify-between items-center">
+                                                                <h5 className="text-white font-arabicUI3 flex items-center gap-2">
+                                                                    <span className="text-blue-400">#{index + 1}</span>
+                                                                    {chapter.title}
+                                                                </h5>
                                                                 <div className="flex items-center gap-2">
-                                                                    <button type="button" onClick={() => setEditingLesson({ ...lesson, chapterId: chapter._id })} className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors">
-                                                                        <FaEdit size={12} />
+                                                                    <button type="button" onClick={() => setEditingChapter(chapter)} className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors">
+                                                                        <FaEdit size={14} />
                                                                     </button>
-                                                                    <button type="button" onClick={() => handleDeleteLesson(chapter._id, lesson._id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
-                                                                        <FaTrash size={12} />
+                                                                    <button type="button" onClick={() => handleDeleteChapter(chapter._id)} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                                                                        <FaTrash size={14} />
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                        ))}
 
-                                                        {/* Add Lesson Form */}
-                                                        <div className="flex gap-2">
-                                                            <input
-                                                                type="text"
-                                                                value={lessonInputs[chapter._id]?.title || ''}
-                                                                onChange={(e) => setLessonInputs(prev => ({ ...prev, [chapter._id]: { ...prev[chapter._id], title: e.target.value } }))}
-                                                                placeholder="عنوان الدرس"
-                                                                className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                                                            />
-                                                            <input
-                                                                type="text"
-                                                                value={lessonInputs[chapter._id]?.videoUrl || ''}
-                                                                onChange={(e) => setLessonInputs(prev => ({ ...prev, [chapter._id]: { ...prev[chapter._id], videoUrl: e.target.value } }))}
-                                                                placeholder="رابط الفيديو"
-                                                                className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleAddLesson(chapter._id)}
-                                                                className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors"
-                                                            >
-                                                                <FaPlus size={14} />
-                                                            </button>
+                                                            {/* Lessons List */}
+                                                            <div className="pl-6 border-r border-white/10 space-y-3">
+                                                                {chapter.lessons?.map((lesson, lessonIndex) => (
+                                                                    <div key={lesson._id || `temp-lesson-${chapter._id}-${lessonIndex}`} className="flex justify-between items-center">
+                                                                        <span className="text-gray-400 flex items-center gap-2">
+                                                                            <FaVideo size={12} />
+                                                                            {lesson.title}
+                                                                        </span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <button type="button" onClick={() => setEditingLesson({ ...lesson, chapterId: chapter._id })} className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors">
+                                                                                <FaEdit size={12} />
+                                                                            </button>
+                                                                            <button type="button" onClick={() => handleDeleteLesson(chapter._id, lesson._id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                                                                                <FaTrash size={12} />
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+
+                                                                {/* Add Lesson Form */}
+                                                                <div className="flex gap-2">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={lessonInputs[chapter._id]?.title || ''}
+                                                                        onChange={(e) => setLessonInputs(prev => ({ ...prev, [chapter._id]: { ...prev[chapter._id], title: e.target.value } }))}
+                                                                        placeholder="عنوان الدرس"
+                                                                        className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        value={lessonInputs[chapter._id]?.videoUrl || ''}
+                                                                        onChange={(e) => setLessonInputs(prev => ({ ...prev, [chapter._id]: { ...prev[chapter._id], videoUrl: e.target.value } }))}
+                                                                        placeholder="رابط الفيديو"
+                                                                        className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleAddLesson(chapter._id)}
+                                                                        className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors"
+                                                                    >
+                                                                        <FaPlus size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    ))}
                                                 </div>
-                                            ))}
-                                        </div>
+                                            </>
+                                        )}
                                     </div>
                                 )}
 
@@ -1072,7 +1090,7 @@ const CourseManager = () => {
                                                             <FaBookmark className="text-blue-400 text-lg" />
                                                         </div>
                                                         <div>
-                                                            <h4 className="text-white font-medium">كورس مجاني</h4>
+                                                            <h4 className="text-white font-arabicUI3">كورس مجاني</h4>
                                                             <p className="text-gray-400 text-sm">يمكن للطلاب الوصول مجاناً</p>
                                                         </div>
                                                     </div>
@@ -1113,7 +1131,7 @@ const CourseManager = () => {
                                                             <FaArchive className="text-yellow-400 text-lg" />
                                                         </div>
                                                         <div>
-                                                            <h4 className="text-white font-medium">وضع المسودة</h4>
+                                                            <h4 className="text-white font-arabicUI3">وضع المسودة</h4>
                                                             <p className="text-gray-400 text-sm">الكورس غير مرئي للطلاب</p>
                                                         </div>
                                                     </div>
@@ -1136,7 +1154,7 @@ const CourseManager = () => {
                                         {/* Exams Section */}
                                         <div className="space-y-4 mt-6">
                                             <div className="flex justify-between items-center">
-                                                <h4 className="text-lg font-medium text-white flex items-center gap-2">
+                                                <h4 className="text-lg font-arabicUI3 text-white flex items-center gap-2">
                                                     <FaQuestionCircle className="text-blue-400" />
                                                     الامتحانات المرتبطة
                                                 </h4>
@@ -1154,7 +1172,7 @@ const CourseManager = () => {
                                                                 <FaQuestionCircle className="text-blue-400" />
                                                             </div>
                                                             <div>
-                                                                <h5 className="text-white font-medium">{exam.title}</h5>
+                                                                <h5 className="text-white font-arabicUI3">{exam.title}</h5>
                                                                 <p className="text-sm text-gray-400">
                                                                     {exam.questions?.length || 0} سؤال • {exam.duration} دقيقة
                                                                 </p>
@@ -1247,7 +1265,7 @@ const CourseManager = () => {
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl w-full max-w-md 
                                   border border-white/10 shadow-2xl p-6">
-                        <h3 className="text-xl font-semibold text-white mb-4">إضافة فصل جديد</h3>
+                        <h3 className="text-xl font-arabicUI3 text-white mb-4">إضافة فصل جديد</h3>
                         <div className="space-y-4">
                             <input
                                 type="text"
@@ -1292,7 +1310,7 @@ const CourseManager = () => {
             {editingChapter && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl w-full max-w-md border border-white/10 shadow-2xl p-6">
-                        <h3 className="text-xl font-semibold text-white mb-4">تعديل الفصل</h3>
+                        <h3 className="text-xl font-arabicUI3 text-white mb-4">تعديل الفصل</h3>
                         <div className="space-y-4">
                             <input
                                 type="text"
@@ -1323,7 +1341,7 @@ const CourseManager = () => {
             {editingLesson && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl w-full max-w-md border border-white/10 shadow-2xl p-6">
-                        <h3 className="text-xl font-semibold text-white mb-4">تعديل الدرس</h3>
+                        <h3 className="text-xl font-arabicUI3 text-white mb-4">تعديل الدرس</h3>
                         <div className="space-y-4">
                             <input
                                 type="text"

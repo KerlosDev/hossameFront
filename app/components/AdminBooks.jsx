@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import BooksManager from './BooksManager';
+import BooksManager from '../admin/components/BooksManager';
 import BookOrders from './BookOrders';
 
 export default function AdminBooks() {

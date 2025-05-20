@@ -32,35 +32,36 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
             icon: <FileText size={20} />,
             tab: 'examMangae'
         },
+        
         {
             id: 5,
-            label: "التحليلات والتقارير",
-            icon: <FileText size={20} />,
-            tab: 'analytics'
-        },
-        {
-            id: 6,
             label: "المدفوعات",
             icon: <CreditCard size={20} />,
             tab: 'payments'
         },
         {
-            id: 7,
+            id: 6,
             label: "احصائيات الامتحانات",
             icon: <CreditCard size={20} />,
             tab: 'exam'
         },
         {
-            id: 8,
+            id: 7,
             label: " متابعة الطلاب",
             icon: <CreditCard size={20} />,
             tab: 'followup'
         },
         {
-            id: 9,
+            id: 8,
             label: "إدارة العروض",
             icon: <FileText size={20} />,
             tab: 'offers'
+        },
+        {
+            id: 9,
+            label: "إدارة الكتب",
+            icon: <FileText size={20} />,
+            tab: 'books'
         },
         {
             id: 10,
@@ -77,7 +78,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
     };
 
     return (
-        <aside className="lg:col-span-3 bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500 h-fit">
+        <aside className="lg:col-span-3 font-arabicUI3 bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500 h-fit">
             <div className="flex flex-col items-center mb-8">
                 <div className="group relative">
                     <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full mb-4 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:shadow-indigo-500/50">
@@ -89,12 +90,10 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
                     </div>
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                            <h2 className="text-2xl font-arabicUI2 text-white group-hover:text-indigo-300 transition-colors duration-300">{adminData.name}</h2>
+                            <h2 className="text-2xl font-arabicUI3 text-white group-hover:text-indigo-300 transition-colors duration-300">{adminData.name}</h2>
                         </div>
-                        <p className="text-indigo-200 text-sm mb-2">{adminData.role}</p>
-                        <div className="flex items-center justify-center gap-2 text-xs text-white/60">
-                            <span>آخر تسجيل دخول: {formatDate(adminData.lastLogin)}</span>
-                        </div>
+                        <p className="text-indigo-200 font-arabicUI3 text-sm mb-2">{adminData.role}</p>
+                        
                     </div>
                 </div>
             </div>

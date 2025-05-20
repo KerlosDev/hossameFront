@@ -22,6 +22,14 @@ const Courses = () => {
     const [enrollmentChecking, setEnrollmentChecking] = useState(false);
 
     useEffect(() => {
+        // Check localStorage for enrolled courses
+        const enrolledCourses = JSON.parse(localStorage.getItem('enrolledCourses') || '[]');
+        const enrollmentMap = {};
+        enrolledCourses.forEach(courseId => {
+            enrollmentMap[courseId] = true;
+        });
+        setEnrollmentStatus(enrollmentMap);
+        
         getAllCourses();
     }, []);
 
@@ -113,32 +121,14 @@ const Courses = () => {
     };
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:from-blue-950 dark:via-slate-900 dark:to-slate-950">
-                <div className="flex flex-col items-center">
-                    <FaAtom className="text-4xl text-blue-500 animate-spin mb-4" />
-                    <p className="text-xl font-arabicUI2 text-slate-700 dark:text-slate-300">جاري تحميل الكورسات...</p>
-                </div>
-            </div>
-        );
+        return <div>Loading...</div>;
     }
 
     if (error) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:from-blue-950 dark:via-slate-900 dark:to-slate-950">
-                <div className="p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-xl shadow-lg border border-red-300 max-w-md">
-                    <h2 className="text-2xl font-arabicUI2 text-red-600 dark:text-red-400 mb-4">حدث خطأ</h2>
-                    <p className="text-slate-700 dark:text-slate-300 font-arabicUI3">{error}</p>
-                    <button
-                        onClick={getAllCourses}
-                        className="mt-6 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-arabicUI2"
-                    >
-                        إعادة المحاولة
-                    </button>
-                </div>
-            </div>
-        );
+        return <div>Error: {error}</div>;
     }
+
+    const filteredCourses = filterCoursesByLevel(datacourse);
 
     return (
         <div dir="rtl" className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 
@@ -218,7 +208,7 @@ const Courses = () => {
                 </div>
                 {/* Filtered Courses Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 rtl-grid">
-                    {filterCoursesByLevel(datacourse).map((item, index) => (
+                    {filteredCourses.map((item, index) => (
                         <div key={item._id} className={`group relative bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl
                                       rounded-xl sm:rounded-2xl overflow-hidden border transform
                                       hover:scale-105 transition-all duration-500 hover:shadow-xl

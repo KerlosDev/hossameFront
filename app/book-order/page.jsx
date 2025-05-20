@@ -1,16 +1,13 @@
 'use client';
-import { useUser } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
-import { IoBookSharp, IoArrowForward } from 'react-icons/io5';
-import { BsCheck2Circle, BsArrowRight, BsStars } from 'react-icons/bs';
-import { FiPackage } from 'react-icons/fi';
-import { RiBookLine } from 'react-icons/ri';
-import { IoSchoolOutline } from 'react-icons/io5';
-import { motion, AnimatePresence } from 'framer-motion';
-import GlobalApi from '../api/GlobalApi';
+import { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Cookies from 'js-cookie';
+import { motion, AnimatePresence } from 'framer-motion';
+import { IoBookSharp, IoSchoolOutline } from 'react-icons/io5';
+import { BsStars, BsCheck2Circle, BsArrowRight } from 'react-icons/bs';
+import { RiBookLine } from 'react-icons/ri';
 
 const egyptianGovernorates = [
     "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "البحر الأحمر", "البحيرة",
@@ -21,10 +18,9 @@ const egyptianGovernorates = [
 ];
 
 export default function BookOrder() {
-    const { user, isLoaded, isSignedIn } = useUser();
     const router = useRouter();
     const [userOrders, setUserOrders] = useState([]);
-    const [showHistory, setShowHistory] = useState(true);
+    const [showHistory, setShowHistory] = useState(false); // Changed to false to show book order form first
     const [validationErrors, setValidationErrors] = useState({});
     const [books, setBooks] = useState([]);
     const [booksLoading, setBooksLoading] = useState(true);
@@ -40,24 +36,26 @@ export default function BookOrder() {
     const [step, setStep] = useState(1);
     const [isAnimating, setIsAnimating] = useState(false);
 
+    // Initial data loading
     useEffect(() => {
-        if (isLoaded && !isSignedIn) {
-            router.push('/sign-in?redirect_url=' + encodeURIComponent('/book-order'));
-        }
-    }, [isLoaded, isSignedIn, router]);
-
-    useEffect(() => {
-        if (isSignedIn && user) {
-            fetchUserOrders();
-            fetchBooks();
-        }
-    }, [isSignedIn, user]);
+        fetchBooks();
+        fetchUserOrders();
+    }, []);
 
     const fetchBooks = async () => {
         try {
-            const result = await GlobalApi.getBooks();
-            const booksList = JSON.parse(result.bookOrder?.books || '[]');
-            setBooks(booksList.filter(book => book.isAvailable !== false));
+            setBooksLoading(true);
+            const token = Cookies.get('token');
+            const response = await fetch('http://localhost:9000/books', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch books');
+            }
+            const data = await response.json();
+            setBooks(data);
         } catch (error) {
             console.error('Error fetching books:', error);
             toast.error('حدث خطأ أثناء تحميل الكتب');
@@ -68,31 +66,109 @@ export default function BookOrder() {
 
     const fetchUserOrders = async () => {
         try {
-            const result = await GlobalApi.getBookOrders();
-            const orders = JSON.parse(result.bookOrder.books || '[]');
-            const userOrders = orders.filter(order => order.userEmail === user.primaryEmailAddress.emailAddress);
-            setUserOrders(userOrders);
-            // Set showHistory based on whether user has orders
-            setShowHistory(userOrders.length > 0);
+            const token = Cookies.get('token');
+            const response = await fetch('http://localhost:9000/book-orders', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch user orders');
+            }
+            const data = await response.json();
+            setUserOrders(data);
         } catch (error) {
-            console.error('Error fetching orders:', error);
+            console.error('Error fetching user orders:', error);
+            toast.error('حدث خطأ أثناء تحميل الطلبات السابقة');
+        }
+    }; const validateForm = () => {
+        const errors = {};
+        if (!formData.name) errors.name = 'الاسم مطلوب';
+        if (!formData.phone) errors.phone = 'رقم الهاتف مطلوب';
+        else if (!/^01[0125][0-9]{8}$/.test(formData.phone)) {
+            errors.phone = 'رقم الهاتف غير صحيح';
+        }
+        if (!formData.governorate) errors.governorate = 'المحافظة مطلوبة';
+        if (!formData.address) errors.address = 'العنوان مطلوب';
+        if (formData.selectedBooks.length === 0) errors.books = 'يجب اختيار كتاب واحد على الأقل';
+
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    }; const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+
+        try {
+            setLoading(true);
+            const token = Cookies.get('token');
+
+            // Calculate total price here to double-check with server
+            const calculatedTotalPrice = formData.selectedBooks.reduce((total, bookId) => {
+                const book = books.find(b => b._id === bookId);
+                return total + (book?.price || 0);
+            }, 0);
+
+            const orderData = {
+                ...formData,
+                books: formData.selectedBooks.map(bookId => ({
+                    bookId,
+                    quantity: 1
+                })),
+                totalPrice: calculatedTotalPrice
+            };
+
+            console.log('Sending order data:', orderData); // Debug log
+
+            const response = await fetch('http://localhost:9000/book-orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                credentials: 'include', // Include credentials
+                body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create order');
+            }
+
+            const data = await response.json();
+            console.log('Order created:', data); // Debug log
+
+            setShowSuccess(true);
+            toast.success('تم تقديم الطلب بنجاح');
+            setFormData({
+                name: '',
+                phone: '',
+                governorate: '',
+                address: '',
+                selectedBooks: [],
+            });
+            await fetchUserOrders();
+        } catch (error) {
+            console.error('Error creating order:', error);
+            toast.error(error.message || 'حدث خطأ أثناء تقديم الطلب');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const validateForm = () => {
-        const errors = {};
-        if (!formData.phone.match(/^01[0125][0-9]{8}$/)) {
-            errors.phone = 'يجب أن يكون رقم الهاتف 11 رقم ويبدأ ب 01';
-        }
-        if (formData.name.length < 3) {
-            errors.name = 'يجب أن يكون الاسم أكثر من 3 أحرف';
-        }
-        if (!formData.address || formData.address.length < 10) {
-            errors.address = 'يجب إدخال العنوان بالتفصيل';
-        }
-        setValidationErrors(errors);
-        return Object.keys(errors).length === 0;
+    const handleBookSelection = (bookId) => {
+        setFormData(prev => {
+            const selectedBooks = prev.selectedBooks.includes(bookId)
+                ? prev.selectedBooks.filter(id => id !== bookId)
+                : [...prev.selectedBooks, bookId];
+            return { ...prev, selectedBooks };
+        });
     };
+
+    // Calculate total price using _id from MongoDB
+    const totalPrice = formData.selectedBooks.reduce((total, bookId) => {
+        const book = books.find(b => b._id === bookId);
+        return total + (book?.price || 0);
+    }, 0);
 
     const nextStep = () => {
         setIsAnimating(true);
@@ -110,72 +186,6 @@ export default function BookOrder() {
         }, 300);
     };
 
-    const handleBookSelection = (bookId) => {
-        setFormData(prev => {
-            const bookIdStr = bookId.toString();
-            const selectedBooks = prev.selectedBooks.includes(bookIdStr)
-                ? prev.selectedBooks.filter(id => id !== bookIdStr)
-                : [...prev.selectedBooks, bookIdStr];
-            return { ...prev, selectedBooks };
-        });
-    };
-
-    // Calculate total price
-    const totalPrice = formData.selectedBooks.reduce((total, bookId) => {
-        const book = books.find(b => b.id.toString() === bookId);
-        return total + (book?.price || 0);
-    }, 0);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-        if (formData.selectedBooks.length === 0) {
-            toast.error('الرجاء اختيار كتاب واحد على الأقل');
-            return;
-        }
-        setLoading(true);
-        try {
-            const selectedBooksData = formData.selectedBooks.map(bookId => {
-                const book = books.find(b => b.id.toString() === bookId);
-                return {
-                    bookId,
-                    bookName: book?.name,
-                    price: book?.price
-                };
-            });
-            const orderData = {
-                ...formData,
-                userEmail: user.primaryEmailAddress.emailAddress,
-                userName: user.fullName,
-                books: selectedBooksData,
-                totalPrice: totalPrice,
-                status: 'pending',
-                orderDate: new Date().toISOString()
-            };
-            await GlobalApi.saveBookOrder(orderData);
-            await fetchUserOrders();
-            setShowSuccess(true);
-            setFormData({
-                name: '',
-                phone: '',
-                governorate: '',
-                address: '',
-                selectedBooks: [],
-            });
-            setTimeout(() => {
-                router.push('/');
-            }, 2000);
-        } catch (error) {
-            if (error.message === 'لديك طلب معلق لنفس الكتاب') {
-                toast.error(error.message);
-            } else {
-                toast.error('حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -183,20 +193,9 @@ export default function BookOrder() {
         });
     };
 
-    if (!isLoaded) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-            </div>
-        );
-    }
-
-    if (!isSignedIn) {
-        return null; // Router will handle redirect
-    }
 
     return (
-        <div className="min-h-screen bg-[url('/chemistry-pattern.png')] bg-fixed bg-opacity-5 
+        <div className="min-h-screen bg-fixed bg-opacity-5 
                         bg-gradient-to-br from-blue-50 via-white to-slate-50 
                         dark:from-blue-950 dark:via-slate-900 dark:to-slate-950">
             {/* Animated Background */}
@@ -209,7 +208,7 @@ export default function BookOrder() {
             <div className="relative max-w-6xl mx-auto px-4 py-16">
                 {/* Enhanced Header with 3D Effect */}
                 <div className="text-center mb-16 transform hover:scale-105 transition-transform duration-500">
-                    <motion.div 
+                    <motion.div
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="inline-block p-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 mb-6"
@@ -241,7 +240,7 @@ export default function BookOrder() {
                                 className="px-6 py-3 rounded-xl bg-blue-500 text-white font-arabicUI3
                                      hover:bg-blue-600 transition-colors duration-300"
                             >
-                                {showHistory ? 'طلب جديد' : 'عرض طلباتي'}
+                                {showHistory ? 'طلب جديد' : 'عرض طلباتي السابقة'}
                             </button>
                         )}
                     </div>
@@ -253,12 +252,11 @@ export default function BookOrder() {
                                 لا يوجد طلبات سابقة
                             </div>
                         ) : (
-                            userOrders.map((order, index) => (
+                            userOrders.map((order) => (
                                 <motion.div
-                                    key={order.id}
+                                    key={order._id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
                                     className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-2xl
                                              shadow-lg border border-blue-500/20"
                                 >
@@ -266,7 +264,7 @@ export default function BookOrder() {
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h3 className="text-xl font-arabicUI2 text-slate-800 dark:text-white">
-                                                    {order.bookName}
+                                                    الطلب رقم: {order._id.slice(-6)}
                                                 </h3>
                                                 <p className="text-slate-600 dark:text-slate-300">
                                                     تاريخ الطلب: {new Date(order.orderDate).toLocaleDateString('ar-EG')}
@@ -274,35 +272,31 @@ export default function BookOrder() {
                                             </div>
                                             <div className={`px-4 py-2 rounded-xl text-sm font-arabicUI3
                                                 ${order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
-                                                  order.status === 'completed' ? 'bg-green-500/20 text-green-500' :
-                                                  'bg-red-500/20 text-red-500'}`}>
+                                                    order.status === 'completed' ? 'bg-green-500/20 text-green-500' :
+                                                        'bg-red-500/20 text-red-500'}`}>
                                                 {order.status === 'pending' ? 'قيد الانتظار' :
-                                                 order.status === 'completed' ? 'تم التسليم' : 'ملغي'}
+                                                    order.status === 'completed' ? 'تم التسليم' : 'ملغي'}
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                                             <div className="space-y-2">
                                                 <p className="text-slate-600 dark:text-slate-400">
-                                                    <span className="font-semibold">الاسم: </span>
-                                                    {order.name}
+                                                    <span className="font-semibold">الكتب: </span>
+                                                    {order.books.map((book, idx) => (
+                                                        <span key={book.bookId}>
+                                                            {books.find(b => b._id === book.bookId)?.name}
+                                                            {idx < order.books.length - 1 ? ' ، ' : ''}
+                                                        </span>
+                                                    ))}
                                                 </p>
-                                                <p className="text-slate-600 dark:text-slate-400">
-                                                    <span className="font-semibold">رقم الهاتف: </span>
-                                                    {order.phone}
-                                                </p>
-                                                <p className="text-slate-600 dark:text-slate-400">
-                                                    <span className="font-semibold">المحافظة: </span>
-                                                    {order.governorate}
-                                                </p>
-                                            </div>
-                                            <div className="space-y-2">
                                                 <p className="text-slate-600 dark:text-slate-400">
                                                     <span className="font-semibold">العنوان: </span>
-                                                    {order.address}
+                                                    {order.governorate} - {order.address}
                                                 </p>
-                                                <p className="text-slate-600 dark:text-slate-400">
-                                                    <span className="font-semibold">السعر: </span>
-                                                    {order.price} جنيه
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-xl font-bold text-green-500">
+                                                    {order.totalPrice} جنيه
                                                 </p>
                                             </div>
                                         </div>
@@ -312,53 +306,52 @@ export default function BookOrder() {
                         )}
                     </div>
                 ) : (
-                    <motion.div 
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
-                    >
-                        {/* Book Selection Cards */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                        {/* Book Selection Section */}
                         <div className="space-y-6">
                             <h2 className="text-2xl font-arabicUI2 text-slate-800 dark:text-white mb-6">
                                 اختر الكتب المطلوبة
                             </h2>
-                            <div className="grid gap-6">
-                                {books.map((book) => (
-                                    <motion.div
-                                        key={book.id}
-                                        whileHover={{ scale: 1.02, y: -5 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className={`relative group cursor-pointer`}
-                                        onClick={() => handleBookSelection(book.id)}
-                                    >
-                                        <div className={`relative rounded-2xl p-6 transform transition-all duration-300
-                                            ${formData.selectedBooks.includes(book.id.toString())
+                            {booksLoading ? (
+                                <div className="text-center">
+                                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                </div>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {books.map((book) => (
+                                        <motion.div
+                                            key={book._id}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className={`relative group cursor-pointer`}
+                                            onClick={() => handleBookSelection(book._id)}
+                                        >
+                                            <div className={`relative rounded-2xl p-6 transform transition-all duration-300                                            ${formData.selectedBooks.includes(book._id)
                                                 ? 'bg-gradient-to-r from-blue-500 to-purple-500 shadow-xl shadow-blue-500/20'
                                                 : 'bg-white/80 dark:bg-slate-800/80 hover:shadow-2xl hover:shadow-blue-500/10'
-                                            }`}
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h3 className={`text-xl font-arabicUI2 mb-2
-                                                        ${formData.selectedBooks.includes(book.id.toString()) ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div>                                        <h3 className={`text-xl font-arabicUI2 mb-2
+                                                            ${formData.selectedBooks.includes(book._id) ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
                                                         {book.name}
-                                                    </h3>
-                                                    <p className={`text-3xl font-bold
-                                                        ${formData.selectedBooks.includes(book.id.toString()) ? 'text-white' : 'text-blue-500'}`}>
-                                                        {book.price} جنيه
-                                                    </p>
-                                                </div>
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center
-                                                    ${formData.selectedBooks.includes(book.id.toString())
+                                                    </h3>                                        <p className={`text-3xl font-bold
+                                                            ${formData.selectedBooks.includes(book._id) ? 'text-white' : 'text-blue-500'}`}>
+                                                            {book.price} جنيه
+                                                        </p>
+                                                    </div>
+                                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center                                        ${formData.selectedBooks.includes(book._id)
                                                         ? 'bg-white text-blue-500'
                                                         : 'bg-blue-500/10 text-blue-500'}`}>
-                                                    <BsCheck2Circle className="text-2xl" />
+                                                        <BsCheck2Circle className="text-2xl" />
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+
                             {formData.selectedBooks.length > 0 && (
                                 <div className="mt-4 p-4 bg-blue-500/10 rounded-xl">
                                     <p className="text-xl font-arabicUI2 text-slate-800 dark:text-white">
@@ -367,8 +360,9 @@ export default function BookOrder() {
                                 </div>
                             )}
                         </div>
-                        {/* Enhanced Form Section */}
-                        <motion.form 
+
+                        {/* Order Form Section */}
+                        <motion.form
                             onSubmit={handleSubmit}
                             className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl
                                      border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300"
@@ -458,7 +452,7 @@ export default function BookOrder() {
                                     </div>
                                 </div>
                             </div>
-                            <motion.button 
+                            <motion.button
                                 type="submit"
                                 disabled={loading}
                                 whileHover={{ scale: 1.02 }}
@@ -481,19 +475,19 @@ export default function BookOrder() {
                                 )}
                             </motion.button>
                         </motion.form>
-                    </motion.div>
+                    </div>
                 )}
             </div>
             {/* Enhanced Success Modal */}
             <AnimatePresence>
                 {showSuccess && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
                     >
-                        <motion.div 
+                        <motion.div
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
@@ -520,8 +514,8 @@ export default function BookOrder() {
                     </motion.div>
                 )}
             </AnimatePresence>
-            
-            <ToastContainer 
+
+            <ToastContainer
                 position="top-right"
                 rtl={true}
                 theme="colored"

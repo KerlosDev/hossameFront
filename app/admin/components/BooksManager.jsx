@@ -1,9 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import GlobalApi from '../api/GlobalApi';
 import { toast } from 'react-toastify';
 import { BsPlus, BsPencil, BsTrash } from 'react-icons/bs';
+import Cookies from 'js-cookie';
 
 export default function BooksManager() {
     const [books, setBooks] = useState([]);
@@ -24,9 +24,19 @@ export default function BooksManager() {
 
     const fetchBooks = async () => {
         try {
-            const result = await GlobalApi.getBooks();
-            const booksList = JSON.parse(result.bookOrder?.books || '[]');
-            setBooks(booksList);
+            setLoading(true);
+            const token = Cookies.get('token');
+            const response = await fetch('http://localhost:9000/books', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch books');
+            }
+            const data = await response.json();
+            // Update the state outside of render
+            setBooks(data);
         } catch (error) {
             console.error('Error fetching books:', error);
             toast.error('حدث خطأ أثناء تحميل الكتب');
@@ -38,26 +48,30 @@ export default function BooksManager() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const token = Cookies.get('token');
             const newBook = {
-                id: editingBook ? editingBook.id : Date.now().toString(),
                 ...formData,
                 price: Number(formData.price)
             };
 
-            let updatedBooks;
-            if (editingBook) {
-                updatedBooks = books.map(book => 
-                    book.id === editingBook.id ? newBook : book
-                );
-            } else {
-                updatedBooks = [...books, newBook];
+            const response = await fetch(`http://localhost:9000/books${editingBook ? `/${editingBook._id}` : ''}`, {
+                method: editingBook ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(newBook)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save book');
             }
 
-            await GlobalApi.saveBooks(updatedBooks);
             await fetchBooks();
             resetForm();
             toast.success(editingBook ? 'تم تحديث الكتاب بنجاح' : 'تم إضافة الكتاب بنجاح');
         } catch (error) {
+            console.error('Error saving book:', error);
             toast.error('حدث خطأ أثناء حفظ الكتاب');
         }
     };
@@ -77,11 +91,22 @@ export default function BooksManager() {
         if (!window.confirm('هل أنت متأكد من حذف هذا الكتاب؟')) return;
 
         try {
-            const updatedBooks = books.filter(book => book.id !== bookId);
-            await GlobalApi.saveBooks(updatedBooks);
+            const token = Cookies.get('token');
+            const response = await fetch(`http://localhost:9000/books/${bookId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete book');
+            }
+
             await fetchBooks();
             toast.success('تم حذف الكتاب بنجاح');
         } catch (error) {
+            console.error('Error deleting book:', error);
             toast.error('حدث خطأ أثناء حذف الكتاب');
         }
     };
@@ -108,7 +133,7 @@ export default function BooksManager() {
                         type="text"
                         placeholder="اسم الكتاب"
                         value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20"
                         required
                     />
@@ -116,14 +141,14 @@ export default function BooksManager() {
                         type="number"
                         placeholder="السعر"
                         value={formData.price}
-                        onChange={(e) => setFormData({...formData, price: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                         className="px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20"
                         required
                     />
                     <textarea
                         placeholder="وصف الكتاب"
                         value={formData.description}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         className="px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20 md:col-span-2"
                     />
                 </div>
@@ -147,31 +172,37 @@ export default function BooksManager() {
             </form>
 
             <div className="grid gap-4">
-                {books.map((book) => (
-                    <div key={book.id} className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h3 className="text-xl font-arabicUI2 text-white">{book.name}</h3>
-                                <p className="text-white/70">{book.description}</p>
-                                <p className="text-green-400 mt-2">{book.price} جنيه</p>
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handleEdit(book)}
-                                    className="p-2 rounded-lg bg-blue-500/20 text-blue-500 hover:bg-blue-500/30"
-                                >
-                                    <BsPencil />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(book.id)}
-                                    className="p-2 rounded-lg bg-red-500/20 text-red-500 hover:bg-red-500/30"
-                                >
-                                    <BsTrash />
-                                </button>
+                {loading ? (
+                    <div className="text-center text-white/70">جاري التحميل...</div>
+                ) : books.length === 0 ? (
+                    <div className="text-center text-white/70">لا يوجد كتب</div>
+                ) : (
+                    books.map((book) => (
+                        <div key={book._id} className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-xl font-arabicUI2 text-white">{book.name}</h3>
+                                    <p className="text-white/70">{book.description}</p>
+                                    <p className="text-green-400 mt-2">{book.price} جنيه</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleEdit(book)}
+                                        className="p-2 rounded-lg bg-blue-500/20 text-blue-500 hover:bg-blue-500/30"
+                                    >
+                                        <BsPencil />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(book._id)}
+                                        className="p-2 rounded-lg bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                                    >
+                                        <BsTrash />
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );

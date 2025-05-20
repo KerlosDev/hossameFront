@@ -43,11 +43,33 @@ export default function ChemistryLMSProfile() {
         gender: "",
         government: "",
         createdAt: ""
+    });    // Stats data
+    const [stats, setStats] = useState({
+        platformActivity: '0%',
+        averageScore: '0%',
+        completedExams: { value: 0, subText: '0 من 0' },
+        enrolledCourses: { value: 0, subText: 'إجمالي الكورسات' }
     });
-
-    // Stats data
-    const [totalHours, setTotalHours] = useState(0);
     const [lastActive, setLastActive] = useState("اليوم");
+
+    // Fetch stats data
+    const fetchStats = async () => {
+        try {
+            const token = Cookies.get('token');
+            const response = await axios.get('http://localhost:9000/stats/user-stats', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setStats(response.data.stats);
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
 
     useEffect(() => {
         const tab = searchParams.get('tab');
@@ -96,13 +118,8 @@ export default function ChemistryLMSProfile() {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            });
-
-            // Update state with fetched data
+            });            // Update state with fetched data
             setUserData(response.data);
-
-            // Calculate total hours (random for demo)
-            setTotalHours(Math.floor(Math.random() * 100));
 
             // Calculate last active time based on current date
             setLastActive(calculateTimeSinceJoining(response.data.createdAt));
@@ -135,12 +152,10 @@ export default function ChemistryLMSProfile() {
             ...prev,
             ...updatedData
         }));
-    };
-
-    const stats = [
+    }; const statsDisplay = [
         {
             id: 1,
-            value: "75%",
+            value: stats.platformActivity,
             label: "نشاطك على المنصة",
             color: "bg-blue-600",
             icon: <Target className="text-blue-600" />,
@@ -148,7 +163,7 @@ export default function ChemistryLMSProfile() {
         },
         {
             id: 2,
-            value: "85%",
+            value: stats.averageScore,
             label: "متوسط النتائج",
             color: "bg-indigo-600",
             icon: <Brain className="text-indigo-600" />,
@@ -156,20 +171,20 @@ export default function ChemistryLMSProfile() {
         },
         {
             id: 3,
-            value: "12",
+            value: stats.completedExams.value.toString(),
             label: "الاختبارات المكتملة",
-            subText: "12 من 15",
+            subText: stats.completedExams.subText,
             color: "bg-purple-600",
             icon: <Beaker className="text-purple-600" />,
             gradient: "from-purple-600 to-indigo-600"
         },
         {
             id: 4,
-            value: totalHours.toString(),
-            label: "ساعات الدراسة",
-            subText: "هذا الشهر",
+            value: stats.enrolledCourses.value.toString(),
+            label: "الكورسات المسجلة",
+            subText: stats.enrolledCourses.subText,
             color: "bg-blue-600",
-            icon: <Clock className="text-blue-600" />,
+            icon: <BookOpen className="text-blue-600" />,
             gradient: "from-blue-600 to-indigo-600"
         }
     ];
@@ -282,10 +297,10 @@ export default function ChemistryLMSProfile() {
             <div className="flex flex-col items-center mb-8">
                 <div className="group relative">
                     <div className="flex  justify-center">
-                    <div className="  relative w-32 h-32 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full mb-4 flex items-center justify-center overflow-hidden transition-all duration-300  ">
-                        <User size={50} className="text-white relative z-10 transform group-hover:scale-110 transition-transform duration-300" />
+                        <div className="  relative w-32 h-32 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full mb-4 flex items-center justify-center overflow-hidden transition-all duration-300  ">
+                            <User size={50} className="text-white relative z-10 transform group-hover:scale-110 transition-transform duration-300" />
 
-                    </div>
+                        </div>
                     </div>
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-2">
@@ -378,7 +393,7 @@ export default function ChemistryLMSProfile() {
 
             {/* Statistics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map(stat => (
+                {statsDisplay.map(stat => (
                     <div key={stat.id} className="group bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/40 transition-all duration-500 hover:transform hover:scale-105">
                         <div className="relative w-full aspect-square flex items-center justify-center">
                             {/* Glowing background */}

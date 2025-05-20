@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import GlobalApi from '../api/GlobalApi';
 import { BsCheck2Circle, BsClockHistory, BsXCircle } from 'react-icons/bs';
 import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
 
 export default function BookOrders() {
     const [orders, setOrders] = useState([]);
@@ -11,15 +11,38 @@ export default function BookOrders() {
     const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, cancelled: 0 });
 
     useEffect(() => {
-        fetchOrders();
+        fetchOrdersAndStats();
     }, []);
 
-    const fetchOrders = async () => {
+    const fetchOrdersAndStats = async () => {
         try {
-            const result = await GlobalApi.getBookOrders();
-            const parsedOrders = JSON.parse(result.bookOrder.books || '[]');
-            setOrders(parsedOrders);
-            updateStats(parsedOrders);
+            setLoading(true);
+            const token = Cookies.get('token');
+            // Fetch orders and stats in parallel
+            const [ordersResponse, statsResponse] = await Promise.all([
+                fetch('http://localhost:9000/book-orders', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                }),
+                fetch('http://localhost:9000/book-orders/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                })
+            ]);
+
+            if (!ordersResponse.ok || !statsResponse.ok) {
+                throw new Error('Failed to fetch orders data');
+            }
+
+            const [ordersData, statsData] = await Promise.all([
+                ordersResponse.json(),
+                statsResponse.json()
+            ]);
+
+            setOrders(ordersData);
+            setStats(statsData);
         } catch (error) {
             console.error('Error fetching orders:', error);
             toast.error('حدث خطأ أثناء تحميل الطلبات');
@@ -28,32 +51,33 @@ export default function BookOrders() {
         }
     };
 
-    const updateStats = (orders) => {
-        const newStats = orders.reduce((acc, order) => ({
-            total: acc.total + 1,
-            pending: acc.pending + (order.status === 'pending' ? 1 : 0),
-            completed: acc.completed + (order.status === 'completed' ? 1 : 0),
-            cancelled: acc.cancelled + (order.status === 'cancelled' ? 1 : 0),
-        }), { total: 0, pending: 0, completed: 0, cancelled: 0 });
-        setStats(newStats);
-    };
-
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            const updatedOrders = orders.map(order => 
-                order.id === orderId ? { ...order, status: newStatus } : order
-            );
-            await GlobalApi.updateBookOrders(updatedOrders);
-            setOrders(updatedOrders);
-            updateStats(updatedOrders);
+            const token = Cookies.get('token');
+            const response = await fetch(`http://localhost:9000/book-orders/${orderId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update order status');
+            }
+
+            // Fetch fresh data after update
+            await fetchOrdersAndStats();
             toast.success('تم تحديث حالة الطلب بنجاح');
         } catch (error) {
+            console.error('Error updating order status:', error);
             toast.error('حدث خطأ أثناء تحديث حالة الطلب');
         }
     };
 
     const getStatusIcon = (status) => {
-        switch(status) {
+        switch (status) {
             case 'completed':
                 return <BsCheck2Circle className="text-green-500 text-xl" />;
             case 'pending':
@@ -65,10 +89,17 @@ export default function BookOrders() {
         }
     };
 
-    const filteredOrders = orders.filter(order => {
-        if (filter === 'all') return true;
-        return order.status === filter;
-    });
+    const filteredOrders = filter === 'all'
+        ? orders
+        : orders.filter(order => order.status === filter);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center p-8">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 space-y-6">
@@ -99,26 +130,26 @@ export default function BookOrders() {
                         key={status}
                         onClick={() => setFilter(status)}
                         className={`px-4 py-2 rounded-lg font-arabicUI3 transition-all ${
-                            filter === status 
-                                ? 'bg-blue-500 text-white' 
+                            filter === status
+                                ? 'bg-blue-500 text-white'
                                 : 'bg-white/10 text-white/70 hover:bg-white/20'
                         }`}
                     >
-                        {status === 'all' ? 'الكل' : 
-                         status === 'pending' ? 'قيد الانتظار' :
-                         status === 'completed' ? 'مكتملة' : 'ملغاة'}
+                        {status === 'all' ? 'الكل' :
+                            status === 'pending' ? 'قيد الانتظار' :
+                                status === 'completed' ? 'مكتملة' : 'ملغاة'}
                     </button>
                 ))}
             </div>
 
             {/* Orders List */}
-            {loading ? (
-                <div className="text-center text-white/70">جاري التحميل...</div>
-            ) : (
-                <div className="grid gap-4">
-                    {filteredOrders.map((order) => (
-                        <div key={order.id} 
-                             className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20
+            <div className="grid gap-4">
+                {filteredOrders.length === 0 ? (
+                    <div className="text-center text-white/70">لا توجد طلبات</div>
+                ) : (
+                    filteredOrders.map((order) => (
+                        <div key={order._id}
+                            className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20
                                         transition-all hover:bg-white/20">
                             <div className="flex flex-col md:flex-row justify-between gap-4">
                                 <div className="space-y-2">
@@ -128,16 +159,20 @@ export default function BookOrders() {
                                     </div>
                                     <p className="text-white/70">{order.phone}</p>
                                     <p className="text-white/70">{order.governorate} - {order.address}</p>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-blue-400">{order.bookName}</span>
-                                        <span className="text-white/50">|</span>
-                                        <span className="text-green-400">{order.price} جنيه</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {order.books.map((book, index) => (
+                                            <span key={book.bookId} className="text-blue-400">
+                                                {book.name}
+                                                {index < order.books.length - 1 ? '، ' : ''}
+                                            </span>
+                                        ))}
                                     </div>
+                                    <p className="text-green-400">{order.totalPrice} جنيه</p>
                                 </div>
                                 <div className="flex flex-col gap-3">
                                     <select
                                         value={order.status}
-                                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
                                         className="px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20
                                                  hover:bg-white/20 transition-all"
                                     >
@@ -151,9 +186,9 @@ export default function BookOrders() {
                                 </div>
                             </div>
                         </div>
-                    ))}
-                </div>
-            )}
+                    ))
+                )}
+            </div>
         </div>
     );
 }

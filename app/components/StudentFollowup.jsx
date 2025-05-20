@@ -12,9 +12,7 @@ import {
 import { Bar, Line } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
 import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
-const { decrypt } = require('../utils/encryption');
-const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'default-key';
-import Cookies from 'js-cookie';
+  import Cookies from 'js-cookie';
 
 const getAuthHeaders = () => ({
     'Content-Type': 'application/json',

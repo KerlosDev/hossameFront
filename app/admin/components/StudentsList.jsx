@@ -250,27 +250,27 @@ export default function StudentsList() {
         window.URL.revokeObjectURL(url);
     };    // Analytics Section Component
     const AnalyticsSection = () => (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1  font-arabicUI3 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-lg text-white/70 mb-2">إجمالي الطلاب</h3>
-                <p className="text-3xl font-bold text-white">{analytics?.totalStudents || 0}</p>
+                <p className="text-3xl  font-arabicUI3 text-white">{analytics?.totalStudents || 0}</p>
                 {analytics?.totalStudents !== totalStudents &&
                     <p className="text-sm text-white/50 mt-2">مجموع كل الطلاب في النظام</p>
                 }
             </div>
             <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-lg text-white/70 mb-2">الطلاب النشطين</h3>
-                <p className="text-3xl font-bold text-green-400">{analytics?.activeStudents || 0}</p>
+                <p className="text-3xl  font-arabicUI3 text-green-400">{analytics?.activeStudents || 0}</p>
                 <p className="text-sm text-white/50 mt-2">الطلاب الغير محظورين</p>
             </div>
             <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-lg text-white/70 mb-2">الطلاب المحظورين</h3>
-                <p className="text-3xl font-bold text-red-400">{analytics?.bannedStudents || 0}</p>
+                <p className="text-3xl  font-arabicUI3 text-red-400">{analytics?.bannedStudents || 0}</p>
                 <p className="text-sm text-white/50 mt-2">الطلاب المحظورين حالياً</p>
             </div>
             <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-lg text-white/70 mb-2">نشطين آخر أسبوع</h3>
-                <p className="text-3xl font-bold text-blue-400">{analytics?.lastWeekActive || 0}</p>
+                <p className="text-3xl  font-arabicUI3 text-blue-400">{analytics?.lastWeekActive || 0}</p>
                 <p className="text-sm text-white/50 mt-2">الطلاب النشطين في آخر 7 أيام</p>
             </div>
         </div>
@@ -304,7 +304,7 @@ export default function StudentsList() {
         };
 
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid  font-arabicUI3 grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                     <h3 className="text-lg text-white/70 mb-4">توزيع المحافظات</h3>
                     <div className="relative h-[400px]">
@@ -417,7 +417,7 @@ export default function StudentsList() {
 
     // Table View Component
     const TableView = () => (
-        <div className="overflow-x-auto rounded-2xl bg-white/5 border border-white/10">
+        <div className="overflow-x-auto font-arabicUI3 rounded-2xl bg-white/5 border border-white/10">
             <table className="w-full">
                 <thead>
                     <tr className="border-b border-white/10">
@@ -505,7 +505,7 @@ export default function StudentsList() {
                                         <User className="text-white" size={14} />
                                     </div>
                                     <div>
-                                        <p className="font-medium">{student.name}</p>
+                                        <p className=" font-arabicUI3">{student.name}</p>
                                         <p className="text-sm text-white/50">{student.level}</p>
                                     </div>
                                 </div>
@@ -544,7 +544,7 @@ export default function StudentsList() {
                                 </div>
                             </td>
                             <td className="p-4">
-                                <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${student.isBanned
+                                <span className={`px-3 py-1.5 rounded-full text-xs  font-arabicUI3 ${student.isBanned
                                     ? 'bg-red-500/20 text-red-400'
                                     : 'bg-green-500/20 text-green-400'
                                     }`}>
@@ -584,7 +584,7 @@ export default function StudentsList() {
     // Loading skeleton
     if (loading) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            <div className="grid font-arabicUI3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 {[1, 2, 3, 4, 5, 6].map((n) => (
                     <div key={n} className="animate-pulse bg-white/5 rounded-2xl p-6">
                         <div className="flex space-x-4">
@@ -605,7 +605,7 @@ export default function StudentsList() {
 
     // Pagination component
     const Pagination = () => (
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-6 flex font-arabicUI3 items-center justify-between">
             <div className="text-sm text-white/60">
                 عرض {((page - 1) * limit) + 1} إلى {Math.min(page * limit, totalStudents)} من {totalStudents} طالب
             </div>
@@ -647,10 +647,10 @@ export default function StudentsList() {
     );
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container font-arabicUI3 mx-auto p-6">
             {/* Header Section */}
             <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-arabicUI2 text-white">إدارة الطلاب</h1>
+                <h1 className="text-3xl  font-arabicUI3 text-white">إدارة الطلاب</h1>
                 <button
                     onClick={exportToExcel}
                     className="flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-colors"
@@ -686,7 +686,7 @@ export default function StudentsList() {
 
             {/* Existing Search and Filter Section */}
             <div className="mb-8">
-                <h1 className="text-3xl font-arabicUI2 text-white mb-6">إدارة الطلاب</h1>
+                <h1 className="text-3xl  font-arabicUI3 text-white mb-6">إدارة الطلاب</h1>
                 <div className="flex flex-wrap gap-4 items-center justify-between">
                     {/* Search */}
                     <div className="relative flex-1 max-w-md">
@@ -736,7 +736,7 @@ export default function StudentsList() {
                                         <User className="text-white" size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-arabicUI2 text-white group-hover:text-blue-300 transition-colors">{student.name}</h3>
+                                        <h3 className="text-lg  font-arabicUI3 text-white group-hover:text-blue-300 transition-colors">{student.name}</h3>
                                         <div className="flex items-center gap-2 mt-1">
                                             <FaGraduationCap className="text-white/60" size={14} />
                                             <span className="text-sm text-white/60">{student.level}</span>
@@ -837,7 +837,7 @@ export default function StudentsList() {
             {showBanConfirm && selectedStudent && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
                     <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 max-w-md w-full mx-4">
-                        <h3 className="text-xl font-arabicUI2 text-white mb-4">
+                        <h3 className="text-xl  font-arabicUI3 text-white mb-4">
                             {selectedStudent.isBanned ? 'إلغاء حظر الطالب' : 'حظر الطالب'}
                         </h3>
 
@@ -883,7 +883,7 @@ export default function StudentsList() {
                                     <User className="text-white" size={32} />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-arabicUI2 text-white">{selectedStudent.name}</h3>
+                                    <h3 className="text-2xl  font-arabicUI3 text-white">{selectedStudent.name}</h3>
                                     <div className="flex items-center gap-2 mt-1">
                                         <FaGraduationCap className="text-white/60" />
                                         <span className="text-white/60">{selectedStudent.level}</span>

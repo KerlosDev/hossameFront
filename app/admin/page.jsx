@@ -8,21 +8,19 @@ import { Users, Book, BarChart2, CreditCard, CheckCircle, AlertTriangle } from '
 import { FaAtom } from "react-icons/fa";
 import { GiMolecule } from "react-icons/gi";
 import { IoMdFlask } from "react-icons/io";
-
-// Import components
-import AdminHeader from './components/AdminHeader';
 import AdminSidebar from './components/AdminSidebar';
 import DashboardStats from './components/DashboardStats';
 import StudentsList from './components/StudentsList';
 import PaymentsList from './components/PaymentsList';
 import SettingsPanel from './components/SettingsPanel';
 import ExamAnalysis from './components/ExamAnalysis';
-import Analytics from './components/Analytics';
 import CourseManager from './components/CourseManager';
 import ExamManage from './components/ExamManage';
 import StudentFollowup from '../components/StudentFollowup';
 import OffersManagement from './components/OffersManagement';
 import NotFound from '../not-found';
+import BooksManager from './components/BooksManager';
+import AdminBooks from '../components/AdminBooks';
 
 
 export default function ChemistryLMSAdmin() {
@@ -151,9 +149,7 @@ export default function ChemistryLMSAdmin() {
             <ChemBackground />
 
             <div className="relative z-10">
-                {/* Header */}
-                <AdminHeader />
-
+            
                 {/* Main Content */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Sidebar */}
@@ -185,9 +181,6 @@ export default function ChemistryLMSAdmin() {
                             <StudentFollowup />
                         )}
 
-                        {activeTab === 'analytics' && (
-                            <Analytics />
-                        )}
                         {activeTab === 'payments' && (
                             <PaymentsList />
                         )}
@@ -201,6 +194,9 @@ export default function ChemistryLMSAdmin() {
                         )}
                         {activeTab === 'examMangae' && (
                             <ExamManage />
+                        )}
+                        {activeTab === 'books' && (
+                            <AdminBooks />
                         )}
                         {activeTab === 'offers' && (
                             <OffersManagement />

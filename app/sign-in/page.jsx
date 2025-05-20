@@ -12,6 +12,7 @@ const SignInPage = () => {
         password: '',
         rememberMe: false
     });
+    const [errors, setErrors] = useState({});
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -22,7 +23,24 @@ const SignInPage = () => {
         if (token) {
             router.replace("/"); // أو "/dashboard"
         }
-    }, []);
+    }, []); const validateForm = () => {
+        const newErrors = {};        // Email validation
+        if (!formData.email) {
+            newErrors.email = 'البريد الإلكتروني مطلوب';
+        } else if (!/^[\w-\.]+@gmail\.com$/.test(formData.email)) {
+            newErrors.email = 'يجب استخدام بريد Gmail فقط';
+        }
+
+        // Password validation
+        if (!formData.password) {
+            newErrors.password = 'كلمة المرور مطلوبة';
+        } else if (formData.password.length < 8) {
+            newErrors.password = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -30,11 +48,24 @@ const SignInPage = () => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        // Validate form before submission
+        if (!validateForm()) {
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -53,13 +84,13 @@ const SignInPage = () => {
 
             if (response.ok) {
                 // Save token and username in cookies
-                Cookies.set("token", data.token, { 
+                Cookies.set("token", data.token, {
                     expires: formData.rememberMe ? 30 : 1 // 30 days if remember me is checked, 1 day otherwise
                 });
                 Cookies.set("username", encodeURIComponent(data.user.name), {
                     expires: formData.rememberMe ? 30 : 1
-                  });
-               
+                });
+
                 window.dispatchEvent(new Event("login_success"));
 
 
@@ -119,7 +150,7 @@ const SignInPage = () => {
                     </h1>
 
                     <p className="text-lg lg:text-xl font-arabicUI2 text-white/80 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                        سجل دخولك الآن واستكمل رحلتك في تعلم الكيمياء بطريقة مختلفة ومبتكرة 
+                        سجل دخولك الآن واستكمل رحلتك في تعلم الكيمياء بطريقة مختلفة ومبتكرة
                         <span className="text-blue-300"> مع أفضل المدرسين </span>
                         وأحدث طرق شرح المفاهيم الكيميائية ❤️
                     </p>
@@ -171,9 +202,11 @@ const SignInPage = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="البريد الإلكتروني"
-                                    className="pr-10 w-full py-4 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
-                                    required
+                                    className={`pr-10 w-full py-4 bg-white/10 border ${errors.email ? 'border-red-400' : 'border-white/20'} rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all`}
                                 />
+                                {errors.email && (
+                                    <p className="mt-1 text-red-400 text-sm font-arabicUI2">{errors.email}</p>
+                                )}
                             </div>
 
                             <div className="relative group">
@@ -186,9 +219,11 @@ const SignInPage = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="كلمة المرور"
-                                    className="pr-10 w-full py-4 font-arabicUI3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white  focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
-                                    required
+                                    className={`pr-10 w-full py-4 font-arabicUI3 bg-white/10 border ${errors.password ? 'border-red-400' : 'border-white/20'} rounded-xl placeholder-white/50 text-white focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all`}
                                 />
+                                {errors.password && (
+                                    <p className="mt-1 text-red-400 text-sm font-arabicUI2">{errors.password}</p>
+                                )}
                             </div>
 
                             <div className="flex justify-between items-center">
@@ -237,7 +272,7 @@ const SignInPage = () => {
                                 </div>
                             </div>
 
-                         
+
                         </form>
 
                         <div className="mt-8 text-center">
