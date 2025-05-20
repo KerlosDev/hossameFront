@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import {
     User, Book, BarChart2, FileText, Settings as SettingsIcon,
-    LogOut, CreditCard, Camera, Users, CheckCircle, AlertTriangle
+    LogOut, CreditCard, Camera, Users, CheckCircle, AlertTriangle,
+    Bell
 } from 'lucide-react';
 import { MdOutlineAdminPanelSettings } from 'react-icons/md';
 
@@ -32,7 +33,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
             icon: <FileText size={20} />,
             tab: 'examMangae'
         },
-        
+
         {
             id: 5,
             label: "المدفوعات",
@@ -68,6 +69,12 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
             label: "الإعدادات",
             icon: <SettingsIcon size={20} />,
             tab: 'settings'
+        },
+        {
+            id: 11,
+            label: "إدارة الإشعارات",
+            icon: <Bell size={20} />,
+            tab: 'notifications'
         }
     ];
 
@@ -93,7 +100,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
                             <h2 className="text-2xl font-arabicUI3 text-white group-hover:text-indigo-300 transition-colors duration-300">{adminData.name}</h2>
                         </div>
                         <p className="text-indigo-200 font-arabicUI3 text-sm mb-2">{adminData.role}</p>
-                        
+
                     </div>
                 </div>
             </div>

@@ -10,6 +10,8 @@ import { HiOutlineUserGroup, HiOutlineClock, HiOutlineChartBar } from 'react-ico
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import Cookies from 'js-cookie';
+
 const CourseManager = () => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -76,11 +78,14 @@ const CourseManager = () => {
 
     useEffect(() => {
         fetchCourses();
-    }, []);
-
-    const fetchCourses = async () => {
+    }, []); const fetchCourses = async () => {
         try {
-            const response = await axios.get('http://localhost:9000/course');
+            const token = Cookies.get('token');
+            const response = await axios.get('http://localhost:9000/course', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setCourses(response.data.courses || []);
             setLoading(false);
         } catch (error) {
@@ -91,7 +96,11 @@ const CourseManager = () => {
     }; useEffect(() => {
         const fetchExams = async () => {
             try {
+                const token = Cookies.get('token');
                 const response = await axios.get('http://localhost:9000/exam', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
                     params: {
                         page: examPagination.currentPage,
                         limit: examPageSize,
@@ -120,9 +129,7 @@ const CourseManager = () => {
             message,
             progress: Math.min(100, progress)
         });
-    };
-
-    const handleSubmit = async (e) => {
+    }; const handleSubmit = async (e) => {
         e.preventDefault();
         // Only process if we're on the last step
         if (currentStep !== totalSteps) {
@@ -133,6 +140,7 @@ const CourseManager = () => {
         updateProcessingStatus(1, 'جاري تجهيز البيانات...', 10);
 
         try {
+            const token = Cookies.get('token');
             const formData = new FormData();
 
             formData.append('name', newCourse.name);
@@ -148,10 +156,11 @@ const CourseManager = () => {
                 formData.append('image', newCourse.imageFile);
             } else if (newCourse.imageUrl) {
                 formData.append('imageUrl', newCourse.imageUrl);
-            }
-
-            const config = {
-                headers: { 'Content-Type': 'multipart/form-data' },
+            } const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
+                },
                 onUploadProgress: (progressEvent) => {
                     const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     setUploadProgress(progress);
@@ -196,12 +205,15 @@ const CourseManager = () => {
                 setProcessingStatus(prev => ({ ...prev, show: false }));
             }, 2000);
         }
-    };
-
-    const handleDelete = async (courseId) => {
+    }; const handleDelete = async (courseId) => {
         if (window.confirm('هل أنت متأكد من حذف هذا الكورس؟')) {
             try {
-                await axios.delete(`http://localhost:9000/course/${courseId}`);
+                const token = Cookies.get('token');
+                await axios.delete(`http://localhost:9000/course/${courseId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 toast.success('تم حذف الكورس بنجاح');
                 fetchCourses();
             } catch (error) {
@@ -209,11 +221,14 @@ const CourseManager = () => {
                 toast.error('حدث خطأ في حذف الكورس');
             }
         }
-    };
-
-    const handleCourseSelect = async (course) => {
+    }; const handleCourseSelect = async (course) => {
         try {
-            const response = await axios.get(`http://localhost:9000/course/${course._id}`);
+            const token = Cookies.get('token');
+            const response = await axios.get(`http://localhost:9000/course/admin/${course._id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             const data = response.data;
             setSelectedCourse(data);
             setCourseChapters(data.chapters || []);
@@ -256,9 +271,7 @@ const CourseManager = () => {
 
     if (loading) {
         return <div className="p-6">Loading...</div>;
-    }
-
-    const handleAddChapter = async () => {
+    } const handleAddChapter = async () => {
         if (!newChapter.title) {
             toast.error('يرجى إدخال عنوان الفصل');
             return;
@@ -266,6 +279,7 @@ const CourseManager = () => {
 
         setChapterLoading(true);
         try {
+            const token = Cookies.get('token');
             const response = await axios.post('http://localhost:9000/chapter', {
 
                 title: newChapter.title,
@@ -283,12 +297,14 @@ const CourseManager = () => {
         } finally {
             setChapterLoading(false);
         }
-    };
-
-    const handleDeleteChapter = async (chapterId) => {
+    }; const handleDeleteChapter = async (chapterId) => {
         if (window.confirm('هل أنت متأكد من حذف هذا الفصل؟')) {
             try {
+                const token = Cookies.get('token');
                 await axios.delete(`http://localhost:9000/chapter/${chapterId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
                     data: { courseId: selectedCourse._id }
                 });
 
@@ -299,14 +315,17 @@ const CourseManager = () => {
                 toast.error('حدث خطأ في حذف الفصل');
             }
         }
-    };
-
-    const handleUpdateChapter = async (chapterId, updatedData) => {
+    }; const handleUpdateChapter = async (chapterId, updatedData) => {
         try {
+            const token = Cookies.get('token');
             const response = await axios.put(`http://localhost:9000/chapter/${chapterId}`, {
                 title: updatedData.title,
                 lessons: updatedData.lessons,
                 courseId: selectedCourse._id
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             setCourseChapters(prev => prev.map(chapter =>

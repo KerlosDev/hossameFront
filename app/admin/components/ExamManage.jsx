@@ -8,6 +8,23 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
+
+// Create axios instance with base configuration
+const api = axios.create({
+    baseURL: 'http://localhost:9000'
+});
+
+// Add request interceptor to include token
+api.interceptors.request.use((config) => {
+    const token = Cookies.get('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
 
 const SearchBar = ({ value, onChange }) => (
     <div className="relative">
@@ -197,7 +214,7 @@ const ExamManage = () => {
     const fetchExams = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:9000/exam`, {
+            const response = await api.get(`/exam`, {
                 params: {
                     page: pagination.currentPage,
                     limit: pageSize,
@@ -313,7 +330,7 @@ const ExamManage = () => {
     const handleEditExam = async (exam) => {
         try {
             // Fetch the full exam data first
-            const response = await axios.get(`http://localhost:9000/exam/${exam._id}`);
+            const response = await api.get(`/exam/${exam._id}`);
             const fullExam = response.data;
 
             setIsEditing(true);
@@ -347,7 +364,7 @@ const ExamManage = () => {
     const handleDeleteExam = async (examId) => {
         if (window.confirm('هل أنت متأكد من حذف هذا الامتحان؟')) {
             try {
-                await axios.delete(`http://localhost:9000/exam/${examId}`);
+                await api.delete(`/exam/${examId}`);
                 toast.success('تم حذف الامتحان بنجاح');
                 fetchExams(); // Refresh the list
             } catch (error) {
@@ -397,12 +414,12 @@ const ExamManage = () => {
             formData.append('questions', JSON.stringify(questionsToSubmit));
 
             if (isEditing) {
-                await axios.put(`http://localhost:9000/exam/${editingExamId}`, formData, {
+                await api.put(`/exam/${editingExamId}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 toast.success('تم تحديث الامتحان بنجاح');
             } else {
-                await axios.post('http://localhost:9000/exam', formData, {
+                await api.post('/exam', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 toast.success('تم إنشاء الامتحان بنجاح');

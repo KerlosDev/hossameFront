@@ -21,6 +21,7 @@ import OffersManagement from './components/OffersManagement';
 import NotFound from '../not-found';
 import BooksManager from './components/BooksManager';
 import AdminBooks from '../components/AdminBooks';
+import NotificationManagement from './components/NotificationManagement';
 
 
 export default function ChemistryLMSAdmin() {
@@ -187,6 +188,9 @@ export default function ChemistryLMSAdmin() {
 
                         {activeTab === 'settings' && (
                             <SettingsPanel />
+                        )}
+                        {activeTab === 'notifications' && (
+                            <NotificationManagement />
                         )}
 
                         {activeTab === 'exam' && (
