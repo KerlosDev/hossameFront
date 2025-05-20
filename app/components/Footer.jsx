@@ -60,20 +60,20 @@ const Footer = () => {
     ];
 
     return (
-        <footer dir="rtl" className="relative font-arabicUI3 bg-white/5 backdrop-blur-xl border-t border-blue-500/10">
+        <footer dir="rtl" className="relative font-arabicUI3 bg-white/5 backdrop-blur-xl border-t border-green-500/10">
             {/* Decorative elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-400/50 via-purple-400/50 to-pink-400/50"></div>
-                <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-blue-400/5 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-purple-400/5 rounded-full blur-3xl animate-pulse-delayed"></div>
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-green-500/50 via-emerald-500/50 to-green-400/50"></div>
+                <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-green-500/5 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl animate-pulse-delayed"></div>
             </div>
-            
+
             {/* Back to top button */}
             {isVisible && (
-                <button 
+                <button
                     onClick={scrollToTop}
-                    className="fixed bottom-8 left-8 z-50 p-3 rounded-full bg-blue-400/80 backdrop-blur text-white shadow-lg 
-                             hover:bg-blue-500/80 transition-all duration-300 group animate-bounce-gentle"
+                    className="fixed bottom-8 left-8 z-50 p-3 rounded-full bg-green-500/80 backdrop-blur text-white shadow-lg 
+                             hover:bg-emerald-500/80 transition-all duration-300 group animate-bounce-gentle"
                 >
                     <FaChevronUp className="group-hover:-translate-y-1 transition-transform duration-300" />
                 </button>
@@ -84,7 +84,7 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="lg:col-span-4 space-y-6">
                         <Link href="/" className="flex items-center gap-3 group">
-                            <div className="p-3 bg-gradient-to-br from-blue-400/80 to-purple-400/80 rounded-2xl 
+                            <div className="p-3 bg-gradient-to-br from-green-500/80 to-emerald-500/80 rounded-2xl 
                                         shadow-lg group-hover:scale-105 transition-all duration-300">
                                 <GiChemicalTank className="text-3xl text-white" />
                             </div>
@@ -92,16 +92,13 @@ const Footer = () => {
                                 <span className="text-2xl text-slate-700 dark:text-white font-arabicUI2 font-bold">
                                     منصة والتر وايت
                                 </span>
-                                <span className="text-xs text-blue-400">منصة تعليم الكيمياء الأولى</span>
+                                <span className="text-xs text-green-400">منصة تعليم الكيمياء الأولى</span>
                             </div>
                         </Link>
-                        
+
                         <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                             المنصة الأولى لتعليم الكيمياء بطريقة مبسطة وممتعة، نقدم لك تجربة تعليمية فريدة مع أفضل المدرسين والمحتوى التعليمي المميز.
                         </p>
-                        
-                        {/* Newsletter */}
-                       
                     </div>
 
                     {/* Quick Links */}
@@ -113,10 +110,10 @@ const Footer = () => {
                             {quickLinks.map((link, index) => (
                                 <li key={index}>
                                     <Link href={link.href}
-                                        className="text-slate-600 dark:text-slate-300 hover:text-blue-400 
+                                        className="text-slate-600 dark:text-slate-300 hover:text-green-400 
                                                  transition-colors flex items-center gap-2 group"
                                     >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 opacity-0 
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 opacity-0 
                                                      group-hover:opacity-100 transition-opacity"></span>
                                         {link.name}
                                     </Link>
@@ -134,10 +131,10 @@ const Footer = () => {
                             {communityLinks.map((link, index) => (
                                 <li key={index}>
                                     <Link href={link.href}
-                                        className="text-slate-600 dark:text-slate-300 hover:text-blue-400 
+                                        className="text-slate-600 dark:text-slate-300 hover:text-green-400 
                                                  transition-colors flex items-center gap-2 group"
                                     >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 opacity-0 
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 opacity-0 
                                                      group-hover:opacity-100 transition-opacity"></span>
                                         {link.name}
                                     </Link>
@@ -151,15 +148,15 @@ const Footer = () => {
                         <h3 className="text-slate-700 dark:text-white font-arabicUI2 text-lg font-bold">
                             تواصل معنا
                         </h3>
-                        
+
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white/50 dark:bg-slate-800/50 backdrop-blur rounded-xl text-blue-400">
+                                <div className="p-2 bg-white/5 backdrop-blur rounded-xl border border-green-500/20 text-green-400">
                                     <BsWhatsapp size={18} />
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-500 dark:text-slate-400">واتساب</p>
-                                    <a href="tel:+20123456789" className="text-slate-700 dark:text-white hover:text-blue-400 transition-colors">
+                                    <a href="tel:+20123456789" className="text-slate-700 dark:text-white hover:text-green-400 transition-colors">
                                         +20 123 456 789
                                     </a>
                                 </div>
@@ -174,9 +171,9 @@ const Footer = () => {
                                     <a key={idx}
                                         href={social.href}
                                         aria-label={social.label}
-                                        className={`p-3 bg-white/50 dark:bg-slate-800/50 backdrop-blur rounded-xl text-slate-400 
-                                                 ${social.color} hover:text-white hover:scale-110 hover:shadow-lg
-                                                 transition-all duration-300`}
+                                        className="p-3 bg-white/5 backdrop-blur rounded-xl border border-green-500/20 text-slate-400 
+                                                 hover:bg-green-500/80 hover:text-white hover:scale-110 hover:shadow-lg
+                                                 transition-all duration-300"
                                     >
                                         {social.icon}
                                     </a>
@@ -187,20 +184,21 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="mt-12 pt-6 border-t border-blue-100 dark:border-blue-500/10 flex flex-col sm:flex-row 
+                <div className="mt-12 pt-6 border-t border-green-500/10 flex flex-col sm:flex-row 
                             justify-between items-center gap-4">
                     <p dir="rtl" className="text-slate-600 dark:text-slate-300 text-sm">
                         © {new Date().getFullYear()} منصة والتر وايت - جميع الحقوق محفوظة
                     </p>
-                    
+
                     <a href="https://kerlos.site/"
-                        className="group flex items-center gap-2 px-4 py-2 rounded-xl overflow-hidden relative 
-                                 hover:bg-white/5 transition-colors duration-300">
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-blue-400 transition-colors">
-                            Developed with 
+                        className="group hover:scale-110 ease-in-out flex items-center gap-2 px-4 py-2 rounded-xl overflow-hidden relative 
+                                   backdrop-blur border border-green-500/20
+                                  bg-green-500/10 transition-all duration-300">
+                        <span className="text-sm font-medium     text-green-400 transition-colors">
+                            Developed with
                         </span>
                         <span className="animate-pulse text-red-500">❤️</span>
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-blue-400 transition-colors">
+                        <span className="text-sm font-medium     text-green-400 transition-colors">
                             by Kerlos Hany
                         </span>
                     </a>

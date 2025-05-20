@@ -134,11 +134,11 @@ const Courses = () => {
                 <div className="max-w-7xl mx-auto relative z-10">
                     {/* Header Section Skeleton */}
                     <div className="text-center mb-8 sm:mb-16">
-                        <div className="inline-flex items-center gap-2 sm:gap-4 px-4 sm:px-8 py-2 sm:py-4 bg-white/30 dark:bg-slate-800/30 backdrop-blur-xl rounded-2xl
+                        <div className="inline-flex items-center gap-2 sm:gap-4 px-4 sm:px-8 py-2 sm:py-4  bg-slate-800/30 backdrop-blur-xl rounded-2xl
                                     border border-blue-500/20 mb-6 animate-pulse">
-                            <div className="h-10 w-32 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                            <div className="h-10 w-32  bg-slate-700 rounded-lg"></div>
                         </div>
-                        <div className="h-6 w-64 mx-auto bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse mt-4"></div>
+                        <div className="h-6 w-64 mx-auto bg-slate-700 rounded-lg animate-pulse mt-4"></div>
                     </div>
 
                     {/* Level Selection Skeleton */}
