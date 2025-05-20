@@ -1,40 +1,66 @@
 'use client'
-import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { FaLock, FaUnlock, FaGraduationCap, FaPlay } from "react-icons/fa";
 import { BsLightningChargeFill } from "react-icons/bs";
-import GlobalApi from '../api/GlobalApi';
-import { toast } from 'react-toastify';
+ import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
-const EnrollmentSection = ({ courseInfo, isCourseFound }) => {
-    const { user } = useUser();
+const EnrollmentSection = ({ courseInfo }) => {
     const [loading, setLoading] = useState(false);
-    const [enrolled, setEnrolled] = useState(isCourseFound);
+    const [enrolled, setEnrolled] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userData, setUserData] = useState(null);
 
-    const handleclicknum = async () => {
-        if (!user) {
+    useEffect(() => {
+        // Check if user is logged in by looking for token in cookies
+        const token = Cookies.get('token');
+        if (token) {
+            setIsLoggedIn(true);
+            // Get user data from cookies or localStorage if available
+            const userDataStr = localStorage.getItem('username');
+            if (userDataStr) {
+                setUserData(JSON.parse(userDataStr));
+            }
+            
+            // Check enrollment status
+            checkEnrollmentStatus(token, courseInfo.nicknameforcourse);
+        }
+    }, [courseInfo.nicknameforcourse]);
+
+    const checkEnrollmentStatus = async (token, courseId) => {
+        try {
+            const response = await axios.get(`http://localhost:9000/active/${courseId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            
+            if (response.data && response.data.isHeEnrolled) {
+                setEnrolled(true);
+            }
+        } catch (error) {
+            console.error('Error checking enrollment status:', error);
+            // If there's an error, assume not enrolled
+            setEnrolled(false);
+        }
+    };
+
+    const handleEnrollFree = async () => {
+        if (!isLoggedIn) {
             toast.error('يرجى تسجيل الدخول أولاً');
             return;
         }
 
         setLoading(true);
         try {
+            const token = Cookies.get('token');
             // Generate a unique enrollment ID
             const uniqueEnrollId = `enr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             
             // Save activation with free course data
-            await GlobalApi.saveNewActivation({
-                enrollmentId: uniqueEnrollId,
-                userEmail: user.primaryEmailAddress?.emailAddress,
-                userName: user.firstName,
-                phoneNumber: "free",
-                courseName: courseInfo.nameofcourse,
-                courseId: courseInfo.nicknameforcourse,
-                price: 0,
-                status: "approved", // Auto-approve free courses
-                paymentMethod: "free"
-            });
+            
 
             setEnrolled(true);
             toast.success('تم التسجيل في الكورس بنجاح');
@@ -57,8 +83,8 @@ const EnrollmentSection = ({ courseInfo, isCourseFound }) => {
                             <span className="text-green-400 font-medium">كورس مجاني</span>
                         </span>
                     </div>
-                    {!user ? (
-                        <Link href="/sign-in" className="block">
+                    {!isLoggedIn ? (
+                        <Link href="/login" className="block">
                             <button className="w-full bg-gray-700 hover:bg-gray-600 text-white rounded-lg p-4 
                                 transition flex items-center justify-center gap-2">
                                 <span>تسجيل دخول للمشاهدة</span>
@@ -75,7 +101,7 @@ const EnrollmentSection = ({ courseInfo, isCourseFound }) => {
                         </div>
                     ) : (
                         <button
-                            onClick={handleclicknum}
+                            onClick={handleEnrollFree}
                             disabled={loading}
                             className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 
                                 text-white rounded-lg p-4 transition flex items-center justify-center gap-2"
@@ -92,8 +118,8 @@ const EnrollmentSection = ({ courseInfo, isCourseFound }) => {
     return (
         <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm">
             <div className="space-y-6">
-                {user ? (
-                    isCourseFound ? (
+                {isLoggedIn ? (
+                    enrolled ? (
                         <div className="space-y-4 text-center">
                             <div className="inline-flex items-center gap-2 bg-green-500/20 px-4 py-2 rounded-full">
                                 <BsLightningChargeFill className="text-green-400" />
@@ -121,7 +147,7 @@ const EnrollmentSection = ({ courseInfo, isCourseFound }) => {
                         </Link>
                     )
                 ) : (
-                    <Link href="/sign-in" className="block">
+                    <Link href="/login" className="block">
                         <div className="space-y-4">
                             <div className="text-center">
                                 <h3 className="text-3xl font-bold text-white mb-1">{courseInfo.price} جنيه</h3>

@@ -2,24 +2,26 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import ThemeToggle from './ThemeToggle'
-import { UserButton, useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { PiStudentBold } from "react-icons/pi";
 import { FaBookBookmark } from "react-icons/fa6";
 import { GiMolecule, GiChemicalDrop } from "react-icons/gi";
 import { FaAtom } from "react-icons/fa";
 import { RiMenu4Fill } from "react-icons/ri";
-import { IoClose, IoNotifications } from "react-icons/io5";
-import GlobalApi from '../api/GlobalApi';
+import { IoClose, IoNotifications, IoPersonCircle } from "react-icons/io5";
 import NotificationButton from './NotificationButton';
+import { LuUser, LuLogOut, LuUserCircle, LuChevronDown } from 'react-icons/lu';
 
 const Header = () => {
-    const { user } = useUser()
+
     const router = useRouter()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [username, setUsername] = useState('');
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userDropdownOpen, setUserDropdownOpen] = useState(false);
     const [lastReadTime, setLastReadTime] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('lastReadTime') || '0';
@@ -29,36 +31,89 @@ const Header = () => {
     const [showMobileNotifications, setShowMobileNotifications] = useState(false);
 
     useEffect(() => {
-        if (user) {
+        // Check if user is logged in on component mount
+        checkUserLogin();
+
+        // Set up event listeners for auth state changes
+        window.addEventListener('storage', checkUserLogin);
+        window.addEventListener('auth_state_change', checkUserLogin);
+
+        // Custom event dispatch for login success
+        const handleLoginSuccess = () => {
+            checkUserLogin();
+        };
+        window.addEventListener('login_success', handleLoginSuccess);
+
+        return () => {
+            window.removeEventListener('storage', checkUserLogin);
+            window.removeEventListener('auth_state_change', checkUserLogin);
+            window.removeEventListener('login_success', handleLoginSuccess);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (isLoggedIn) {
             fetchNotifications();
             // Fetch notifications every 5 minutes
             const interval = setInterval(fetchNotifications, 300000);
             return () => clearInterval(interval);
         }
-    }, [user]);
+    }, [isLoggedIn]);
 
-    const fetchNotifications = async () => {
+    // Function to get cookie by name
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    };
+
+    const checkUserLogin = () => {
         try {
-            const response = await GlobalApi.getNotifications();
-            console.log('Notifications response:', response); // Debug log
+            const token = getCookie('token');
+            const username = decodeURIComponent(decodeURIComponent(getCookie('username') || ''));
 
-            if (response?.data?.notifications || response?.notifications) {
-                // Handle both possible response structures
-                const notificationsData = response?.data?.notifications || response?.notifications;
-                const notifArray = notificationsData.map(n => ({
-                    ...n,
-                    isRead: new Date(n.updatedAt) <= new Date(lastReadTime)
+            if (token && username) {
+                setUsername(username);
+                setIsLoggedIn(true);
+                return;
+            }
+
+            setUsername('');
+            setIsLoggedIn(false);
+        } catch (error) {
+            console.error("Error checking user login:", error);
+            setUsername('');
+            setIsLoggedIn(false);
+        }
+    }; const fetchNotifications = async () => {
+        try {
+            const token = getCookie('token');
+            const response = await fetch('http://localhost:9000/notifications', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.data.notifications) {
+                const notifArray = data.data.notifications.map(n => ({
+                    id: n._id,
+                    message: n.message,
+                    createdAt: n.createdAt,
+                    updatedAt: n.updatedAt
                 }));
-                console.log('Processed notifications:', notifArray); // Debug log
+
                 setNotifications(notifArray);
 
-                // Count unread notifications
+                // Count notifications created after last read time
                 const unread = notifArray.filter(n =>
-                    new Date(n.updatedAt) > new Date(lastReadTime)
+                    new Date(n.createdAt) > new Date(lastReadTime)
                 ).length;
                 setUnreadCount(unread);
             } else {
-                console.log('No notifications found in response'); // Debug log
                 setNotifications([]);
                 setUnreadCount(0);
             }
@@ -92,13 +147,40 @@ const Header = () => {
     const handleSignUp = () => {
         router.push("/sign-up")
     }
+
     const handleSignIn = () => {
         router.push("/sign-in")
     }
 
     const handleCoursesClick = () => {
-        router.push("/subscriptions")
-        setIsMobileMenuOpen(false)
+        router.push("/profile?tab=courses");
+        setIsMobileMenuOpen(false);
+    };
+
+    const handleProfileClick = () => {
+        router.push("/profile");
+        setUserDropdownOpen(false);
+    }
+
+    const handleSignOut = () => {
+        // Remove all auth-related cookies
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=strict';
+        document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=strict';
+        document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=strict';
+
+        // Clear state
+        setIsLoggedIn(false);
+        setUsername('');
+        setUserDropdownOpen(false);
+        setNotifications([]);
+        setUnreadCount(0);
+
+        // Clear local storage
+        localStorage.removeItem('lastReadTime');
+        localStorage.setItem('userSignOut', Date.now().toString());
+
+        // Redirect with a smooth transition
+        router.push('/');
     }
 
     return (
@@ -149,19 +231,63 @@ const Header = () => {
 
                     {/* Desktop Menu - Hidden on Mobile */}
                     <div className="hidden md:flex items-center gap-1.5 sm:gap-2 md:gap-4">
-                        {user ? (
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                <div className="hidden sm:flex items-center">
-                                    <Link href="/subscriptions"
-                                        className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg 
-                                                 text-slate-600 dark:text-slate-300 text-sm">
-                                        <PiStudentBold className="text-lg sm:text-xl" />
-                                        <span className="font-arabicUI">كورساتي</span>
-                                    </Link>
-                                </div>
-                                <NotificationButton />
-                                <div className="p-1 sm:p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                                    <UserButton afterSignOutUrl="/" />
+                        {isLoggedIn ? (
+                            <div className="flex items-center gap-1.5 sm:gap-2">                            <div className="hidden sm:flex items-center">
+                                <Link href="/profile?tab=courses"
+                                    className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg 
+             text-slate-600 dark:text-slate-300 text-sm">
+                                    <PiStudentBold className="text-lg sm:text-xl" />
+                                    <span className="font-arabicUI">كورساتي</span>
+                                </Link>
+                            </div>
+                                <NotificationButton
+                                    notifications={notifications}
+                                    unreadCount={unreadCount}
+                                    lastReadTime={lastReadTime}
+                                    setLastReadTime={setLastReadTime}
+                                />
+
+                                {/* User dropdown */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                                        className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                                            <IoPersonCircle className="text-xl" />
+                                        </div>
+                                        <span className="font-arabicUI3 text-sm text-slate-700 dark:text-slate-300">
+                                            {username}
+                                        </span>
+                                    </button>
+
+                                    {/* User dropdown menu */}
+                                    {userDropdownOpen && (
+                                        <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg 
+                                                      border border-slate-200 dark:border-slate-700 z-50">
+                                            <div className="p-3 border-b border-slate-200 dark:border-slate-700">
+                                                <p className="font-arabicUI3 font-medium text-slate-800 dark:text-white">
+                                                    {username}
+                                                </p>
+                                            </div>
+                                            <div className="p-2">
+                                                <button
+                                                    onClick={handleProfileClick}
+                                                    className="w-full text-right px-3 py-2 rounded-md hover:bg-slate-100 
+                                                             dark:hover:bg-slate-700 font-arabicUI text-slate-700 dark:text-slate-300"
+                                                >
+                                                    الملف الشخصي
+                                                </button>
+                                                <button
+                                                    onClick={handleSignOut}
+                                                    className="w-full text-right px-3 py-2 rounded-md hover:bg-red-50 
+                                                             dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 font-arabicUI"
+                                                >
+                                                    تسجيل الخروج
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
@@ -235,6 +361,28 @@ const Header = () => {
                             </button>
                         </div>
 
+                        {/* User Info (if logged in) */}
+                        {isLoggedIn && (
+                            <div className="p-3 mb-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                                        <IoPersonCircle className="text-2xl" />
+                                    </div>
+                                    <div>
+                                        <p className="font-arabicUI3 font-medium text-slate-800 dark:text-white">
+                                            {username}
+                                        </p>
+                                        <button
+                                            onClick={handleProfileClick}
+                                            className="text-xs text-blue-600 dark:text-blue-400 font-arabicUI"
+                                        >
+                                            عرض الملف الشخصي
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Menu Items */}
                         <div className="flex flex-col gap-2">
                             <button
@@ -248,7 +396,7 @@ const Header = () => {
                             </button>
 
                             {/* Auth Section */}
-                            {user ? (
+                            {isLoggedIn ? (
                                 <div className="flex flex-col gap-2">
                                     <button
                                         onClick={handleMobileNotificationClick}
@@ -306,9 +454,14 @@ const Header = () => {
                                         </div>
                                     )}
 
-                                    <div className="px-4 py-2">
-                                        <UserButton afterSignOutUrl="/" />
-                                    </div>
+                                    <button
+                                        onClick={handleSignOut}
+                                        className="flex items-center gap-2 px-4 py-3 text-red-600 dark:text-red-400
+                                                 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl font-arabicUI
+                                                 transition-colors duration-200 w-full text-right"
+                                    >
+                                        <span>تسجيل الخروج</span>
+                                    </button>
                                 </div>
                             ) : (
                                 <div className="space-y-2">

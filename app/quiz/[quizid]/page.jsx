@@ -8,6 +8,7 @@ const page = ({ params }) => {
 
 
   return (
+ 
    <QuizData params={params}></QuizData>
   )
 }

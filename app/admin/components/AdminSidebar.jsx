@@ -1,0 +1,149 @@
+'use client'
+import { useState } from 'react';
+import {
+    User, Book, BarChart2, FileText, Settings as SettingsIcon,
+    LogOut, CreditCard, Camera, Users, CheckCircle, AlertTriangle
+} from 'lucide-react';
+import { MdOutlineAdminPanelSettings } from 'react-icons/md';
+
+export default function AdminSidebar({ activeTab, setActiveTab, adminData, showLogoutConfirm, setShowLogoutConfirm }) {
+    const menuItems = [
+        {
+            id: 1,
+            label: "لوحة التحكم",
+            icon: <BarChart2 size={20} />,
+            tab: 'dashboard'
+        },
+        {
+            id: 2,
+            label: "إدارة الطلاب",
+            icon: <Users size={20} />,
+            tab: 'students'
+        },
+        {
+            id: 3,
+            label: "إدارة الكورسات",
+            icon: <Book size={20} />,
+            tab: 'courses'
+        },
+        {
+            id: 4,
+            label: "ادارة الامتحانات",
+            icon: <FileText size={20} />,
+            tab: 'examMangae'
+        },
+        {
+            id: 5,
+            label: "التحليلات والتقارير",
+            icon: <FileText size={20} />,
+            tab: 'analytics'
+        },
+        {
+            id: 6,
+            label: "المدفوعات",
+            icon: <CreditCard size={20} />,
+            tab: 'payments'
+        },
+        {
+            id: 7,
+            label: "احصائيات الامتحانات",
+            icon: <CreditCard size={20} />,
+            tab: 'exam'
+        },
+        {
+            id: 8,
+            label: " متابعة الطلاب",
+            icon: <CreditCard size={20} />,
+            tab: 'followup'
+        },
+        {
+            id: 9,
+            label: "إدارة العروض",
+            icon: <FileText size={20} />,
+            tab: 'offers'
+        },
+        {
+            id: 10,
+            label: "الإعدادات",
+            icon: <SettingsIcon size={20} />,
+            tab: 'settings'
+        }
+    ];
+
+    // Format date
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('ar-EG', options);
+    };
+
+    return (
+        <aside className="lg:col-span-3 bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500 h-fit">
+            <div className="flex flex-col items-center mb-8">
+                <div className="group relative">
+                    <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full mb-4 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:shadow-indigo-500/50">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
+                        <MdOutlineAdminPanelSettings size={50} className="text-white relative z-10 transform group-hover:scale-110 transition-transform duration-300" />
+                        <button className="absolute bottom-2 right-2 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <Camera size={16} className="text-white" />
+                        </button>
+                    </div>
+                    <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                            <h2 className="text-2xl font-arabicUI2 text-white group-hover:text-indigo-300 transition-colors duration-300">{adminData.name}</h2>
+                        </div>
+                        <p className="text-indigo-200 text-sm mb-2">{adminData.role}</p>
+                        <div className="flex items-center justify-center gap-2 text-xs text-white/60">
+                            <span>آخر تسجيل دخول: {formatDate(adminData.lastLogin)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <nav className="space-y-2">
+                {menuItems.map(item => (
+                    <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.tab)}
+                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-300
+                            ${activeTab === item.tab ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20' : 'hover:bg-white/10 text-white/80 hover:text-white'}`}
+                    >
+                        <span>{item.label}</span>
+                        {item.icon}
+                    </button>
+                ))}
+
+                <button
+                    onClick={() => setShowLogoutConfirm(true)}
+                    className="w-full flex items-center justify-between p-3 mt-4 bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded-xl transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
+                >
+                    <span>خروج من المنصة</span>
+                    <LogOut size={20} />
+                </button>
+            </nav>
+
+            {/* Logout Confirmation Modal */}
+            {showLogoutConfirm && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 max-w-md w-full mx-4">
+                        <h3 className="text-xl font-arabicUI2 text-white mb-4">تأكيد تسجيل الخروج</h3>
+                        <p className="text-white/80 mb-6">هل أنت متأكد من رغبتك في تسجيل الخروج من لوحة التحكم؟</p>
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={() => setShowLogoutConfirm(false)}
+                                className="px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all"
+                            >
+                                إلغاء
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all"
+                            >
+                                تأكيد الخروج
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </aside>
+    );
+}

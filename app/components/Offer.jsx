@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import GlobalApi from '../api/GlobalApi';
 import { FaLightbulb } from "react-icons/fa";
 import { GiTakeMyMoney, GiMolecule, GiChemicalDrop } from "react-icons/gi";
 import { IoMdFlask } from "react-icons/io";
@@ -14,19 +13,19 @@ const Offer = () => {
     useEffect(() => {
         const fetchOffer = async () => {
             try {
-                const response = await GlobalApi.getOffer();
-                if (response?.offer) {
-                    setOfferData(response.offer);
-                } else {
-                    setError('No offer data available');
+                const response = await fetch(`http://localhost:9000/offers/published`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch offer');
                 }
-            } catch (error) {
-                console.error('Error fetching offer:', error);
-                setError('Failed to load offer');
-            } finally {
+                const data = await response.json();
+                setOfferData(data.offer);
+                setLoading(false);
+            } catch (err) {
+                setError(err.message);
                 setLoading(false);
             }
         };
+
         fetchOffer();
     }, []);
 
@@ -190,20 +189,23 @@ const Offer = () => {
                                     </div>
 
                                     {/* Compact CTA section */}
-                                    <div className="flex flex-col sm:flex-row items-center gap-4 mt-6">
-                                        <button className="group/btn relative w-full overflow-hidden px-8 py-4 
-                                          bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-300
-                                          rounded-xl font-arabicUI2 text-blue-900 text-xl
-                                          hover:shadow-[0_0_20px_rgba(253,224,71,0.4)]
-                                          active:scale-95 transition-all duration-500">
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent 
+                                    <div className="flex flex-col sm:flex-row items-center gap-4 mt-6">                                        <a
+                                        href={offerData.courseLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group/btn relative w-full overflow-hidden px-8 py-4 
+                                              bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-300
+                                              rounded-xl font-arabicUI2 text-blue-900 text-xl
+                                              hover:shadow-[0_0_20px_rgba(253,224,71,0.4)]
+                                              active:scale-95 transition-all duration-500">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent 
                                               via-white/30 to-transparent -translate-x-full 
                                               group-hover/btn:translate-x-full transition-transform duration-1000"></div>
-                                            <div className="relative flex items-center justify-center gap-3">
-                                                <span>احجز مكانك الآن</span>
-                                                <GiTakeMyMoney className="text-2xl animate-bounce" />
-                                            </div>
-                                        </button>
+                                        <div className="relative flex items-center justify-center gap-3">
+                                            <span> اشترك فالكورس الان</span>
+                                            <GiTakeMyMoney className="text-2xl animate-bounce" />
+                                        </div>
+                                    </a>
 
                                         {/* Enhanced info badge */}
                                         <div className="hidden lg:flex items-center justify-center gap-3 

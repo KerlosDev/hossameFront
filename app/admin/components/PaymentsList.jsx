@@ -1,0 +1,330 @@
+'use client'
+import { useState, useEffect } from 'react';
+import { CreditCard, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Cookies from 'js-cookie';
+
+export default function PaymentsList() {
+    const [payments, setPayments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [sortBy, setSortBy] = useState('date');
+    const [sortOrder, setSortOrder] = useState('desc');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterStatus, setFilterStatus] = useState('all');
+
+    // Define fetchEnrollments as a component function
+    const fetchEnrollments = async () => {
+        try {
+            const token = Cookies.get('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch('http://localhost:9000/active/admin/enrollments', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch enrollments');
+            const data = await response.json();
+            setPayments(data.enrollments);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching enrollments:', error);
+            setError('Failed to load payments');
+            toast.error('فشل في تحميل المدفوعات');
+        }
+    };
+
+    // Use the defined fetchEnrollments in useEffect
+    useEffect(() => {
+        fetchEnrollments();
+    }, []);
+
+    // Filter payments based on search query and status
+    const filteredPayments = payments?.filter(payment => {
+        const matchesSearch = searchQuery
+            ? payment.userEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            payment.courseName?.toLowerCase().includes(searchQuery.toLowerCase())
+            : true;
+
+        const matchesStatus = filterStatus === 'all' ? true : payment.paymentStatus === filterStatus;
+
+        return matchesSearch && matchesStatus;
+    });
+
+    // Sort payments
+    const sortedPayments = [...(filteredPayments || [])].sort((a, b) => {
+        if (sortBy === 'date') {
+            return sortOrder === 'desc'
+                ? new Date(b.date) - new Date(a.date)
+                : new Date(a.date) - new Date(b.date);
+        }
+        if (sortBy === 'amount') {
+            return sortOrder === 'desc'
+                ? b.amount - a.amount
+                : a.amount - b.amount;
+        }
+        return 0;
+    });
+
+    // Format date
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    // Get status badge style
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'paid':
+                return (
+                    <span className="flex items-center gap-1 text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full text-sm">
+                        <CheckCircle size={14} />
+                        مكتمل
+                    </span>
+                );
+            case 'pending':
+                return (
+                    <span className="flex items-center gap-1 text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-full text-sm">
+                        <Clock size={14} />
+                        قيد المعالجة
+                    </span>
+                );
+            case 'failed':
+                return (
+                    <span className="flex items-center gap-1 text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-full text-sm">
+                        <XCircle size={14} />
+                        فشل
+                    </span>
+                );
+            default:
+                return null;
+        }
+    };
+
+    const handlePaymentStatusChange = async (enrollmentId, newStatus) => {
+        try {
+            const token = Cookies.get('token');
+            const response = await fetch(`http://localhost:9000/active/payment/${enrollmentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ paymentStatus: newStatus })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update payment status');
+            }
+
+            // Update local state and refresh data
+            await fetchEnrollments();
+            
+            toast.success(newStatus === 'paid' ? 'تم تفعيل الكورس بنجاح' : 'تم إلغاء تفعيل الكورس بنجاح');
+        } catch (error) {
+            console.error('Error updating payment status:', error);
+            toast.error(error.message || 'فشل تحديث حالة الدفع');
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            {/* Stats Section */}
+            <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-green-500/10 rounded-xl">
+                            <CheckCircle className="text-2xl text-green-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-white/80 font-arabicUI3 text-sm">المدفوعات المكتملة</h3>
+                            <p className="text-2xl font-arabicUI3 text-white">
+                                {payments?.filter(p => p.paymentStatus === 'paid').length || 0}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-yellow-500/10 rounded-xl">
+                            <Clock className="text-2xl text-yellow-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-white/80 font-arabicUI3 text-sm">قيد المعالجة</h3>
+                            <p className="text-2xl font-arabicUI3 text-white">
+                                {payments?.filter(p => p.paymentStatus === 'pending').length || 0}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-red-500/10 rounded-xl">
+                            <XCircle className="text-2xl text-red-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-white/80 font-arabicUI3 text-sm">المدفوعات الفاشلة</h3>
+                            <p className="text-2xl font-arabicUI3 text-white">
+                                {payments?.filter(p => p.paymentStatus === 'failed').length || 0}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Payments Table */}
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6">
+                    <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <CreditCard className="text-white" size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-arabicUI2 text-white">المدفوعات</h2>
+                            <p className="text-white/60 text-sm">إدارة وتتبع المدفوعات</p>
+                        </div>
+                    </div>
+
+                    {/* Sort Controls */}
+                    <div className="flex items-center gap-4">
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors"
+                        >
+                            <option value="date">تاريخ الدفع</option>
+                            <option value="amount">المبلغ</option>
+                        </select>
+                        <button
+                            onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+                            className="bg-white/5 border border-white/10 rounded-xl p-2 text-white hover:bg-white/10 transition-colors"
+                        >
+                            <ChevronDown
+                                className={`transform transition-transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`}
+                            />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-right">
+                        <thead>
+                            <tr className="border-b border-white/10">
+                                <th className="py-4 px-6 text-white/60">الطالب</th>
+                                <th className="py-4 px-6 text-white/60">الكورس</th>
+                                <th className="py-4 px-6 text-white/60">المبلغ</th>
+                                <th className="py-4 px-6 text-white/60">تاريخ الدفع</th>
+                                <th className="py-4 px-6 text-white/60">الحالة</th>
+                                <th className="py-4 px-6 text-white/60">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedPayments?.map((payment) => (
+                                <tr key={payment._id} className="border-b border-white/5 hover:bg-white/5">
+                                    <td className="py-4 px-6">
+                                        <div className="flex flex-col">
+                                            <span className="text-white font-medium">{payment.userEmail}</span>
+                                            <span className="text-white/60 text-xs" dir="ltr">{payment.phoneNumber || 'لا يوجد رقم هاتف'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="py-4 px-6">
+                                        <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg">
+                                            {payment.courseName}
+                                        </span>
+                                    </td>
+                                    <td className="py-4 px-6 text-white">{payment.price} جنيه</td>
+                                    <td className="py-4 px-6 text-white/80">
+                                        {formatDate(payment.createdAt)}
+                                    </td>
+                                    <td className="py-4 px-6">
+                                        <PaymentStatus status={payment.paymentStatus} />
+                                    </td>
+                                    <td className="py-4 px-6">
+                                        <div className="flex gap-2">
+                                            {payment.paymentStatus === 'pending' ? (
+                                                <>
+                                                    <button
+                                                        onClick={() => handlePaymentStatusChange(payment._id, 'paid')}
+                                                        className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-all"
+                                                    >
+                                                        تفعيل
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handlePaymentStatusChange(payment._id, 'failed')}
+                                                        className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-all"
+                                                    >
+                                                        رفض
+                                                    </button>
+                                                </>
+                                            ) : payment.paymentStatus === 'paid' ? (
+                                                <button
+                                                    onClick={() => handlePaymentStatusChange(payment._id, 'failed')}
+                                                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-all"
+                                                >
+                                                    إلغاء التفعيل
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handlePaymentStatusChange(payment._id, 'paid')}
+                                                    className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-all"
+                                                >
+                                                    تفعيل
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <ToastContainer position="top-right" dir="rtl" />
+        </div>
+    );
+}
+
+// Add this new component for payment status
+const PaymentStatus = ({ status }) => {
+    const statusConfig = {
+        paid: {
+            color: 'text-green-400',
+            bgColor: 'bg-green-500/20',
+            icon: CheckCircle,
+            text: 'مفعل'
+        },
+        pending: {
+            color: 'text-yellow-400',
+            bgColor: 'bg-yellow-500/20',
+            icon: Clock,
+            text: 'قيد المعالجة'
+        },
+        failed: {
+            color: 'text-red-400',
+            bgColor: 'bg-red-500/20',
+            icon: XCircle,
+            text: 'غير مفعل'
+        }
+    };
+
+    const config = statusConfig[status] || statusConfig.pending;
+    const Icon = config.icon;
+
+    return (
+        <span className={`flex items-center gap-2 px-3 py-1.5 ${config.bgColor} ${config.color} rounded-lg text-sm`}>
+            <Icon size={14} />
+            {config.text}
+        </span>
+    );
+};

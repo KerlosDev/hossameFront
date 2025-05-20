@@ -111,54 +111,7 @@ const Hero = () => {
                                     <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] bg-repeat opacity-5 mix-blend-overlay"></div>
                                 </div>
 
-                                {/* Main quote container */}
-                                <div className="relative bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-4 sm:p-6 lg:p-8 
-                                          rounded-2xl border-2 border-yellow-500/30 shadow-lg group-hover:shadow-2xl 
-                                          transition-all duration-500">
-                                    {/* Decorative elements */}
-                                    <div className="absolute -top-3 -right-3">
-                                        <div className="relative">
-                                            <FaAtom className="text-3xl text-yellow-500 animate-spin-slow" />
-                                            <div className="absolute inset-0 bg-yellow-500/20 rounded-full blur-xl"></div>
-                                        </div>
-                                    </div>
-                                    <div className="absolute -bottom-3 -left-3">
-                                        <div className="relative">
-                                            <GiMolecule className="text-3xl text-red-500 animate-pulse" />
-                                            <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl"></div>
-                                        </div>
-                                    </div>
-
-                                    {/* Quote content */}
-                                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 lg:gap-6">
-                                        <div className="flex-1 space-y-2 sm:space-y-3">
-                                            <div className="flex items-center gap-3">
-                                                <FaLightbulb className="text-4xl text-yellow-500" />
-                                                <h3 className="text-xl font-arabicUI2 text-yellow-600 dark:text-yellow-400">
-                                                    نصيحة اليوم
-                                                </h3>
-                                            </div>
-                                            <p className="text-xl sm:text-2xl font-rakkas text-slate-700 dark:text-slate-200 leading-relaxed">
-                                                ❝ لو طريقك صعب اعرف ان النهاية حلوة ❞
-                                            </p>
-                                        </div>
-
-                                        {/* Decorative flask with bubbles */}
-                                        <div className="relative hidden md:block">
-                                            <div className="relative bg-gradient-to-b from-yellow-500/20 to-red-500/20 
-                                                      p-4 rounded-full border border-yellow-500/30">
-                                                <IoMdFlask className="text-5xl text-yellow-500" />
-                                                {/* Animated bubbles */}
-                                                <div className="absolute inset-0 overflow-hidden">
-                                                    <div className="absolute bottom-2 left-1/4 w-1.5 h-1.5 bg-yellow-500/50 
-                                                              rounded-full animate-float"></div>
-                                                    <div className="absolute bottom-4 left-1/2 w-2 h-2 bg-red-500/50 
-                                                              rounded-full animate-float-delayed"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                             
                             </div>
                         </div>
 

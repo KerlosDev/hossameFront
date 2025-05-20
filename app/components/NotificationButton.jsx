@@ -2,25 +2,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { IoNotifications } from "react-icons/io5";
 import { GiMolecule } from "react-icons/gi";
-import GlobalApi from '../api/GlobalApi';
 
-const NotificationButton = () => {
-    const [notifications, setNotifications] = useState([]);
+const NotificationButton = ({ notifications, unreadCount, lastReadTime, setLastReadTime }) => {
     const [showNotifications, setShowNotifications] = useState(false);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [lastReadTime, setLastReadTime] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('lastReadTime') || '0';
-        }
-        return '0';
-    });
-
     const notificationRef = useRef(null);
 
     useEffect(() => {
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 300000);
-
         // Add click outside listener
         const handleClickOutside = (event) => {
             if (notificationRef.current && !notificationRef.current.contains(event.target)) {
@@ -31,31 +18,9 @@ const NotificationButton = () => {
         document.addEventListener('mousedown', handleClickOutside);
 
         return () => {
-            clearInterval(interval);
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
-
-    const fetchNotifications = async () => {
-        try {
-            const response = await GlobalApi.getNotifications();
-            if (response?.notifications) {
-                const notifArray = response.notifications.map(n => ({
-                    id: n.id,
-                    message: n.message,
-                    updatedAt: n.updatedAt,
-                    isRead: new Date(n.updatedAt) <= new Date(lastReadTime)
-                }));
-                setNotifications(notifArray);
-                const unread = notifArray.filter(n =>
-                    new Date(n.updatedAt) > new Date(lastReadTime)
-                ).length;
-                setUnreadCount(unread);
-            }
-        } catch (error) {
-            console.error("Error fetching notifications:", error);
-        }
-    };
 
     const handleNotificationOpen = () => {
         setShowNotifications(!showNotifications);
@@ -63,7 +28,6 @@ const NotificationButton = () => {
             const now = new Date().toISOString();
             setLastReadTime(now);
             localStorage.setItem('lastReadTime', now);
-            setUnreadCount(0);
         }
     };
 
@@ -102,31 +66,18 @@ const NotificationButton = () => {
                             notifications.map((notification) => (
                                 <div
                                     key={notification.id}
-                                    className={`p-4 transition-colors duration-200
-                                              ${!notification.isRead
-                                            ? 'bg-blue-50 dark:bg-blue-900/20'
-                                            : 'bg-transparent'}`}
+                                    className="p-4 transition-colors duration-200 bg-transparent"
                                 >
                                     <div className="flex gap-3 items-start">
-                                        <div className={`mt-1 p-2 rounded-lg
-                                                      ${!notification.isRead
-                                                ? 'bg-blue-100 dark:bg-blue-800'
-                                                : 'bg-slate-100 dark:bg-slate-700'}`}>
-                                            <GiMolecule className={`text-xl
-                                                               ${!notification.isRead
-                                                    ? 'text-blue-600 dark:text-blue-300'
-                                                    : 'text-slate-600 dark:text-slate-300'}`}
-                                            />
+                                        <div className="mt-1 p-2 rounded-lg bg-slate-100 dark:bg-slate-700">
+                                            <GiMolecule className="text-xl text-slate-600 dark:text-slate-300" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className={`text-sm font-arabicUI2
-                                                       ${!notification.isRead
-                                                    ? 'text-slate-900 dark:text-white font-semibold'
-                                                    : 'text-slate-600 dark:text-slate-300'}`}>
+                                            <p className="text-sm font-arabicUI2 text-slate-600 dark:text-slate-300">
                                                 {notification.message}
                                             </p>
                                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                {new Date(notification.updatedAt).toLocaleString('ar-EG')}
+                                                {new Date(notification.createdAt).toLocaleString('ar-EG')}
                                             </p>
                                         </div>
                                     </div>

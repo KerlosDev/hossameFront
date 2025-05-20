@@ -1,0 +1,471 @@
+'use client';
+import React, { useEffect, useState } from 'react';
+import { IoMdFlask } from "react-icons/io";
+import { GiMolecule, GiChemicalDrop } from "react-icons/gi";
+import { FaAtom, FaUser, FaEnvelope, FaLock, FaPhoneAlt, FaUsers, FaMapMarkerAlt, FaGraduationCap, FaChevronDown } from "react-icons/fa";
+import { BsGenderAmbiguous } from "react-icons/bs";
+import Cookies from "js-cookie";
+import { useRouter } from 'next/navigation';
+
+const Page = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phoneNumber: '',
+        parentPhone: '',
+        government: '',
+        level: '',
+        gender: '',
+        password: '',
+        confirmPassword: ''
+    });
+    const router = useRouter();
+    // ⛔ منع المستخدم اللي داخل فعلاً من الوصول لصفحة اللوجين
+    useEffect(() => {
+        const token = Cookies.get("token");
+        if (token) {
+            router.replace("/"); // أو "/dashboard"
+        }
+    }, []);
+
+    const [loading, setLoading] = useState(false);
+    const [step, setStep] = useState(1); // For multi-step form
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const nextStep = () => {
+        setStep(step + 1);
+    };
+
+    const prevStep = () => {
+        setStep(step - 1);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (formData.password !== formData.confirmPassword) {
+            alert('كلمة المرور وتأكيدها غير متطابقين!');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await fetch('http://localhost:9000/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    phoneNumber: formData.phoneNumber,
+                    parentPhoneNumber: formData.parentPhone,
+                    government: formData.government,
+                    level: formData.level,
+                    gender: formData.gender,
+                    password: formData.password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Save token and username in cookies
+                Cookies.set("token", data.token, { expires: 30 });
+                Cookies.set("username", data.user.name, { expires: 30 });
+              
+                Cookies.set("username", encodeURIComponent(data.user.name), {
+                    expires: 30
+                });
+                alert("✅ تم التسجيل بنجاح!");
+                router.replace("/");
+            } else {
+                alert(data.message || "❌ حدث خطأ في التسجيل");
+            }
+            window.dispatchEvent(new Event("login_success"));
+
+        } catch (err) {
+            alert('حصلت مشكلة في الاتصال بالسيرفر');
+            console.error(err);
+        }
+
+        console.log(formData)
+        setLoading(false);
+    };
+
+
+    // All Egyptian governorates
+    const egyptGovernments = [
+        "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "البحر الأحمر", "البحيرة",
+        "الفيوم", "الغربية", "الإسماعيلية", "المنوفية", "المنيا", "القليوبية",
+        "الوادي الجديد", "السويس", "أسوان", "أسيوط", "بني سويف", "بورسعيد",
+        "دمياط", "الشرقية", "جنوب سيناء", "كفر الشيخ", "مطروح", "الأقصر",
+        "قنا", "شمال سيناء", "سوهاج"
+    ];
+
+    return (
+        <div dir='rtl' className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 p-4">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] opacity-5 mix-blend-overlay"></div>
+                <div className="absolute top-20 left-20 text-white/10 text-7xl animate-float">
+                    <FaAtom />
+                </div>
+                <div className="absolute bottom-40 right-20 text-white/10 text-8xl animate-spin-slow">
+                    <GiMolecule />
+                </div>
+                <div className="absolute top-1/2 left-1/3 text-white/10 text-6xl animate-bounce-slow">
+                    <IoMdFlask />
+                </div>
+                {/* Gradient orbs */}
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full filter blur-3xl animate-pulse-delayed"></div>
+            </div>
+
+            {/* Main container */}
+            <div className="relative w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 p-8">
+                {/* Left side - Content */}
+                <div className="w-full lg:w-1/2 text-center lg:text-right space-y-6">
+                    <div className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-2xl
+                         bg-white/5 backdrop-blur-lg border border-white/10 hover:border-white/20 
+                         transform hover:scale-105 transition-all duration-500">
+                        <IoMdFlask className="text-3xl text-blue-300" />
+                        <span className="font-arabicUI2 text-xl text-blue-300">منصة والتر وايت</span>
+                    </div>
+
+                    <h1 className="text-4xl lg:text-5xl font-arabicUI2 font-bold text-white leading-tight">
+                        انضم إلى منصة
+                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
+                            تعلم الكيمياء
+                        </span>
+                    </h1>
+
+                    <p className="text-lg lg:text-xl font-arabicUI2 text-white/80 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        فالمنصة دي كان هدفي اخلي الكيمياء بالنسبالك لعبة مش مجرد ماده هتاخدها وبعد متخلص ثانوية عامه
+                        <span className="text-blue-300"> ترميها لا بالعكس </span>
+                        انت هتبقي عايز تكمل فيها لان احنا خليناها عادة مش مجرد ماده ❤️
+                    </p>
+
+                    <div className="flex flex-wrap gap-4 justify-center lg:justify-end mt-6">
+                        <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm p-3 rounded-xl">
+                            <GiChemicalDrop className="text-purple-300 text-2xl" />
+                            <span className="font-arabicUI2 text-white/90">تجارب معملية</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm p-3 rounded-xl">
+                            <FaAtom className="text-blue-300 text-2xl" />
+                            <span className="font-arabicUI2 text-white/90">شرح مبسط</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm p-3 rounded-xl">
+                            <IoMdFlask className="text-teal-300 text-2xl" />
+                            <span className="font-arabicUI2 text-white/90">نماذج توضيحية</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right side - Sign Up Form */}
+                <div className="w-full lg:w-1/2">
+                    <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl transition-all hover:shadow-blue-500/20">
+                        <div className="mb-6 text-center">
+                            <div className="flex justify-center mb-3">
+                                <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500">
+                                    <IoMdFlask className="text-3xl text-white" />
+                                </div>
+                            </div>
+                            <h2 className="text-2xl font-arabicUI2 font-bold text-white mb-2">سجل معنا الآن</h2>
+                            <p className="text-white/60 font-arabicUI2">ابدأ رحلتك مع عالم الكيمياء الممتع</p>
+
+                            {/* Progress Bar */}
+                            <div className="mt-6 mb-4 flex justify-between items-center">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-blue-500' : 'bg-white/20'} transition-all`}>
+                                    <span className="text-white">1</span>
+                                </div>
+                                <div className={`h-1 flex-1 mx-2 ${step >= 2 ? 'bg-blue-500' : 'bg-white/20'} transition-all`}></div>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-blue-500' : 'bg-white/20'} transition-all`}>
+                                    <span className="text-white">2</span>
+                                </div>
+                                <div className={`h-1 flex-1 mx-2 ${step >= 3 ? 'bg-blue-500' : 'bg-white/20'} transition-all`}></div>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-blue-500' : 'bg-white/20'} transition-all`}>
+                                    <span className="text-white">3</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {step === 1 && (
+                                <>
+                                    {/* Step 1: Personal Information */}
+                                    <div className="text-white/80 font-arabicUI2 text-lg mb-4">
+                                        <span className="text-blue-300">▪️</span> المعلومات الشخصية
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <FaUser className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            placeholder="الاسم بالكامل"
+                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <FaEnvelope className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            placeholder="البريد الإلكتروني"
+                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <BsGenderAmbiguous className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <div className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl text-white font-arabicUI3 focus-within:ring-2 focus-within:ring-blue-300 focus-within:border-transparent transition-all">
+                                            <div className="flex items-center justify-around">
+                                                <label className="flex items-center cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="gender"
+                                                        value="ذكر"
+                                                        checked={formData.gender === "ذكر"}
+                                                        onChange={handleChange}
+                                                        className="mr-2 text-blue-500 focus:ring-blue-400"
+                                                        required
+                                                    />
+                                                    <span>ذكر</span>
+                                                </label>
+                                                <label className="flex items-center cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="gender"
+                                                        value="انثي"
+                                                        checked={formData.gender === "انثي"}
+                                                        onChange={handleChange}
+                                                        className="mr-2 text-blue-500 focus:ring-blue-400"
+                                                    />
+                                                    <span>أنثى</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={nextStep}
+                                        className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-arabicUI2 font-bold rounded-xl transition-all transform hover:scale-105 focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:outline-none"
+                                    >
+                                        التالي
+                                    </button>
+                                </>
+                            )}
+
+                            {step === 2 && (
+                                <>
+                                    {/* Step 2: Contact Information */}
+                                    <div className="text-white/80 font-arabicUI2 text-lg mb-4">
+                                        <span className="text-blue-300">▪️</span> معلومات الاتصال والتعليم
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <FaPhoneAlt className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <input
+                                            type="tel"
+                                            name="phoneNumber"
+                                            value={formData.phoneNumber}
+                                            dir='rtl'
+                                            onChange={handleChange}
+                                            placeholder="رقم الهاتف"
+                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <FaUsers className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <input
+                                            type="tel"
+                                            name="parentPhone"
+                                            value={formData.parentPhone}
+                                            onChange={handleChange}
+                                            dir='rtl'
+                                            placeholder="رقم هاتف ولي الأمر"
+                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <FaGraduationCap className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <div className="relative">
+                                            <select
+                                                name="level"
+                                                value={formData.level}
+                                                onChange={handleChange}
+                                                className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl text-white font-arabicUI2 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all appearance-none"
+                                                required
+                                            >
+                                                <option value="" disabled className="bg-indigo-900 text-white">اختر المستوى التعليمي</option>
+                                                <option value="الصف الثالث الثانوي" className="bg-indigo-900 text-white">الصف الثالث الثانوي</option>
+                                                <option value="الصف الثاني الثانوي" className="bg-indigo-900 text-white">الصف الثاني الثانوي</option>
+                                                <option value="الصف الأول الثانوي" className="bg-indigo-900 text-white">الصف الأول الثانوي</option>
+                                            </select>
+                                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white pointer-events-none">
+                                                <FaChevronDown className="w-4 h-4" />
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <FaMapMarkerAlt className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <div className="relative">
+                                            <select
+                                                name="government"
+                                                value={formData.government}
+                                                onChange={handleChange}
+                                                className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl text-white font-arabicUI2 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all appearance-none"
+                                                required
+                                            >
+                                                <option value="" disabled className="bg-indigo-900 text-white">اختر المحافظة</option>
+                                                {egyptGovernments.map((gov, index) => (
+                                                    <option key={index} value={gov} className="bg-indigo-900 text-white">{gov}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white pointer-events-none">
+                                                <FaChevronDown className="w-4 h-4" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={prevStep}
+                                            className="w-1/3 py-3 bg-white/10 hover:bg-white/20 text-white font-arabicUI2 font-bold rounded-xl transition-all focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:outline-none"
+                                        >
+                                            السابق
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={nextStep}
+                                            className="w-2/3 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-arabicUI2 font-bold rounded-xl transition-all transform hover:scale-105 focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:outline-none"
+                                        >
+                                            التالي
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+
+                            {step === 3 && (
+                                <>
+                                    {/* Step 3: Password */}
+                                    <div className="text-white/80 font-arabicUI2 text-lg mb-4">
+                                        <span className="text-blue-300">▪️</span> إنشاء كلمة المرور
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <FaLock className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            placeholder="كلمة المرور"
+                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI2 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <FaLock className="text-blue-300 group-focus-within:text-white transition-colors" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            name="confirmPassword"
+                                            value={formData.confirmPassword}
+                                            onChange={handleChange}
+                                            placeholder="تأكيد كلمة المرور"
+                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI2 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        <input
+                                            id="terms"
+                                            type="checkbox"
+                                            className="w-4 h-4 text-blue-500 bg-white/10 border-white/20 rounded focus:ring-blue-400"
+                                            required
+                                        />
+                                        <label htmlFor="terms" className="mr-2 text-sm text-white/70 font-arabicUI2">
+                                            أوافق على <span className="text-blue-300 cursor-pointer hover:underline">الشروط والأحكام</span>
+                                        </label>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={prevStep}
+                                            className="w-1/3 py-3 bg-white/10 hover:bg-white/20 text-white font-arabicUI2 font-bold rounded-xl transition-all focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:outline-none"
+                                        >
+                                            السابق
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="w-2/3 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-arabicUI2 font-bold rounded-xl transition-all transform hover:scale-105 focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:outline-none"
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <span className="animate-spin inline-block w-5 h-5 border-2 border-white/20 border-t-white rounded-full"></span>
+                                                    <span>جاري التسجيل...</span>
+                                                </>
+                                            ) : "إنشاء حساب"}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </form>
+
+                        <div className="mt-6 text-center">
+                            <p className="text-white/60 font-arabicUI2">
+                                لديك حساب بالفعل؟{" "}
+                                <a href="/sign-in" className="text-blue-300 hover:underline font-bold">تسجيل الدخول</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Page;

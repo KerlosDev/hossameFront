@@ -1,17 +1,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
-import GlobalApi from '../api/GlobalApi';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AiOutlineClockCircle, AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineExperiment } from 'react-icons/ai';
-import { GiChemicalDrop, GiAtom, GiMolecule } from 'react-icons/gi';
+import { AiOutlineClockCircle, AiOutlineCheckCircle, AiOutlineCloseCircle } from 'react-icons/ai';
 import Swal from 'sweetalert2';
 import { FiHelpCircle, FiCheck } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
 const QuizData = ({ params }) => {
-    const { user } = useUser();
     const { quizid } = React.use(params);
     const [quiz, setQuiz] = useState(null);
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -22,6 +20,15 @@ const QuizData = ({ params }) => {
     const [loading, setLoading] = useState(true);
     const [showHelp, setShowHelp] = useState(false);
     const [lastAnswerFeedback, setLastAnswerFeedback] = useState(null);
+    const [userData, setUserData] = useState({ email: '', fullName: '' });
+
+    // Load user data from cookies
+    useEffect(() => { 
+        const userFullName = Cookies.get('username');
+        if ( userFullName) {
+            setUserData({   fullName: userFullName });
+        }
+    }, []);
 
     // Load answers from localStorage on initial load
     useEffect(() => {
@@ -41,45 +48,62 @@ const QuizData = ({ params }) => {
     }, [selectedAnswers, quizid]);
 
     useEffect(() => {
-        if (user?.primaryEmailAddress?.emailAddress && quizid) {
+        if (quizid) {
             loadQuizData();
         }
-    }, [user, quizid]);
-
+    }, [quizid]);
     const loadQuizData = async () => {
         try {
-            const data = await GlobalApi.getQuizById(quizid);
-
-            if (!data || !data.exam) {
-                throw new Error('لا يمكن الوصول إلى هذا الاختبار');
+          const token = Cookies.get('token');
+          if (!token) {
+            throw new Error('لم يتم العثور على رمز المصادقة');
+          }
+      
+          const response = await axios.get(`http://localhost:9000/exam/${quizid}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
             }
-
-            const examData = data.exam;
-            const parsedQuiz = JSON.parse(examData.jsonexam);
-
-            setQuiz({
-                ...parsedQuiz,
-                id: examData.id,
-                title: parsedQuiz.title || 'اختبار كيمياء'
-            });
-
-            // Set timer - 2 minutes per question
-            setTimeLeft(parsedQuiz.questions.length * 120);
-            setLoading(false);
+          });
+      
+          if (!response || !response.data) {
+            throw new Error('لا يمكن الوصول إلى هذا الاختبار');
+          }
+      
+          const examData = response.data;
+      
+          // 🔁 تحويل بيانات الأسئلة إلى الشكل المناسب
+          const parsedQuestions = examData.questions.map((q) => ({
+            qus: q.title,
+            opationA: q.options.a,
+            opationB: q.options.b,
+            opationC: q.options.c,
+            opationD: q.options.d,
+            trueChoisevip: q.correctAnswer?.toUpperCase(), // "a" => "A"
+            imageUrl: q.imageUrl
+          }));
+      
+          setQuiz({
+            title: examData.title,
+            questions: parsedQuestions
+          });
+      
+          setTimeLeft(parsedQuestions.length * 120);
+          setLoading(false);
+      
         } catch (error) {
-            console.error('Error loading quiz:', error);
-            Swal.fire({
-                title: 'خطأ',
-                text: error.message || 'حدث خطأ أثناء تحميل الاختبار',
-                icon: 'error',
-                confirmButtonText: 'حسناً'
-            }).then(() => {
-                window.location.href = '/'; // Redirect to home page on error
-            });
-            setLoading(false);
+          console.error('Error loading quiz:', error);
+          Swal.fire({
+            title: 'خطأ',
+            text: error.message || 'حدث خطأ أثناء تحميل الاختبار',
+            icon: 'error',
+            confirmButtonText: 'حسناً'
+          }).then(() => {
+            window.location.href = '/';
+          });
+          setLoading(false);
         }
-    };
-
+      };
+      
     useEffect(() => {
         if (timeLeft === null || quizComplete) return;
 
@@ -194,28 +218,27 @@ const QuizData = ({ params }) => {
 
             if (!result.isConfirmed) return;
 
-            if (!user?.primaryEmailAddress?.emailAddress || !user?.fullName) {
-                throw new Error('بيانات المستخدم غير متوفرة');
-            }
-
             const results = calculateResults();
-            const jsonResult = {
-                quizTitle: quiz.title,
-                submittedAt: new Date().toISOString(),
-                score: results.score,
+            
+            // Format data according to the requested format
+            const examResult = {
+                examTitle: quiz.title,
                 totalQuestions: quiz.questions.length,
-                percentage: results.percentage,
-                detailedAnswers: results.details
+                correctAnswers: results.score
             };
 
-            await GlobalApi.SaveGradesOfQuiz(
-                user.primaryEmailAddress.emailAddress,
-                user.fullName,
-                results.score,
-                quiz.title,
-                quiz.questions.length,
-                jsonResult
-            );
+            // Get the token from cookies
+            const token = Cookies.get('token');
+            if (!token) {
+                throw new Error('لم يتم العثور على رمز المصادقة');
+            }
+
+            // Send result to the backend
+            await axios.post('http://localhost:9000/examResult/create', examResult, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
             setResults(results);
             setQuizComplete(true);
