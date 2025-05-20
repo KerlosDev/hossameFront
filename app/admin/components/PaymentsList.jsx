@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { CreditCard, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { CreditCard, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Phone, Mail } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Cookies from 'js-cookie';
@@ -129,7 +129,7 @@ export default function PaymentsList() {
 
             // Update local state and refresh data
             await fetchEnrollments();
-            
+
             toast.success(newStatus === 'paid' ? 'تم تفعيل الكورس بنجاح' : 'تم إلغاء تفعيل الكورس بنجاح');
         } catch (error) {
             console.error('Error updating payment status:', error);
@@ -233,9 +233,26 @@ export default function PaymentsList() {
                             {sortedPayments?.map((payment) => (
                                 <tr key={payment._id} className="border-b border-white/5 hover:bg-white/5">
                                     <td className="py-4 px-6">
-                                        <div className="flex flex-col">
-                                            <span className="text-white font-medium">{payment.userEmail}</span>
-                                            <span className="text-white/60 text-xs" dir="ltr">{payment.phoneNumber || 'لا يوجد رقم هاتف'}</span>
+                                        <div className="flex flex-col gap-2">
+                                            <div className="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 hover:from-blue-500/15 hover:to-purple-500/15 transition-all group">
+                                                <Mail size={14} className="text-blue-400 mr-2" />
+                                                <span className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 group-hover:from-blue-300 group-hover:to-purple-300" dir="ltr">
+                                                    {payment.userEmail}
+                                                </span>
+                                            </div>
+                                            {payment.phoneNumber ? (
+                                                <div className="inline-flex items-center px-2.5 py-1 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 hover:from-emerald-500/15 hover:to-teal-500/15 transition-all group">
+                                                    <Phone size={12} className="text-emerald-400 mr-1.5" />
+                                                    <span className="text-xs font-medium bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 group-hover:from-emerald-300 group-hover:to-teal-300 font-mono tracking-wider" dir="ltr">
+                                                        {payment.phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1 $2 $3')}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-xl bg-white/5 border border-white/10">
+                                                    <Phone size={12} className="text-white/30 mr-1.5" />
+                                                    <span className="text-xs text-white/40">لا يوجد رقم هاتف</span>
+                                                </span>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="py-4 px-6">

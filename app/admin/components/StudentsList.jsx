@@ -9,7 +9,7 @@ import * as XLSX from 'xlsx';
 
 export default function StudentsList() {
     const [students, setStudents] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
     const [selectedStudent, setSelectedStudent] = useState(null);
@@ -27,11 +27,60 @@ export default function StudentsList() {
         lastWeekActive: 0
     });
 
+    const fetchAnalytics = async () => {
+        try {
+            const token = Cookies.get('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch('http://localhost:9000/analytics/students', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Analytics HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setAnalytics(data.data);
+            } else {
+                throw new Error('Failed to fetch analytics data');
+            }
+        } catch (error) {
+            console.error('Error fetching analytics:', error);
+            toast.error('حدث خطأ في تحميل الإحصائيات');
+            setAnalytics({
+                totalStudents: 0,
+                activeStudents: 0,
+                bannedStudents: 0,
+                lastWeekActive: 0,
+                governmentDistribution: [],
+                levelDistribution: []
+            });
+        }
+    };
+
+    // Effect to fetch analytics data
+    useEffect(() => {
+        fetchAnalytics();
+    }, [students]); // Refresh when students data changes
+
     // Add new state for sorting
     const [sortConfig, setSortConfig] = useState({
         key: null,
         direction: 'ascending'
     });
+
+    // Pagination states
+    const [page, setPage] = useState(1);
+    const [limit] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalStudents, setTotalStudents] = useState(0);
 
     // Add dummy data structure at the beginning of the component
     const getStudentMetrics = (student) => {
@@ -56,19 +105,15 @@ export default function StudentsList() {
         };
     };
 
-    // Fetch students
-    useEffect(() => {
-        fetchStudents();
-    }, []);
-
+    // Define fetchStudents outside useEffect so it's available to the whole component
     const fetchStudents = async () => {
+        setLoading(true);
         try {
             const token = Cookies.get('token');
             if (!token) {
                 throw new Error('No authentication token found');
             }
-
-            const response = await fetch('http://localhost:9000/user/students', {
+            const response = await fetch(`http://localhost:9000/user/students?page=${page}&limit=${limit}&search=${searchQuery}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -82,6 +127,8 @@ export default function StudentsList() {
             const data = await response.json();
             if (data.status === 'success') {
                 setStudents(data.data);
+                setTotalPages(data.totalPages);
+                setTotalStudents(data.total);
             } else {
                 throw new Error(data.message || 'Failed to fetch students');
             }
@@ -93,7 +140,11 @@ export default function StudentsList() {
         }
     };
 
-    // Toggle ban status
+    // Effect to fetch students
+    useEffect(() => {
+        fetchStudents();
+    }, [page, limit, searchQuery]);
+
     const toggleBanStatus = async (studentId, reason = '') => {
         try {
             const token = Cookies.get('token');
@@ -116,10 +167,15 @@ export default function StudentsList() {
 
             const data = await response.json();
             if (data.status === 'success') {
-                await fetchStudents();
-                toast.success('تم تحديث حالة الحظر بنجاح');
+                // Refresh both the students list and analytics data
+                await Promise.all([
+                    fetchStudents(),
+                    fetchAnalytics()
+                ]);
+
                 setShowBanConfirm(false);
                 setBanReason('');
+                toast.success('تم تحديث حالة الحظر بنجاح');
             } else {
                 throw new Error(data.message || 'Failed to update ban status');
             }
@@ -131,13 +187,13 @@ export default function StudentsList() {
 
     // Filter students
     const filteredStudents = students.filter(student => {
-        const matchesSearch = 
+        const matchesSearch =
             student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
             student.phoneNumber.includes(searchQuery) ||
             student.government.includes(searchQuery);
 
-        const matchesStatus = filterStatus === 'all' || 
+        const matchesStatus = filterStatus === 'all' ||
             (filterStatus === 'banned' && student.isBanned) ||
             (filterStatus === 'active' && !student.isBanned);
 
@@ -156,48 +212,6 @@ export default function StudentsList() {
         return `https://wa.me/${cleanNumber}`;
     };
 
-    // Calculate analytics
-    useEffect(() => {
-        if (students.length > 0) {
-            const governmentCounts = {};
-            const levelCounts = {};
-            let activeCount = 0;
-            let bannedCount = 0;
-            let lastWeekActiveCount = 0;
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-            students.forEach(student => {
-                // Government distribution
-                governmentCounts[student.government] = (governmentCounts[student.government] || 0) + 1;
-                
-                // Level distribution
-                levelCounts[student.level] = (levelCounts[student.level] || 0) + 1;
-                
-                // Active/Banned counts
-                if (student.isBanned) bannedCount++;
-                else activeCount++;
-
-                // Last week active
-                if (new Date(student.lastActive) > oneWeekAgo) {
-                    lastWeekActiveCount++;
-                }
-            });
-
-            setAnalytics({
-                totalStudents: students.length,
-                activeStudents: activeCount,
-                bannedStudents: bannedCount,
-                governmentDistribution: Object.entries(governmentCounts)
-                    .map(([id, value]) => ({ id, value }))
-                    .sort((a, b) => b.value - a.value),
-                levelDistribution: Object.entries(levelCounts)
-                    .map(([id, value]) => ({ id, value })),
-                lastWeekActive: lastWeekActiveCount
-            });
-        }
-    }, [students]);
-
     // Export to Excel
     const exportToExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(students.map(student => ({
@@ -214,15 +228,15 @@ export default function StudentsList() {
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
-        
+
         // Generate Excel file
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        
+
         // Create Blob and download
-        const blob = new Blob([excelBuffer], { 
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([excelBuffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
-        
+
         // Create download link
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -230,74 +244,139 @@ export default function StudentsList() {
         link.setAttribute('download', `students-${new Date().toISOString().split('T')[0]}.xlsx`);
         document.body.appendChild(link);
         link.click();
-        
+
         // Cleanup
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-    };
-
-    // Analytics Section Component
+    };    // Analytics Section Component
     const AnalyticsSection = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-lg text-white/70 mb-2">إجمالي الطلاب</h3>
-                <p className="text-3xl font-bold text-white">{analytics.totalStudents}</p>
+                <p className="text-3xl font-bold text-white">{analytics?.totalStudents || 0}</p>
+                {analytics?.totalStudents !== totalStudents &&
+                    <p className="text-sm text-white/50 mt-2">مجموع كل الطلاب في النظام</p>
+                }
             </div>
             <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-lg text-white/70 mb-2">الطلاب النشطين</h3>
-                <p className="text-3xl font-bold text-green-400">{analytics.activeStudents}</p>
+                <p className="text-3xl font-bold text-green-400">{analytics?.activeStudents || 0}</p>
+                <p className="text-sm text-white/50 mt-2">الطلاب الغير محظورين</p>
             </div>
             <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-lg text-white/70 mb-2">الطلاب المحظورين</h3>
-                <p className="text-3xl font-bold text-red-400">{analytics.bannedStudents}</p>
+                <p className="text-3xl font-bold text-red-400">{analytics?.bannedStudents || 0}</p>
+                <p className="text-sm text-white/50 mt-2">الطلاب المحظورين حالياً</p>
             </div>
             <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-lg text-white/70 mb-2">نشطين آخر أسبوع</h3>
-                <p className="text-3xl font-bold text-blue-400">{analytics.lastWeekActive}</p>
+                <p className="text-3xl font-bold text-blue-400">{analytics?.lastWeekActive || 0}</p>
+                <p className="text-sm text-white/50 mt-2">الطلاب النشطين في آخر 7 أيام</p>
             </div>
         </div>
     );
 
     // Charts Section
     const ChartsSection = () => {
-        const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+        // Custom colors with a modern and vibrant palette
+        const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'];
+
+        const RADIAN = Math.PI / 180;
+        const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value, index, name }) => {
+            const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+            const x = cx + radius * Math.cos(-midAngle * RADIAN);
+            const y = cy + radius * Math.sin(-midAngle * RADIAN);
+            
+            if (percent < 0.05) return null; // Don't show labels for small segments
+            
+            return (
+                <text
+                    x={x}
+                    y={y}
+                    fill="white"
+                    textAnchor={x > cx ? 'start' : 'end'}
+                    dominantBaseline="central"
+                    fontSize="12"
+                >
+                    {`${(percent * 100).toFixed(0)}%`}
+                </text>
+            );
+        };
 
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm h-[400px]">
+                <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
                     <h3 className="text-lg text-white/70 mb-4">توزيع المحافظات</h3>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={analytics.governmentDistribution}
-                                dataKey="value"
-                                nameKey="id"
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={100}
-                                fill="#8884d8"
-                            >
+                    <div className="relative h-[400px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={analytics.governmentDistribution}
+                                    dataKey="value"
+                                    nameKey="id"
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    label={renderCustomizedLabel}
+                                    outerRadius={150}
+                                    innerRadius={80}
+                                    paddingAngle={2}
+                                    startAngle={90}
+                                    endAngle={450}
+                                    animationBegin={0}
+                                    animationDuration={1500}
+                                    animationEasing="ease-out"
+                                >
+                                    {analytics.governmentDistribution.map((entry, index) => (
+                                        <Cell 
+                                            key={`cell-${index}`} 
+                                            fill={COLORS[index % COLORS.length]}
+                                            className="transition-all duration-300 hover:opacity-80"
+                                            strokeWidth={2}
+                                            stroke="rgba(255,255,255,0.1)"
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{ 
+                                        backgroundColor: '#1f2937', 
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                    labelStyle={{ color: 'white' }}
+                                    formatter={(value, name) => [
+                                        `${value} طالب`,
+                                        `${name}`
+                                    ]}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute bottom-0 left-0 right-0">
+                            <div className="flex flex-wrap justify-center gap-4">
                                 {analytics.governmentDistribution.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    <div key={`legend-${index}`} className="flex items-center gap-2">
+                                        <div 
+                                            className="w-3 h-3 rounded-full" 
+                                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                        />
+                                        <span className="text-sm text-white/70">{entry.id}</span>
+                                    </div>
                                 ))}
-                            </Pie>
-                            <Tooltip 
-                                contentStyle={{ backgroundColor: '#1f2937', border: 'none' }}
-                                labelStyle={{ color: 'white' }}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm h-[400px]">
                     <h3 className="text-lg text-white/70 mb-4">توزيع المستويات</h3>
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={analytics.levelDistribution}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-                            <XAxis 
-                                dataKey="id" 
+                            <XAxis
+                                dataKey="id"
                                 stroke="#ffffff70"
                             />
-                            <YAxis 
+                            <YAxis
                                 stroke="#ffffff70"
                             />
                             <Tooltip
@@ -342,7 +421,7 @@ export default function StudentsList() {
             <table className="w-full">
                 <thead>
                     <tr className="border-b border-white/10">
-                        <th 
+                        <th
                             className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('name')}
                         >
@@ -355,7 +434,7 @@ export default function StudentsList() {
                                 )}
                             </div>
                         </th>
-                        <th 
+                        <th
                             className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('email')}
                         >
@@ -368,7 +447,7 @@ export default function StudentsList() {
                                 )}
                             </div>
                         </th>
-                        <th 
+                        <th
                             className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('phoneNumber')}
                         >
@@ -381,7 +460,7 @@ export default function StudentsList() {
                                 )}
                             </div>
                         </th>
-                        <th 
+                        <th
                             className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('government')}
                         >
@@ -390,11 +469,11 @@ export default function StudentsList() {
                                 {sortConfig.key === 'government' && (
                                     <span className="text-blue-400">
                                         {sortConfig.direction === 'ascending' ? '↑' : '↓'
-                                    }</span>
+                                        }</span>
                                 )}
                             </div>
                         </th>
-                        <th 
+                        <th
                             className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('lastActive')}
                         >
@@ -413,8 +492,8 @@ export default function StudentsList() {
                 </thead>
                 <tbody>
                     {getSortedData(filteredStudents).map((student, index) => (
-                        <tr 
-                            key={student._id} 
+                        <tr
+                            key={student._id}
                             className={`
                                 border-b border-white/5 hover:bg-white/5 transition-colors
                                 ${index % 2 === 0 ? 'bg-white/[0.02]' : ''}
@@ -465,11 +544,10 @@ export default function StudentsList() {
                                 </div>
                             </td>
                             <td className="p-4">
-                                <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-                                    student.isBanned 
-                                        ? 'bg-red-500/20 text-red-400' 
-                                        : 'bg-green-500/20 text-green-400'
-                                }`}>
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${student.isBanned
+                                    ? 'bg-red-500/20 text-red-400'
+                                    : 'bg-green-500/20 text-green-400'
+                                    }`}>
                                     {student.isBanned ? 'محظور' : 'نشط'}
                                 </span>
                             </td>
@@ -487,11 +565,10 @@ export default function StudentsList() {
                                             setSelectedStudent(student);
                                             setShowBanConfirm(true);
                                         }}
-                                        className={`p-2 rounded-lg transition-colors ${
-                                            student.isBanned
-                                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                                                : 'bg-white/5 text-white/70 hover:bg-white/10'
-                                        }`}
+                                        className={`p-2 rounded-lg transition-colors ${student.isBanned
+                                            ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                                            : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                            }`}
                                     >
                                         <Ban size={16} />
                                     </button>
@@ -526,6 +603,49 @@ export default function StudentsList() {
         );
     }
 
+    // Pagination component
+    const Pagination = () => (
+        <div className="mt-6 flex items-center justify-between">
+            <div className="text-sm text-white/60">
+                عرض {((page - 1) * limit) + 1} إلى {Math.min(page * limit, totalStudents)} من {totalStudents} طالب
+            </div>
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                    disabled={page === 1}
+                    className={`px-3 py-1 rounded-lg ${page === 1
+                        ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                        } transition-colors`}
+                >
+                    السابق
+                </button>
+                {[...Array(totalPages)].map((_, index) => (
+                    <button
+                        key={index + 1}
+                        onClick={() => setPage(index + 1)}
+                        className={`w-8 h-8 rounded-lg ${page === index + 1
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-white/10 text-white hover:bg-white/20'
+                            } transition-colors`}
+                    >
+                        {index + 1}
+                    </button>
+                ))}
+                <button
+                    onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={page === totalPages}
+                    className={`px-3 py-1 rounded-lg ${page === totalPages
+                        ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                        } transition-colors`}
+                >
+                    التالي
+                </button>
+            </div>
+        </div>
+    );
+
     return (
         <div className="container mx-auto p-6">
             {/* Header Section */}
@@ -550,17 +670,15 @@ export default function StudentsList() {
             <div className="flex items-center gap-4 mb-6">
                 <button
                     onClick={() => setViewMode('grid')}
-                    className={`px-4 py-2 rounded-xl transition-colors ${
-                        viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-white/5 text-white/70'
-                    }`}
+                    className={`px-4 py-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-white/5 text-white/70'
+                        }`}
                 >
                     عرض البطاقات
                 </button>
                 <button
                     onClick={() => setViewMode('table')}
-                    className={`px-4 py-2 rounded-xl transition-colors ${
-                        viewMode === 'table' ? 'bg-blue-500 text-white' : 'bg-white/5 text-white/70'
-                    }`}
+                    className={`px-4 py-2 rounded-xl transition-colors ${viewMode === 'table' ? 'bg-blue-500 text-white' : 'bg-white/5 text-white/70'
+                        }`}
                 >
                     عرض الجدول
                 </button>
@@ -607,8 +725,8 @@ export default function StudentsList() {
                             key={student._id}
                             onClick={() => setSelectedStudent(student)}
                             className={`group bg-white/5 backdrop-blur-sm rounded-2xl p-6 border transition-all cursor-pointer
-                                ${student.isBanned 
-                                    ? 'border-red-500/50 bg-red-500/5' 
+                                ${student.isBanned
+                                    ? 'border-red-500/50 bg-red-500/5'
                                     : 'border-white/10 hover:border-white/20 hover:bg-white/10'}`}
                         >
                             {/* Student Header */}
@@ -628,8 +746,8 @@ export default function StudentsList() {
 
                                 {/* Status Badge */}
                                 <span className={`px-3 py-1 rounded-full text-xs 
-                                    ${student.isBanned 
-                                        ? 'bg-red-500/20 text-red-400' 
+                                    ${student.isBanned
+                                        ? 'bg-red-500/20 text-red-400'
                                         : 'bg-green-500/20 text-green-400'}`}>
                                     {student.isBanned ? 'محظور' : 'نشط'}
                                 </span>
@@ -641,7 +759,7 @@ export default function StudentsList() {
                                     <Mail size={14} className="text-white/50" />
                                     <span>{student.email}</span>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-3">
                                     <Phone size={14} className="text-white/50" />
                                     <div className="flex items-center gap-2">
@@ -697,11 +815,10 @@ export default function StudentsList() {
                                         setSelectedStudent(student);
                                         setShowBanConfirm(true);
                                     }}
-                                    className={`p-2 rounded-lg transition-colors ${
-                                        student.isBanned
-                                            ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
-                                            : 'bg-white/5 hover:bg-white/10 text-white/70'
-                                    }`}
+                                    className={`p-2 rounded-lg transition-all ${student.isBanned
+                                        ? 'bg-green-500 hover:bg-green-600 text-white'
+                                        : 'bg-red-500 hover:bg-red-600 text-white'
+                                        }`}
                                     title={student.isBanned ? 'إلغاء الحظر' : 'حظر الطالب'}
                                 >
                                     <Ban size={18} />
@@ -714,6 +831,8 @@ export default function StudentsList() {
                 <TableView />
             )}
 
+            <Pagination />
+
             {/* Ban Confirmation Modal */}
             {showBanConfirm && selectedStudent && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -721,7 +840,7 @@ export default function StudentsList() {
                         <h3 className="text-xl font-arabicUI2 text-white mb-4">
                             {selectedStudent.isBanned ? 'إلغاء حظر الطالب' : 'حظر الطالب'}
                         </h3>
-                        
+
                         {!selectedStudent.isBanned && (
                             <textarea
                                 value={banReason}
@@ -774,11 +893,10 @@ export default function StudentsList() {
 
                             {/* Status Badge */}
                             <div className="flex items-center gap-3">
-                                <span className={`px-3 py-1 rounded-full text-sm ${
-                                    selectedStudent.isBanned
-                                        ? 'bg-red-500/20 text-red-400'
-                                        : 'bg-green-500/20 text-green-400'
-                                }`}>
+                                <span className={`px-3 py-1 rounded-full text-sm ${selectedStudent.isBanned
+                                    ? 'bg-red-500/20 text-red-400'
+                                    : 'bg-green-500/20 text-green-400'
+                                    }`}>
                                     {selectedStudent.isBanned ? 'محظور' : 'نشط'}
                                 </span>
                             </div>
@@ -883,18 +1001,18 @@ export default function StudentsList() {
                                 onClick={() => {
                                     setShowBanConfirm(true);
                                 }}
-                                className={`px-4 py-2 rounded-xl transition-all ${
-                                    selectedStudent.isBanned
-                                        ? 'bg-green-500 hover:bg-green-600 text-white'
-                                        : 'bg-red-500 hover:bg-red-600 text-white'
-                                }`}
+                                className={`px-4 py-2 rounded-xl transition-all ${selectedStudent.isBanned
+                                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                                    : 'bg-red-500 hover:bg-red-600 text-white'
+                                    }`}
                             >
                                 {selectedStudent.isBanned ? 'إلغاء الحظر' : 'حظر الطالب'}
                             </button>
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

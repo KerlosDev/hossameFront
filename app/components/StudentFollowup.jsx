@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
- import {
+import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
@@ -43,7 +43,7 @@ const StudentFollowup = () => {
         datasets: []
     });
     const [studentList, setStudentList] = useState([]);
-    const [sortBy, setSortBy] = useState('views'); // 'views', 'recent', or 'inactive'
+    const [sortBy, setSortBy] = useState('views'); // 'views', 'recent' or 'inactive'
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showLessonsModal, setShowLessonsModal] = useState(false);
     const [whatsappNumbers, setWhatsappNumbers] = useState({});
@@ -56,10 +56,11 @@ const StudentFollowup = () => {
     const [allExams, setAllExams] = useState([]);
     const [studentProgress, setStudentProgress] = useState(null);
     const [expandedCourses, setExpandedCourses] = useState({});
-    const [lessonFilter, setLessonFilter] = useState({}); // 'watched', 'unwatched', or null
+    const [lessonFilter, setLessonFilter] = useState({}); // 'watched', 'unwatched' or null
     const [examFilter, setExamFilter] = useState('all'); // 'all', 'completed', 'pending'
     const [filteredExams, setFilteredExams] = useState([]);
     const [inactivityThreshold] = useState(7); // Days to consider a student inactive
+    const [watchHistory, setWatchHistory] = useState([]);
 
     useEffect(() => {
         fetchLessonData();
@@ -284,24 +285,42 @@ const StudentFollowup = () => {
             '20' + cleanNumber.substring(1) :
             cleanNumber;
         return `https://wa.me/${fullNumber}`;
-    };
+    }; const prepareStudentChartData = () => {
+        if (!watchHistory || watchHistory.length === 0) {
+            return {
+                labels: [],
+                datasets: []
+            };
+        }
 
-    const prepareStudentChartData = (student) => {
-        // Sort lessons by date
-        const sortedLessons = Array.from(student.lessons).map(lesson => ({
-            name: lesson,
-            views: student.lessonViews[lesson],
-            // Assuming we have timestamp data for each view
-            dates: student.viewDates?.[lesson] || []
-        }));
+        // Group by course and calculate total views
+        const courseStats = watchHistory.reduce((acc, entry) => {
+            const courseName = entry.courseId.name;
+            if (!acc[courseName]) {
+                acc[courseName] = {
+                    totalViews: 0,
+                    uniqueLessons: new Set()
+                };
+            }
+            acc[courseName].totalViews += entry.watchedCount;
+            acc[courseName].uniqueLessons.add(entry.lessonId);
+            return acc;
+        }, {});
 
+        // Prepare chart data
         return {
-            labels: sortedLessons.map(l => l.name),
+            labels: Object.keys(courseStats),
             datasets: [{
                 label: 'عدد المشاهدات',
-                data: sortedLessons.map(l => l.views),
+                data: Object.values(courseStats).map(stats => stats.totalViews),
                 backgroundColor: 'rgba(59, 130, 246, 0.5)',
                 borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1
+            }, {
+                label: 'عدد الدروس المشاهدة',
+                data: Object.values(courseStats).map(stats => stats.uniqueLessons.size),
+                backgroundColor: 'rgba(147, 51, 234, 0.5)',
+                borderColor: 'rgb(147, 51, 234)',
                 borderWidth: 1
             }]
         };
@@ -315,11 +334,15 @@ const StudentFollowup = () => {
             });
 
             if (!response.ok) {
+                if (response.status === 404) {
+                    // If no results found, set empty array instead of throwing error
+                    setQuizResults([]);
+                    return;
+                }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            // Transform the new response format into the expected format
             if (data && data.results) {
                 const processedResults = data.results.map(result => ({
                     nameofquiz: result.examTitle,
@@ -330,11 +353,12 @@ const StudentFollowup = () => {
                 }));
                 setQuizResults(processedResults);
             } else {
-                console.error('Unexpected response format:', data);
+                // If data format is unexpected, set empty array
                 setQuizResults([]);
             }
         } catch (error) {
             console.error('Error fetching quiz results:', error);
+            // In case of any error, set empty array
             setQuizResults([]);
         }
     };
@@ -357,25 +381,28 @@ const StudentFollowup = () => {
             const courseLessons = courseChapters.flatMap(ch => ch.lessons || []);
             const totalLessons = courseLessons.length;
 
-            const watchedLessons = getWatchedLessonsByCourse(student, course, allChapters);
-
-            // Get exams for this course
-            const courseExams = allExams.filter(exam =>
-                exam.courseId === course.id || exam.courseName === course.nameofcourse
+            // Filter watch history for this course
+            const courseWatchHistory = watchHistory.filter(entry =>
+                entry.courseId._id === course.id
             );
 
-            // Calculate completed exams
-            const completedExams = quizResults.filter(quiz =>
-                courseExams.some(exam => exam.title === quiz.nameofquiz)
-            );
+            // Get unique watched lessons
+            const watchedLessonsSet = new Set(courseWatchHistory.map(entry => entry.lessonId));
+            const watchedLessonsCount = watchedLessonsSet.size;
+
+            // Calculate total views for this course
+            const totalViews = courseWatchHistory.reduce((sum, entry) => sum + entry.watchedCount, 0);
 
             // Find unwatched lessons
             const unwatchedLessons = courseChapters.flatMap(chapter => {
+                const chapterHistory = courseWatchHistory.filter(entry =>
+                    entry.chapterId._id === chapter.id
+                );
+
+                const watchedIds = new Set(chapterHistory.map(entry => entry.lessonId));
+
                 return (chapter.lessons || [])
-                    .filter(lesson => {
-                        const fullLessonName = `${chapter.title} - ${lesson.title}`;
-                        return !student.lessons.includes(fullLessonName);
-                    })
+                    .filter(lesson => !watchedIds.has(lesson.id))
                     .map(lesson => ({
                         chapterTitle: chapter.title,
                         lessonTitle: lesson.title
@@ -387,15 +414,16 @@ const StudentFollowup = () => {
                 courseName: course.nameofcourse,
                 courseNickname: course.nicknameforcourse,
                 totalLessons,
-                watchedLessons: watchedLessons,
-                watchedLessonsCount: watchedLessons.length,
-                completion: totalLessons > 0 ? (watchedLessons.length / totalLessons) * 100 : 0,
-                examsTotal: courseExams.length,
-                examsCompleted: completedExams.length,
+                watchedLessons: courseWatchHistory,
+                watchedLessonsCount,
+                totalViews,
+                completion: totalLessons > 0 ? (watchedLessonsCount / totalLessons) * 100 : 0,
+                examsTotal: course.exams?.length || 0,
+                examsCompleted: quizResults.length,
                 unwatchedLessons,
-                courseChapters // Add this
+                courseChapters
             };
-        }).filter(course => course.totalLessons > 0); // Only show courses with lessons
+        }).filter(course => course.totalLessons > 0);
 
         setStudentProgress(progress);
     };
@@ -434,8 +462,48 @@ const StudentFollowup = () => {
         const studentData = whatsappNumbers[student.email];
         if (studentData && studentData.studentId) {
             fetchQuizResults(studentData.studentId);
+            fetchWatchHistory(studentData.studentId);
         }
         calculateStudentProgress(student);
+    };
+
+    const fetchWatchHistory = async (studentId) => {
+        try {
+            const response = await fetch(`http://localhost:9000/watchHistory/student/${studentId}`, {
+                headers: getAuthHeaders()
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                const sortedHistory = data.data.sort((a, b) =>
+                    new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt)
+                );
+                setWatchHistory(sortedHistory);
+
+                // Update student's total views and unique lessons in the student list
+                if (selectedStudent) {
+                    const totalViews = sortedHistory.reduce((sum, entry) => sum + entry.watchedCount, 0);
+                    const uniqueLessons = new Set(sortedHistory.map(entry => entry.lessonId)).size;
+
+                    setStudentList(prevList =>
+                        prevList.map(student =>
+                            student.email === selectedStudent.email
+                                ? {
+                                    ...student,
+                                    totalViews,
+                                    uniqueLessons,
+                                    hasWatchHistory: true,
+                                    lastViewed: sortedHistory[0]?.lastWatchedAt
+                                }
+                                : student
+                        )
+                    );
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching watch history:', error);
+            setWatchHistory([]);
+        }
     };
 
     const chartOptions = {
@@ -586,6 +654,76 @@ const StudentFollowup = () => {
         </div>
     );
 
+    const WatchHistorySection = () => (
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+            <h3 className="text-xl font-bold text-white mb-6">سجل المشاهدة</h3>            {watchHistory.length > 0 ? (
+                <div className="space-y-6">
+                    {/* Summary statistics */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-white/5 rounded-lg p-4">
+                            <div className="text-2xl font-bold text-blue-400">
+                                {watchHistory.reduce((sum, entry) => sum + entry.watchedCount, 0)}
+                            </div>
+                            <div className="text-sm text-white/60">إجمالي المشاهدات</div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-4">
+                            <div className="text-2xl font-bold text-purple-400">
+                                {new Set(watchHistory.map(entry => entry.lessonId)).size}
+                            </div>
+                            <div className="text-sm text-white/60">الدروس المشاهدة</div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-4">
+                            <div className="text-2xl font-bold text-green-400">
+                                {new Set(watchHistory.map(entry => entry.courseId._id)).size}
+                            </div>
+                            <div className="text-sm text-white/60">الكورسات النشطة</div>
+                        </div>
+                    </div>
+
+                    {/* Watch history list */}
+                    <div className="space-y-4">
+                        {watchHistory.map((entry, index) => (
+                            <div key={index} className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors">
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <h4 className="text-white font-medium">{entry.lessonTitle}</h4>
+                                        <p className="text-sm text-white/60">
+                                            {entry.courseId?.name} - {entry.chapterId?.title}
+                                        </p>
+                                        <div className="flex items-center gap-4 mt-2">
+                                            <div className="flex items-center gap-2">
+                                                <FaEye className="text-blue-400" />
+                                                <span className="text-sm text-white/60">
+                                                    {entry.watchedCount} مشاهدة
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FaClock className="text-purple-400" />
+                                                <span className="text-sm text-white/60">
+                                                    آخر مشاهدة: {new Date(entry.lastWatchedAt).toLocaleDateString('ar-EG', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="text-center py-8 text-white/60">
+                    لا يوجد سجل مشاهدة
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div ref={reportRef} className="p-6 space-y-6">
             {/* Tabs Navigation */}
@@ -696,7 +834,6 @@ const StudentFollowup = () => {
                                         <th className="py-3 px-4 text-right">الطالب</th>
                                         <th className="py-3 px-4 text-center">رقم الطالب</th>
                                         <th className="py-3 px-4 text-center">رقم ولي الأمر</th>
-                                        <th className="py-3 px-4 text-center">عدد المشاهدات</th>
                                         <th className="py-3 px-4 text-center">الدروس المشاهدة</th>
                                         <th className="py-3 px-4 text-center">آخر نشاط</th>
                                         <th className="py-3 px-4 text-center">تفاصيل</th>
@@ -756,14 +893,9 @@ const StudentFollowup = () => {
                                             </td>
 
                                             {/* ...rest of existing cells... */}
-                                            <td className="py-4 px-4 text-center">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <FaEye className="text-blue-400" />
-                                                    <span>{student.views}</span>
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-4 text-center">
-                                                {student.uniqueLessons} درس
+
+                                            <td dir='rtl' className="py-4 px-4 text-center">
+                                                {student.uniqueLessons}       درس
                                             </td>
                                             <td className="py-4 px-4 text-center">
                                                 <div className="flex items-center justify-center gap-2">
@@ -807,33 +939,21 @@ const StudentFollowup = () => {
                                             </span>
                                         </div>
                                         <div className="flex-1">
-                                            <h2 className="text-2xl font-bold text-white mb-2">{selectedStudent.userName}</h2>
-                                            <div className="flex flex-wrap gap-4">
+                                            <h2 className="text-2xl font-bold text-white mb-2">{selectedStudent.userName}</h2>                                            <div className="flex flex-wrap gap-4">
                                                 <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-1">
                                                     <FaEye className="text-blue-400" />
-                                                    <span className="text-white">{selectedStudent.activityStatus?.totalWatchedLessons || 0} مشاهدة</span>
+                                                    <span className="text-white">
+                                                        {watchHistory.reduce((total, entry) => total + entry.watchedCount, 0)} مشاهدة
+                                                    </span>
                                                 </div>
-                                                {selectedStudent.activityStatus?.lastActivity && (
+                                                {watchHistory.length > 0 && (
                                                     <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-1">
                                                         <FaClock className="text-green-400" />
                                                         <span className="text-white">
-                                                            آخر نشاط: {new Date(selectedStudent.activityStatus.lastActivity).toLocaleDateString('ar-EG')}
+                                                            آخر نشاط: {new Date(watchHistory[0].lastWatchedAt).toLocaleDateString('ar-EG')}
                                                         </span>
                                                     </div>
                                                 )}
-                                                <div className={`flex items-center gap-2 rounded-full px-4 py-1 ${selectedStudent.enrollmentStatus?.isEnrolled
-                                                    ? 'bg-green-500/20 text-green-400'
-                                                    : 'bg-red-500/20 text-red-400'
-                                                    }`}>
-                                                    {selectedStudent.enrollmentStatus?.isEnrolled
-                                                        ? <FaGraduationCap />
-                                                        : <FaTimes />}
-                                                    <span>
-                                                        {selectedStudent.enrollmentStatus?.isEnrolled
-                                                            ? 'مشترك'
-                                                            : 'غير مشترك'}
-                                                    </span>
-                                                </div>
                                             </div>
 
                                             {/* Contact Information */}
@@ -887,13 +1007,12 @@ const StudentFollowup = () => {
                                 {/* Activity Status */}
                                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
                                     <h3 className="text-xl font-bold text-white mb-4">حالة النشاط</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="bg-white/5 rounded-lg p-4">
-                                            <div className="text-sm text-white/70 mb-1">إجمالي المشاهدات</div>
-                                            <div className="text-2xl text-white font-bold">
-                                                {selectedStudent.activityStatus?.totalWatchedLessons || 0}
-                                            </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">                                <div className="bg-white/5 rounded-lg p-4">
+                                        <div className="text-sm text-white/70 mb-1">إجمالي المشاهدات</div>
+                                        <div className="text-2xl text-white font-bold">
+                                            {watchHistory.reduce((total, entry) => total + entry.watchedCount, 0)}
                                         </div>
+                                    </div>
                                         <div className="bg-white/5 rounded-lg p-4">
                                             <div className="text-sm text-white/70 mb-1">الحالة</div>
                                             <div className={`text-2xl font-bold ${selectedStudent.status?.color}`}>
@@ -903,46 +1022,84 @@ const StudentFollowup = () => {
                                         <div className="bg-white/5 rounded-lg p-4">
                                             <div className="text-sm text-white/70 mb-1">آخر نشاط</div>
                                             <div className="text-2xl text-white font-bold">
-                                                {selectedStudent.activityStatus?.lastActivity
-                                                    ? new Date(selectedStudent.activityStatus.lastActivity).toLocaleDateString('ar-EG')
+                                                {watchHistory.length > 0
+                                                    ? new Date(watchHistory[0].lastWatchedAt).toLocaleDateString('ar-EG')
                                                     : 'لم يبدأ بعد'}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
 
-                        {/* Course Progress Grid */}
+                                {/* Watch History Section */}
+                                <WatchHistorySection />
+                            </div>
+                        )}                        {/* Course Progress Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {studentProgress?.map((course, index) => (
+                            {/* Group watchHistory by courseId */}
+                            {Object.values(watchHistory.reduce((acc, entry) => {
+                                const courseId = entry.courseId._id;
+                                if (!acc[courseId]) {
+                                    acc[courseId] = {
+                                        courseId: courseId,
+                                        courseName: entry.courseId.name,
+                                        chapters: {},
+                                        totalViews: 0,
+                                        uniqueLessons: new Set(),
+                                        watchedLessons: []
+                                    };
+                                }
+
+                                // Add lesson to unique lessons set
+                                acc[courseId].uniqueLessons.add(entry.lessonId);
+
+                                // Add to total views
+                                acc[courseId].totalViews += entry.watchedCount;
+
+                                // Add to watched lessons array
+                                acc[courseId].watchedLessons.push({
+                                    lessonId: entry.lessonId,
+                                    lessonTitle: entry.lessonTitle,
+                                    chapterTitle: entry.chapterId.title,
+                                    watchedCount: entry.watchedCount,
+                                    lastWatchedAt: entry.lastWatchedAt
+                                });
+
+                                // Group by chapters
+                                if (!acc[courseId].chapters[entry.chapterId._id]) {
+                                    acc[courseId].chapters[entry.chapterId._id] = {
+                                        title: entry.chapterId.title,
+                                        lessons: []
+                                    };
+                                }
+                                acc[courseId].chapters[entry.chapterId._id].lessons.push({
+                                    lessonId: entry.lessonId,
+                                    lessonTitle: entry.lessonTitle,
+                                    watchedCount: entry.watchedCount,
+                                    lastWatchedAt: entry.lastWatchedAt
+                                });
+
+                                return acc;
+                            }, {})).map((course, index) => (
                                 <div key={index} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
                                     <div className="flex justify-between items-center mb-4">
                                         <h3 className="text-lg font-bold text-white">{course.courseName}</h3>
                                         <div className="text-2xl font-bold text-blue-400">
-                                            {Math.round(course.completion)}%
+                                            {course.totalViews} مشاهدة
                                         </div>
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div className="w-full bg-white/10 rounded-full h-3">
-                                            <div
-                                                className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500"
-                                                style={{ width: `${course.completion}%` }}
-                                            />
-                                        </div>
-
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="bg-white/5 rounded-lg p-4">
-                                                <div className="text-sm text-white/70 mb-1">الدروس المكتملة</div>
+                                                <div className="text-sm text-white/70 mb-1">الدروس المشاهدة</div>
                                                 <div className="text-xl text-white font-bold">
-                                                    {course.watchedLessonsCount} / {course.totalLessons}
+                                                    {course.uniqueLessons.size} درس
                                                 </div>
                                             </div>
                                             <div className="bg-white/5 rounded-lg p-4">
-                                                <div className="text-sm text-white/70 mb-1">الاختبارات المكتملة</div>
+                                                <div className="text-sm text-white/70 mb-1">الفصول</div>
                                                 <div className="text-xl text-white font-bold">
-                                                    {course.examsCompleted} / {course.examsTotal}
+                                                    {Object.keys(course.chapters).length} فصل
                                                 </div>
                                             </div>
                                         </div>
@@ -987,38 +1144,32 @@ const StudentFollowup = () => {
                                                     </button>
                                                 </div>
                                             )}
-                                        </div>
-
-                                        {/* Lessons List */}
+                                        </div>                                        {/* Chapters and Lessons List */}
                                         {expandedCourses[course.courseId] && (
-                                            <div className="mt-4 space-y-2">
-                                                {lessonFilter[course.courseId] !== 'watched' &&
-                                                    course.unwatchedLessons
-                                                        .map((lesson, idx) => (
-                                                            <div key={`unwatched-${idx}`}
-                                                                className="flex items-center gap-2 bg-red-500/10 text-white/70 p-3 rounded-lg"
-                                                            >
-                                                                <FaTimes className="text-red-400" />
-                                                                <span>{lesson.chapterTitle} - {lesson.lessonTitle}</span>
-                                                            </div>
-                                                        ))
-                                                }
-                                                {lessonFilter[course.courseId] !== 'unwatched' &&
-                                                    course.watchedLessons
-                                                        .map((lesson, idx) => (
-                                                            <div key={`watched-${idx}`}
+                                            <div className="mt-4 space-y-4">
+                                                {Object.values(course.chapters).map((chapter, chapterIdx) => (
+                                                    <div key={chapterIdx} className="space-y-2">
+                                                        <h4 className="text-white font-medium mb-2">{chapter.title}</h4>
+                                                        {chapter.lessons.map((lesson, lessonIdx) => (
+                                                            <div key={lessonIdx}
                                                                 className="flex items-center justify-between bg-green-500/10 text-white/70 p-3 rounded-lg"
                                                             >
                                                                 <div className="flex items-center gap-2">
                                                                     <FaEye className="text-green-400" />
-                                                                    <span>{lesson}</span>
+                                                                    <div className="flex flex-col">
+                                                                        <span>{lesson.lessonTitle}</span>
+                                                                        <span className="text-xs text-white/50">
+                                                                            آخر مشاهدة: {new Date(lesson.lastWatchedAt).toLocaleDateString('ar-EG')}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                                 <span className="text-sm text-green-400">
-                                                                    {selectedStudent.lessonViews[lesson]} مشاهدة
+                                                                    {lesson.watchedCount} مشاهدة
                                                                 </span>
                                                             </div>
-                                                        ))
-                                                }
+                                                        ))}
+                                                    </div>
+                                                ))}
                                             </div>
                                         )}
                                     </div>

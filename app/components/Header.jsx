@@ -17,10 +17,10 @@ const Header = () => {
     const router = useRouter()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [notifications, setNotifications] = useState([]);
-    const [showNotifications, setShowNotifications] = useState(false);
-    const [unreadCount, setUnreadCount] = useState(0);
+    const [showNotifications, setShowNotifications] = useState(false); const [unreadCount, setUnreadCount] = useState(0);
     const [username, setUsername] = useState('');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
     const [lastReadTime, setLastReadTime] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -66,14 +66,19 @@ const Header = () => {
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
         return null;
-    };
-
-    const checkUserLogin = () => {
+    }; const checkUserLogin = () => {
         try {
             const token = getCookie('token');
             const username = decodeURIComponent(decodeURIComponent(getCookie('username') || ''));
 
             if (token && username) {
+                // Decode the JWT token to get user role
+                const tokenParts = token.split('.');
+                if (tokenParts.length === 3) {
+                    const payload = JSON.parse(atob(tokenParts[1]));
+                    setIsAdmin(payload.role === 'admin');
+                }
+
                 setUsername(username);
                 setIsLoggedIn(true);
                 return;
@@ -81,10 +86,12 @@ const Header = () => {
 
             setUsername('');
             setIsLoggedIn(false);
+            setIsAdmin(false);
         } catch (error) {
             console.error("Error checking user login:", error);
             setUsername('');
             setIsLoggedIn(false);
+            setIsAdmin(false);
         }
     }; const fetchNotifications = async () => {
         try {
@@ -231,65 +238,72 @@ const Header = () => {
 
                     {/* Desktop Menu - Hidden on Mobile */}
                     <div className="hidden md:flex items-center gap-1.5 sm:gap-2 md:gap-4">
-                        {isLoggedIn ? (
-                            <div className="flex items-center gap-1.5 sm:gap-2">                            <div className="hidden sm:flex items-center">
+                        {isLoggedIn ? (<div className="flex items-center gap-1.5 sm:gap-2">
+                            {isAdmin && (
+                                <Link href="/admin"
+                                    className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg 
+                                                 text-blue-600 dark:text-blue-400 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                                    <span className="font-arabicUI">لوحة التحكم</span>
+                                </Link>
+                            )}
+                            <div className="hidden sm:flex items-center">
                                 <Link href="/profile?tab=courses"
                                     className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg 
-             text-slate-600 dark:text-slate-300 text-sm">
+                                                 text-slate-600 dark:text-slate-300 text-sm">
                                     <PiStudentBold className="text-lg sm:text-xl" />
                                     <span className="font-arabicUI">كورساتي</span>
                                 </Link>
                             </div>
-                                <NotificationButton
-                                    notifications={notifications}
-                                    unreadCount={unreadCount}
-                                    lastReadTime={lastReadTime}
-                                    setLastReadTime={setLastReadTime}
-                                />
+                            <NotificationButton
+                                notifications={notifications}
+                                unreadCount={unreadCount}
+                                lastReadTime={lastReadTime}
+                                setLastReadTime={setLastReadTime}
+                            />
 
-                                {/* User dropdown */}
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                                        className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                                    >
-                                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                                            <IoPersonCircle className="text-xl" />
-                                        </div>
-                                        <span className="font-arabicUI3 text-sm text-slate-700 dark:text-slate-300">
-                                            {username}
-                                        </span>
-                                    </button>
+                            {/* User dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                                    className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                                        <IoPersonCircle className="text-xl" />
+                                    </div>
+                                    <span className="font-arabicUI3 text-sm text-slate-700 dark:text-slate-300">
+                                        {username}
+                                    </span>
+                                </button>
 
-                                    {/* User dropdown menu */}
-                                    {userDropdownOpen && (
-                                        <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg 
+                                {/* User dropdown menu */}
+                                {userDropdownOpen && (
+                                    <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg 
                                                       border border-slate-200 dark:border-slate-700 z-50">
-                                            <div className="p-3 border-b border-slate-200 dark:border-slate-700">
-                                                <p className="font-arabicUI3 font-medium text-slate-800 dark:text-white">
-                                                    {username}
-                                                </p>
-                                            </div>
-                                            <div className="p-2">
-                                                <button
-                                                    onClick={handleProfileClick}
-                                                    className="w-full text-right px-3 py-2 rounded-md hover:bg-slate-100 
-                                                             dark:hover:bg-slate-700 font-arabicUI text-slate-700 dark:text-slate-300"
-                                                >
-                                                    الملف الشخصي
-                                                </button>
-                                                <button
-                                                    onClick={handleSignOut}
-                                                    className="w-full text-right px-3 py-2 rounded-md hover:bg-red-50 
-                                                             dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 font-arabicUI"
-                                                >
-                                                    تسجيل الخروج
-                                                </button>
-                                            </div>
+                                        <div className="p-3 border-b border-slate-200 dark:border-slate-700">
+                                            <p className="font-arabicUI3 font-medium text-slate-800 dark:text-white">
+                                                {username}
+                                            </p>
                                         </div>
-                                    )}
-                                </div>
+                                        <div className="p-2">
+                                            <button
+                                                onClick={handleProfileClick}
+                                                className="w-full text-right px-3 py-2 rounded-md hover:bg-slate-100 
+                                                             dark:hover:bg-slate-700 font-arabicUI text-slate-700 dark:text-slate-300"
+                                            >
+                                                الملف الشخصي
+                                            </button>
+                                            <button
+                                                onClick={handleSignOut}
+                                                className="w-full text-right px-3 py-2 rounded-md hover:bg-red-50 
+                                                             dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 font-arabicUI"
+                                            >
+                                                تسجيل الخروج
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+                        </div>
                         ) : (
                             <div className="flex items-center gap-1.5 sm:gap-2">
                                 <button
@@ -385,6 +399,16 @@ const Header = () => {
 
                         {/* Menu Items */}
                         <div className="flex flex-col gap-2">
+                            {isAdmin && (
+                                <Link href="/admin"
+                                    className="flex items-center gap-2 px-4 py-3 text-blue-600 dark:text-blue-400 
+                                             hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl font-arabicUI
+                                             transition-colors duration-200 w-full text-right"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    <span>لوحة التحكم</span>
+                                </Link>
+                            )}
                             <button
                                 onClick={handleCoursesClick}
                                 className="flex items-center gap-2 px-4 py-3 text-slate-600 dark:text-slate-300 

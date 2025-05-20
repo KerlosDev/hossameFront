@@ -206,7 +206,12 @@ export default function ChemistryLMSProfile() {
             id: 1, label: "ملف الشخصي", icon: <User size={20} />, onClick: () => {
                 setActiveTab('profile');
                 setShowSettings(false);
+                setShowExamAnalysis(false);
                 setShowCourses(false);
+                setShowSettings(false);
+                setShowLessonView(false);
+                setShowCourses(false);
+                setShowChat(false)
                 setShowLessonView(false); // لازم تضيف دي عشان تخفي LessonViews لو ظاهر
             }
         }, { id: 2, label: "كورساتي", icon: <Book size={20} />, onClick: () => { setActiveTab('courses'); setShowCourses(true); setShowSettings(false); } },
@@ -276,16 +281,15 @@ export default function ChemistryLMSProfile() {
         <aside className="lg:col-span-3 bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500 h-fit">
             <div className="flex flex-col items-center mb-8">
                 <div className="group relative">
-                    <div className="relative w-32 h-32 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full mb-4 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/50">
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
+                    <div className="flex  justify-center">
+                    <div className="  relative w-32 h-32 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full mb-4 flex items-center justify-center overflow-hidden transition-all duration-300  ">
                         <User size={50} className="text-white relative z-10 transform group-hover:scale-110 transition-transform duration-300" />
-                        <button className="absolute bottom-2 right-2 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300">
-                            <Camera size={16} className="text-white" />
-                        </button>
+
+                    </div>
                     </div>
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                            <h2 className="text-2xl font-arabicUI2 text-white group-hover:text-blue-300 transition-colors duration-300">{userData.name}</h2>
+                            <h2 className="text-2xl font-arabicUI3 text-white group-hover:text-blue-300 transition-colors duration-300">{userData.name}</h2>
                         </div>
                         <p className="text-blue-200 text-sm mb-2">{userData.level}</p>
                         <div className="flex items-center justify-center gap-2 text-xs text-white/60">
@@ -459,32 +463,7 @@ export default function ChemistryLMSProfile() {
                 </div>
             </div>
 
-            {/* Additional Data Section */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500">
-                <h3 className="text-xl font-arabicUI2 text-white mb-6 flex items-center gap-2">
-                    <BookOpen className="text-blue-500" />
-                    معلومات إضافية
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
-                        <h4 className="text-white/80 text-sm mb-2">رقم هاتف ولي الأمر</h4>
-                        <p className="text-white flex items-center gap-2">
-                            <Phone size={16} className="text-blue-400" />
-                            {userData.parentPhoneNumber}
-                        </p>
-                    </div>
-                    <div className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
-                        <h4 className="text-white/80 text-sm mb-2">الجنس</h4>
-                        <p className="text-white">{userData.gender}</p>
-                    </div>
-                </div>
-            </div>
 
-            {/* Action Button */}
-            <button className="mx-auto flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-white hover:shadow-lg hover:shadow-blue-500/20 transition-all transform hover:scale-105">
-                <span>تحديث الملف الشخصي</span>
-                <Edit2 size={16} />
-            </button>
         </>
     );
 

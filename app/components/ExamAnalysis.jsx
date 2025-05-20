@@ -76,10 +76,12 @@ export default function EnhancedCourseOverview() {
 
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
+        } const data = await response.json();
+        if (data.message === "No results found.") {
+          setStudentData({ results: [] });
+        } else {
+          setStudentData(data);
         }
-
-        const data = await response.json();
-        setStudentData(data);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching student data:", err);
@@ -230,7 +232,7 @@ export default function EnhancedCourseOverview() {
   if (!currentAdvice) return null;
   const skillsData = [
     { name: 'الشرح', value: 70 },
- 
+
     { name: 'الحل', value: 99 },
     { name: 'الاستمرارية', value: 95 },
     { name: 'الحفظ', value: 75 },
@@ -276,14 +278,19 @@ export default function EnhancedCourseOverview() {
       </div>
     );
   }
-
-  if (!studentData || !course) {
+  if (!studentData || (!course && studentData?.results?.length === 0)) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white" dir="rtl">
-        <div className="bg-yellow-900/20 backdrop-blur-sm rounded-xl p-6 border border-yellow-500/30 max-w-md text-center">
-          <AlertCircle size={40} className="text-yellow-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold mb-2">لا توجد بيانات</h3>
-          <p className="text-white/70">لم نتمكن من العثور على بيانات للعرض</p>
+        <div className="bg-purple-900/20 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30 max-w-md text-center">
+          <FileText size={40} className="text-purple-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold mb-2">لم تقم بإجراء أي امتحانات بعد</h3>
+          <p className="text-white/70 mb-4">ابدأ رحلتك التعليمية وقم بحل بعض الامتحانات لتتمكن من رؤية تقدمك وتحليل أدائك</p>
+          <button
+            onClick={() => window.location.href = '/Courses'}
+            className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-colors"
+          >
+            استكشف الدورات والامتحانات
+          </button>
         </div>
       </div>
     );
@@ -467,7 +474,7 @@ export default function EnhancedCourseOverview() {
             {/* Time distribution and upcoming events */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Exam distribution */}
-             
+
               <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-purple-500/30 transition-all">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 rounded-lg bg-purple-500/20">
@@ -481,7 +488,7 @@ export default function EnhancedCourseOverview() {
                     const score = Math.round(exam.correctAnswers / exam.totalQuestions * 100);
                     const examDate = new Date(exam.examDate);
                     const formattedDate = examDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-                    
+
                     return (
                       <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
                         <div className="flex items-center gap-3">
@@ -491,23 +498,22 @@ export default function EnhancedCourseOverview() {
                             <p className="text-sm text-white/60">{formattedDate}</p>
                           </div>
                         </div>
-                        <div className={`px-3 py-1 rounded-full text-xs ${
-                          score >= 70 ? 'bg-green-500/20 text-green-300' : 
-                          score >= 50 ? 'bg-yellow-500/20 text-yellow-300' : 
-                          'bg-red-500/20 text-red-300'
-                        }`}>
+                        <div className={`px-3 py-1 rounded-full text-xs ${score >= 70 ? 'bg-green-500/20 text-green-300' :
+                            score >= 50 ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-red-500/20 text-red-300'
+                          }`}>
                           {score}%
                         </div>
                       </div>
                     );
                   })}
                 </div>
-                
-               
+
+
               </div>
 
               {/* Upcoming events */}
-             <MemoryGame></MemoryGame>
+              <MemoryGame></MemoryGame>
             </div>
           </div>
         )}

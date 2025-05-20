@@ -25,32 +25,38 @@ export default function DashboardStats() {
                 throw new Error('No authentication token found');
             }
 
-            // Fetch new students count
-            const studentsResponse = await fetch('http://localhost:9000/analytics/new-students', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
 
-            // Fetch revenue
-            const revenueResponse = await fetch('http://localhost:9000/analytics/revenue', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Wait for both requests to complete
-            const [studentsData, revenueData] = await Promise.all([
-                studentsResponse.json(),
-                revenueResponse.json()
+            // Fetch all required data in parallel
+            const [studentsResponse, revenueResponse, pendingResponse, progressResponse] = await Promise.all([
+                fetch('http://localhost:9000/analytics/new-students', { headers }),
+                fetch('http://localhost:9000/analytics/revenue', { headers }),
+                fetch('http://localhost:9000/analytics/pending-enrollments', { headers }),
+                fetch('http://localhost:9000/analytics/all', { headers })
             ]);
+
+            // Parse all responses in parallel
+            const [studentsData, revenueData, pendingData, progressData] = await Promise.all([
+                studentsResponse.json(),
+                revenueResponse.json(),
+                pendingResponse.json(),
+                progressResponse.json()
+            ]);
+
+            // Calculate completion rate from progress data
+            const completionRate = progressData.data ?
+                Math.round(progressData.data.reduce((acc, curr) => acc + (curr.progress || 0), 0) / progressData.data.length) :
+                0;
 
             setStats({
                 ...stats,
                 newStudents: studentsData.data || 0,
-                totalRevenue: revenueData.data || 0
+                totalRevenue: revenueData.data || 0,
+                pendingEnrollments: pendingData.data || 0,
+                completionRate: completionRate || 0
             });
 
             setLoading(false);
