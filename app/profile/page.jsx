@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, use } from 'react';
 import {
     User, Book, BarChart2, Award, Eye, FileText, Settings as SettingsIcon,
     LogOut, CreditCard, ChevronDown, Mail, Phone, BookOpen,
@@ -18,9 +18,9 @@ import MyCourses from '../components/MyCourses';
 import LessonViews from '../components/LessonViews'; // أو مسار الملف حسب مكانه
 import ExamAnalysis from '../components/ExamAnalysis'; // غيّر المسار لو الملف في مكان تاني
 import Chat from '../components/Chat'; // غيّر المسار لو مختلف
-import { useSearchParams } from 'next/navigation'; // في أعلى الملف
 
-export default function ChemistryLMSProfile() {
+export default function ChemistryLMSProfile({ searchParams }) {
+    const params = use(searchParams);
     const [activeTab, setActiveTab] = useState('profile');
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -31,7 +31,6 @@ export default function ChemistryLMSProfile() {
     const [showLessonView, setShowLessonView] = useState(false);
     const [showExamAnalysis, setShowExamAnalysis] = useState(false);
     const [showChat, setShowChat] = useState(false);
-    const searchParams = useSearchParams();
 
     // User profile data
     const [userData, setUserData] = useState({
@@ -72,7 +71,7 @@ export default function ChemistryLMSProfile() {
     }, []);
 
     useEffect(() => {
-        const tab = searchParams.get('tab');
+        const tab = params?.tab;
         if (tab === 'courses') {
             setActiveTab('courses');
             setShowCourses(true);
@@ -513,7 +512,6 @@ export default function ChemistryLMSProfile() {
 
             {/* Main Content */}
             <div className="relative z-20 container mx-auto px-4 py-8">
-                <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div></div>}>
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
@@ -533,7 +531,6 @@ export default function ChemistryLMSProfile() {
                         </div>
                     </div>
                 )}
-                </Suspense>
             </div>
 
             {/* Logout Confirmation Modal */}
