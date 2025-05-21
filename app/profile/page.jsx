@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import {
     User, Book, BarChart2, Award, Eye, FileText, Settings as SettingsIcon,
     LogOut, CreditCard, ChevronDown, Mail, Phone, BookOpen,
@@ -480,14 +480,29 @@ export default function ChemistryLMSProfile() {
 
 
         </>
-    );
+    );    // Main Content Handler with SearchParams
+    const MainContentWithParams = () => {
+        const searchParams = useSearchParams();
+        const [showSettings, setShowSettings] = useState(false);
+        const [showCourses, setShowCourses] = useState(false);
+        const [showLessonView, setShowLessonView] = useState(false);
+        const [showExamAnalysis, setShowExamAnalysis] = useState(false);
+        const [showChat, setShowChat] = useState(false);
 
-    // Main Content Handler
-    const MainContent = () => {
+        useEffect(() => {
+            const tab = searchParams.get('tab');
+            if (tab === 'courses') {
+                setShowCourses(true);
+                setShowSettings(false);
+                setShowLessonView(false);
+                setShowExamAnalysis(false);
+                setShowChat(false);
+            }
+        }, [searchParams]);
+
         if (showSettings) {
             return <Settings userData={userData} onClose={() => setShowSettings(false)} onUpdate={handleUserDataUpdate} />;
         }
-
 
         if (showCourses) {
             return <MyCourses onBack={() => setShowCourses(false)} />;
@@ -500,7 +515,6 @@ export default function ChemistryLMSProfile() {
         }
         if (showChat) {
             return <Chat onBack={() => setShowChat(false)} />;
-
         }
 
         return <ProfileContent />;
@@ -521,16 +535,21 @@ export default function ChemistryLMSProfile() {
                     <div className="bg-red-500/20 backdrop-blur-xl rounded-xl p-4 text-white text-center">
                         {error}
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        {/* Left Sidebar - User Navigation */}
-                        <Sidebar />
+                ) : (<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Sidebar - User Navigation */}
+                    <Sidebar />
 
-                        {/* Main Content Area */}
-                        <div className="lg:col-span-9 space-y-6">
-                            <MainContent />
-                        </div>
+                    {/* Main Content Area */}
+                    <div className="lg:col-span-9 space-y-6">
+                        <Suspense fallback={
+                            <div className="flex items-center justify-center h-64">
+                                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+                            </div>
+                        }>
+                            <MainContentWithParams />
+                        </Suspense>
                     </div>
+                </div>
                 )}
             </div>
 
