@@ -22,7 +22,7 @@ export default function PaymentsList() {
                 throw new Error('No authentication token found');
             }
 
-            const response = await fetch('http://localhost:9000/active/admin/enrollments', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/active/admin/enrollments`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -113,7 +113,7 @@ export default function PaymentsList() {
     const handlePaymentStatusChange = async (enrollmentId, newStatus) => {
         try {
             const token = Cookies.get('token');
-            const response = await fetch(`http://localhost:9000/active/payment/${enrollmentId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/active/payment/${enrollmentId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

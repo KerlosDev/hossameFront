@@ -31,7 +31,7 @@ const EnrollmentSection = ({ courseInfo }) => {
 
     const checkEnrollmentStatus = async (token, courseId) => {
         try {
-            const response = await axios.get(`http://localhost:9000/active/${courseId}`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/active/${courseId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

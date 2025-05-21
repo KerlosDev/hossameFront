@@ -56,7 +56,7 @@ export default function ChemistryLMSProfile() {
     const fetchStats = async () => {
         try {
             const token = Cookies.get('token');
-            const response = await axios.get('http://localhost:9000/stats/user-stats', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/stats/user-stats`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -114,7 +114,7 @@ export default function ChemistryLMSProfile() {
             const token = Cookies.get('token');
 
             // Make request to the endpoint
-            const response = await axios.get('http://localhost:9000/user', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

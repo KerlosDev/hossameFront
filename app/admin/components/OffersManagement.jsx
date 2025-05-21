@@ -325,7 +325,7 @@ const OffersManagement = () => {
     }, []); const fetchOffers = async () => {
         try {
             const token = Cookies.get('token');
-            const response = await fetch('http://localhost:9000/offers', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -353,7 +353,7 @@ const OffersManagement = () => {
 
         try {
             const token = Cookies.get('token');
-            const response = await fetch('http://localhost:9000/offers', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -382,7 +382,7 @@ const OffersManagement = () => {
 
         try {
             const token = Cookies.get('token');
-            const response = await fetch(`http://localhost:9000/offers/${currentOffer._id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers/${currentOffer._id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -409,7 +409,7 @@ const OffersManagement = () => {
         if (window.confirm('هل أنت متأكد من حذف هذا العرض؟')) {
             try {
                 const token = Cookies.get('token');
-                const response = await fetch(`http://localhost:9000/offers/${offerId}`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers/${offerId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

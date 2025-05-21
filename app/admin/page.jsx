@@ -55,7 +55,7 @@ export default function ChemistryLMSAdmin() {
             }
 
             try {
-                const response = await fetch('http://localhost:9000/auth/user', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/user`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

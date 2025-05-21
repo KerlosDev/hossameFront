@@ -26,7 +26,7 @@ export default function BooksManager() {
         try {
             setLoading(true);
             const token = Cookies.get('token');
-            const response = await fetch('http://localhost:9000/books', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/books`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -54,7 +54,7 @@ export default function BooksManager() {
                 price: Number(formData.price)
             };
 
-            const response = await fetch(`http://localhost:9000/books${editingBook ? `/${editingBook._id}` : ''}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/books${editingBook ? `/${editingBook._id}` : ''}`, {
                 method: editingBook ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ export default function BooksManager() {
 
         try {
             const token = Cookies.get('token');
-            const response = await fetch(`http://localhost:9000/books/${bookId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/books/${bookId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,

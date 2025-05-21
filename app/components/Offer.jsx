@@ -13,7 +13,7 @@ const Offer = () => {
     useEffect(() => {
         const fetchOffer = async () => {
             try {
-                const response = await fetch(`http://localhost:9000/offers/published`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers/published`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch offer');
                 }

@@ -20,7 +20,7 @@ export const CourseProvider = ({ children }) => {
         const fetchCourses = async () => {
             setLoading(true);
             try {
-                const response = await fetch('http://localhost:9000/course');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/course`);
                 if (!response.ok) throw new Error('Failed to fetch courses');
                 
                 const data = await response.json();
@@ -32,7 +32,7 @@ export const CourseProvider = ({ children }) => {
                 if (token) {
                     for (const course of courses) {
                         try {
-                            const res = await fetch(`http://localhost:9000/active/${course._id}`, {
+                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/active/${course._id}`, {
                                 headers: { 'Authorization': `Bearer ${token}` }
                             });
                             const result = await res.json();

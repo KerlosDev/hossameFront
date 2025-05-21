@@ -96,7 +96,7 @@ const Header = () => {
     }; const fetchNotifications = async () => {
         try {
             const token = getCookie('token');
-            const response = await fetch('http://localhost:9000/notifications', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'

@@ -55,7 +55,7 @@ const CoursePage = () => {
             setLoading(true);
             try {
                 // Get basic course data first
-                const courseResponse = await axios.get(`http://localhost:9000/course/${courseid}`);
+                const courseResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/course/${courseid}`);
                 let courseData = courseResponse.data;
 
                 // Set basic course info
@@ -77,7 +77,7 @@ const CoursePage = () => {
                     setUser({ token });
                     try {
                         // Check enrollment status
-                        const enrollmentResponse = await axios.get(`http://localhost:9000/active/${courseid}`, {
+                        const enrollmentResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/active/${courseid}`, {
                             headers: {
                                 'Authorization': `Bearer ${token}`
                             }
@@ -178,7 +178,7 @@ const CoursePage = () => {
 
         try {
             await axios.post(
-                'http://localhost:9000/watchHistory',
+                `${process.env.NEXT_PUBLIC_API_URL}/watchHistory`,
                 {
                     courseId: courseid,
                     chapterId: selectedChapter._id,

@@ -81,7 +81,7 @@ const CourseManager = () => {
     }, []); const fetchCourses = async () => {
         try {
             const token = Cookies.get('token');
-            const response = await axios.get('http://localhost:9000/course', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/course`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -97,7 +97,7 @@ const CourseManager = () => {
         const fetchExams = async () => {
             try {
                 const token = Cookies.get('token');
-                const response = await axios.get('http://localhost:9000/exam', {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/exam`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     },
@@ -171,10 +171,10 @@ const CourseManager = () => {
             updateProcessingStatus(3, 'جاري حفظ البيانات...', 70);
 
             if (editingCourse) {
-                await axios.put(`http://localhost:9000/course/${editingCourse._id}`, formData, config);
+                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/course/${editingCourse._id}`, formData, config);
                 updateProcessingStatus(4, 'تم تحديث الكورس بنجاح!', 100);
             } else {
-                await axios.post('http://localhost:9000/course/create', formData, config);
+                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/course/create`, formData, config);
                 updateProcessingStatus(4, 'تم إضافة الكورس بنجاح!', 100);
             }
 
@@ -209,7 +209,7 @@ const CourseManager = () => {
         if (window.confirm('هل أنت متأكد من حذف هذا الكورس؟')) {
             try {
                 const token = Cookies.get('token');
-                await axios.delete(`http://localhost:9000/course/${courseId}`, {
+                await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/course/${courseId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -224,7 +224,7 @@ const CourseManager = () => {
     }; const handleCourseSelect = async (course) => {
         try {
             const token = Cookies.get('token');
-            const response = await axios.get(`http://localhost:9000/course/admin/${course._id}`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/course/admin/${course._id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -280,7 +280,7 @@ const CourseManager = () => {
         setChapterLoading(true);
         try {
             const token = Cookies.get('token');
-            const response = await axios.post('http://localhost:9000/chapter', {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/chapter`, {
 
                 title: newChapter.title,
                 lessons: [],
@@ -301,7 +301,7 @@ const CourseManager = () => {
         if (window.confirm('هل أنت متأكد من حذف هذا الفصل؟')) {
             try {
                 const token = Cookies.get('token');
-                await axios.delete(`http://localhost:9000/chapter/${chapterId}`, {
+                await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/chapter/${chapterId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     },
@@ -318,7 +318,7 @@ const CourseManager = () => {
     }; const handleUpdateChapter = async (chapterId, updatedData) => {
         try {
             const token = Cookies.get('token');
-            const response = await axios.put(`http://localhost:9000/chapter/${chapterId}`, {
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/chapter/${chapterId}`, {
                 title: updatedData.title,
                 lessons: updatedData.lessons,
                 courseId: selectedCourse._id

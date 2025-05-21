@@ -34,7 +34,7 @@ export default function StudentsList() {
                 throw new Error('No authentication token found');
             }
 
-            const response = await fetch('http://localhost:9000/analytics/students', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/students`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -113,7 +113,7 @@ export default function StudentsList() {
             if (!token) {
                 throw new Error('No authentication token found');
             }
-            const response = await fetch(`http://localhost:9000/user/students?page=${page}&limit=${limit}&search=${searchQuery}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/students?page=${page}&limit=${limit}&search=${searchQuery}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -152,7 +152,7 @@ export default function StudentsList() {
                 throw new Error('No authentication token found');
             }
 
-            const response = await fetch(`http://localhost:9000/user/students/${studentId}/ban`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/students/${studentId}/ban`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

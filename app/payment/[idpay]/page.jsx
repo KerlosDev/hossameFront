@@ -59,7 +59,7 @@ const Page = ({ params }) => {
     const fetchUserData = async () => {
         setUserLoading(true);
         try {
-            const response = await axios.get('http://localhost:9000/user', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -87,7 +87,7 @@ const Page = ({ params }) => {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch(`http://localhost:9000/course/${idpay}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/course/${idpay}`);
             if (!res.ok) {
                 throw new Error('Failed to fetch course');
             }
@@ -133,7 +133,7 @@ const Page = ({ params }) => {
             }
 
             // Submit data to the API
-            const response = await axios.post('http://localhost:9000/active', {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/active`, {
                 phoneNumber: number,
                 courseId: idpay,
                 price:courseInfo.price

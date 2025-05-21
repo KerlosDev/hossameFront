@@ -32,10 +32,10 @@ export default function DashboardStats() {
 
             // Fetch all required data in parallel
             const [studentsResponse, revenueResponse, pendingResponse, progressResponse] = await Promise.all([
-                fetch('http://localhost:9000/analytics/new-students', { headers }),
-                fetch('http://localhost:9000/analytics/revenue', { headers }),
-                fetch('http://localhost:9000/analytics/pending-enrollments', { headers }),
-                fetch('http://localhost:9000/analytics/all', { headers })
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/new-students`, { headers }),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/revenue`, { headers }),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/pending-enrollments`, { headers }),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/all`, { headers })
             ]);
 
             // Parse all responses in parallel

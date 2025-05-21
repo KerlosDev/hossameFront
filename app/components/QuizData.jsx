@@ -59,7 +59,7 @@ const QuizData = ({ params }) => {
             throw new Error('لم يتم العثور على رمز المصادقة');
           }
       
-          const response = await axios.get(`http://localhost:9000/exam/${quizid}`, {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/exam/${quizid}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -234,7 +234,7 @@ const QuizData = ({ params }) => {
             }
 
             // Send result to the backend
-            await axios.post('http://localhost:9000/examResult/create', examResult, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/examResult/create`, examResult, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

@@ -46,7 +46,7 @@ export default function BookOrder() {
         try {
             setBooksLoading(true);
             const token = Cookies.get('token');
-            const response = await fetch('http://localhost:9000/books', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/books`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -67,7 +67,7 @@ export default function BookOrder() {
     const fetchUserOrders = async () => {
         try {
             const token = Cookies.get('token');
-            const response = await fetch('http://localhost:9000/book-orders', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/book-orders`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -119,7 +119,7 @@ export default function BookOrder() {
 
             console.log('Sending order data:', orderData); // Debug log
 
-            const response = await fetch('http://localhost:9000/book-orders', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/book-orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

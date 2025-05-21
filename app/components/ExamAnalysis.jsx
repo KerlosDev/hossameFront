@@ -66,7 +66,7 @@ export default function EnhancedCourseOverview() {
 
         const token = cookies.token || '';
 
-        const response = await fetch('http://localhost:9000/examResult/getMe', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/examResult/getMe`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

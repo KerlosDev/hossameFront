@@ -12,7 +12,7 @@ import Cookies from 'js-cookie';
 
 // Create axios instance with base configuration
 const api = axios.create({
-    baseURL: 'http://localhost:9000'
+    baseURL: `${process.env.NEXT_PUBLIC_API_URL}`
 });
 
 // Add request interceptor to include token

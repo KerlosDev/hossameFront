@@ -38,7 +38,7 @@ export default function ExamAnalysis() {
             setLoading(true);
             const token = Cookies.get('token'); // Get token from cookies
 
-            const response = await axios.get('http://localhost:9000/examResult/all', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/examResult/all`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

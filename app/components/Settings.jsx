@@ -62,7 +62,7 @@ export default function Settings({ userData, onClose, onUpdate }) {
             }
 
             // Send update request
-            const response = await axios.put('http://localhost:9000/user/update', formData, {
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/user/update`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

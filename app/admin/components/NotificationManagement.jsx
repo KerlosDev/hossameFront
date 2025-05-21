@@ -28,7 +28,7 @@ export default function NotificationManagement() {
         setLoading(true);
         try {
             const token = Cookies.get('token');
-            const response = await fetch(`http://localhost:9000/notifications?page=${page}&limit=10`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications?page=${page}&limit=10`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -53,7 +53,7 @@ export default function NotificationManagement() {
 
         try {
             const token = Cookies.get('token');
-            const response = await fetch('http://localhost:9000/notifications', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export default function NotificationManagement() {
 
         try {
             const token = Cookies.get('token');
-            const response = await fetch(`http://localhost:9000/notifications/${notificationId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/${notificationId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -108,7 +108,7 @@ export default function NotificationManagement() {
 
         try {
             const token = Cookies.get('token');
-            const response = await fetch('http://localhost:9000/notifications', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

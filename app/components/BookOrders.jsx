@@ -20,12 +20,12 @@ export default function BookOrders() {
             const token = Cookies.get('token');
             // Fetch orders and stats in parallel
             const [ordersResponse, statsResponse] = await Promise.all([
-                fetch('http://localhost:9000/book-orders', {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/book-orders`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }
                 }),
-                fetch('http://localhost:9000/book-orders/stats', {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/book-orders/stats`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }
@@ -54,7 +54,7 @@ export default function BookOrders() {
     const handleStatusChange = async (orderId, newStatus) => {
         try {
             const token = Cookies.get('token');
-            const response = await fetch(`http://localhost:9000/book-orders/${orderId}/status`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/book-orders/${orderId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

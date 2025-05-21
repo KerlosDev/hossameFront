@@ -58,7 +58,7 @@ export default function Dashboard() {
             const token = Cookies.get('token');
 
             // Make request to the endpoint
-            const response = await axios.get('http://localhost:9000/active', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/active`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -88,7 +88,7 @@ export default function Dashboard() {
             const token = Cookies.get('token');
 
             // Make request to the watch history endpoint
-            const response = await axios.get('http://localhost:9000/watchHistory/my', {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/watchHistory/my`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

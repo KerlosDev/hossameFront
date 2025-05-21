@@ -67,7 +67,7 @@ const StudentFollowup = () => {
 
     const fetchLessonData = async () => {
         try {
-            const response = await fetch('http://localhost:9000/user/all-students-status', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/all-students-status`, {
                 headers: getAuthHeaders()
             });
 
@@ -165,7 +165,7 @@ const StudentFollowup = () => {
 
     const fetchAllCoursesAndChapters = async () => {
         try {
-            const response = await fetch('http://localhost:9000/course/allCourses', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/course/allCourses`, {
                 headers: getAuthHeaders()
             });
             const coursesData = await response.json();
@@ -326,7 +326,7 @@ const StudentFollowup = () => {
 
     const fetchQuizResults = async (studentId) => {
         try {
-            const response = await fetch(`http://localhost:9000/examResult/result/${studentId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/examResult/result/${studentId}`, {
                 headers: getAuthHeaders(),
                 credentials: 'include'
             });
@@ -467,7 +467,7 @@ const StudentFollowup = () => {
 
     const fetchWatchHistory = async (studentId) => {
         try {
-            const response = await fetch(`http://localhost:9000/watchHistory/student/${studentId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/watchHistory/student/${studentId}`, {
                 headers: getAuthHeaders()
             });
 
