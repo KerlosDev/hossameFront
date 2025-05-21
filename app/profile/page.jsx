@@ -480,29 +480,14 @@ export default function ChemistryLMSProfile() {
 
 
         </>
-    );    // Main Content Handler with SearchParams
-    const MainContentWithParams = () => {
-        const searchParams = useSearchParams();
-        const [showSettings, setShowSettings] = useState(false);
-        const [showCourses, setShowCourses] = useState(false);
-        const [showLessonView, setShowLessonView] = useState(false);
-        const [showExamAnalysis, setShowExamAnalysis] = useState(false);
-        const [showChat, setShowChat] = useState(false);
+    );
 
-        useEffect(() => {
-            const tab = searchParams.get('tab');
-            if (tab === 'courses') {
-                setShowCourses(true);
-                setShowSettings(false);
-                setShowLessonView(false);
-                setShowExamAnalysis(false);
-                setShowChat(false);
-            }
-        }, [searchParams]);
-
+    // Main Content Handler
+    const MainContent = () => {
         if (showSettings) {
             return <Settings userData={userData} onClose={() => setShowSettings(false)} onUpdate={handleUserDataUpdate} />;
         }
+
 
         if (showCourses) {
             return <MyCourses onBack={() => setShowCourses(false)} />;
@@ -515,6 +500,7 @@ export default function ChemistryLMSProfile() {
         }
         if (showChat) {
             return <Chat onBack={() => setShowChat(false)} />;
+
         }
 
         return <ProfileContent />;
@@ -527,6 +513,7 @@ export default function ChemistryLMSProfile() {
 
             {/* Main Content */}
             <div className="relative z-20 container mx-auto px-4 py-8">
+                <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div></div>}>
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
@@ -535,22 +522,18 @@ export default function ChemistryLMSProfile() {
                     <div className="bg-red-500/20 backdrop-blur-xl rounded-xl p-4 text-white text-center">
                         {error}
                     </div>
-                ) : (<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Left Sidebar - User Navigation */}
-                    <Sidebar />
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Left Sidebar - User Navigation */}
+                        <Sidebar />
 
-                    {/* Main Content Area */}
-                    <div className="lg:col-span-9 space-y-6">
-                        <Suspense fallback={
-                            <div className="flex items-center justify-center h-64">
-                                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-                            </div>
-                        }>
-                            <MainContentWithParams />
-                        </Suspense>
+                        {/* Main Content Area */}
+                        <div className="lg:col-span-9 space-y-6">
+                            <MainContent />
+                        </div>
                     </div>
-                </div>
                 )}
+                </Suspense>
             </div>
 
             {/* Logout Confirmation Modal */}
