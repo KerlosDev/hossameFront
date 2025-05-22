@@ -10,7 +10,7 @@ import Link from 'next/link';
 // Chemistry background component reused from main profile
 const ChemBackground = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] opacity-5 mix-blend-overlay"></div>
+        <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
         <div className="absolute top-20 left-20 text-white/10 text-7xl">
             <FaAtom className="animate-float" />
         </div>
@@ -38,17 +38,20 @@ export default function MyCourses({ onBack }) {
 
     const fetchEnrolledCourses = async () => {
         setIsLoading(true);
-    
+
         // 1. Check cache first
         const cached = localStorage.getItem('enrolledCourses');
         if (cached) {
             try {
-                setEnrolledCourses(JSON.parse(cached));
+                const parsedCache = JSON.parse(cached);
+                // Filter out courses with null courseId from cache
+                const validCourses = parsedCache.filter(course => course.courseId !== null);
+                setEnrolledCourses(validCourses);
             } catch {
                 localStorage.removeItem('enrolledCourses');
             }
         }
-    
+
         try {
             const token = Cookies.get('token');
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/active`, {
@@ -56,12 +59,14 @@ export default function MyCourses({ onBack }) {
                     Authorization: `Bearer ${token}`
                 }
             });
-    
+
             if (response.data.isHeEnrolled && response.data.coursesAreEnrolled?.length > 0) {
-                setEnrolledCourses(response.data.coursesAreEnrolled);
-    
-                // 2. Store in localStorage
-                localStorage.setItem('enrolledCourses', JSON.stringify(response.data.coursesAreEnrolled));
+                // Filter out courses with null courseId
+                const validCourses = response.data.coursesAreEnrolled.filter(course => course.courseId !== null);
+                setEnrolledCourses(validCourses);
+
+                // 2. Store filtered courses in localStorage
+                localStorage.setItem('enrolledCourses', JSON.stringify(validCourses));
             } else {
                 setEnrolledCourses([]);
                 localStorage.removeItem('enrolledCourses');
@@ -73,7 +78,7 @@ export default function MyCourses({ onBack }) {
             setIsLoading(false);
         }
     };
-    
+
 
     // Format date function
     const formatDate = (dateString) => {
@@ -122,7 +127,7 @@ export default function MyCourses({ onBack }) {
                         <ChevronRight size={18} />
                     </button>
                 </Link>
-                
+
                 <div className="grid grid-cols-3 gap-4 mt-8 w-full max-w-lg mx-auto">
                     <div className="p-4 bg-white/5 rounded-xl flex flex-col items-center justify-center text-center">
                         <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center mb-2">

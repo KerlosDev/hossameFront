@@ -12,7 +12,7 @@ import {
 import { Bar, Line } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
 import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
-  import Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 
 const getAuthHeaders = () => ({
     'Content-Type': 'application/json',
@@ -192,22 +192,25 @@ const StudentFollowup = () => {
                             videoUrl: lesson.videoUrl
                         }))
                     }))
-                );
-
-                // Process exams
-                const processedExams = coursesData.flatMap(course =>
-                    course.exams.map(exam => ({
+                );                // Process exams
+                const processedExams = coursesData.flatMap(course => {
+                    if (!course.exams || !Array.isArray(course.exams)) {
+                        console.log(`Course ${course.name} has no exams or invalid exams data`);
+                        return [];
+                    }
+                    return course.exams.map(exam => ({
                         id: exam._id,
                         title: exam.title,
                         duration: exam.duration,
                         courseId: course._id,
                         courseName: course.name,
                         questions: exam.questions
-                    }))
-                );
+                    }));
+                });
 
                 setAllCourses(processedCourses);
                 setAllChapters(processedChapters);
+                console.log(`Loaded ${processedExams.length} exams from courses data`);
                 setAllExams(processedExams);
             }
         } catch (error) {
@@ -338,10 +341,12 @@ const StudentFollowup = () => {
                     return;
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            } const data = await response.json();
+            // Remove console.log in production
+            // console.log(data);
 
-            const data = await response.json();
-            if (data && data.results) {
+            // The results array is directly in the data object, not in a nested 'results' property
+            if (data && Array.isArray(data.results)) {
                 const processedResults = data.results.map(result => ({
                     nameofquiz: result.examTitle,
                     numofqus: result.totalQuestions,
@@ -414,21 +419,21 @@ const StudentFollowup = () => {
                 totalLessons,
                 watchedLessons: courseWatchHistory,
                 watchedLessonsCount,
-                totalViews,
-                completion: totalLessons > 0 ? (watchedLessonsCount / totalLessons) * 100 : 0,
+                totalViews, completion: totalLessons > 0 ? (watchedLessonsCount / totalLessons) * 100 : 0,
                 examsTotal: course.exams?.length || 0,
-                examsCompleted: quizResults.length,
+                // Count only exams completed for this course
+                examsCompleted: quizResults.filter(result =>
+                    allExams.some(exam => exam.title === result.nameofquiz && exam.courseId === course.id)
+                ).length,
                 unwatchedLessons,
                 courseChapters
             };
         }).filter(course => course.totalLessons > 0);
 
         setStudentProgress(progress);
-    };
-
-    const filterExams = (allExams, quizResults) => {
+    }; const filterExams = (allExams, quizResults) => {
         // Group quiz results by exam title to get the latest attempt
-        const latestAttempts = quizResults.reduce((acc, result) => {
+        const latestAttempts = (quizResults || []).reduce((acc, result) => {
             if (!acc[result.nameofquiz] ||
                 acc[result.nameofquiz].attemptNumber < result.attemptNumber) {
                 acc[result.nameofquiz] = result;
@@ -438,6 +443,33 @@ const StudentFollowup = () => {
 
         const completedExamIds = new Set(Object.keys(latestAttempts));
 
+        // Add debugging to check exam titles
+        console.log("Completed exams:", [...completedExamIds]);
+        console.log("Available exams:", allExams.map(exam => exam.title));
+
+        // If we have no exams data but have quiz results, create synthetic exam objects from quiz results
+        if (allExams.length === 0 && quizResults.length > 0) {
+            console.log("Creating synthetic exam objects from quiz results");
+            const syntheticExams = [...new Set(quizResults.map(q => q.nameofquiz))].map(title => ({
+                id: title, // Using title as ID since we don't have actual IDs
+                title: title,
+                courseId: "unknown", // We don't know the course ID
+                courseName: "Unknown Course",
+                isSynthetic: true // Mark as synthetic so we know it wasn't from API
+            }));
+
+            // For filter functionality
+            switch (examFilter) {
+                case 'completed':
+                    return syntheticExams; // All are completed since they're from quiz results
+                case 'pending':
+                    return []; // None are pending since all are from quiz results
+                default:
+                    return syntheticExams;
+            }
+        }
+
+        // Normal filtering if we have exam data
         switch (examFilter) {
             case 'completed':
                 return allExams.filter(exam => completedExamIds.has(exam.title));
@@ -446,11 +478,13 @@ const StudentFollowup = () => {
             default:
                 return allExams;
         }
-    };
-
-    useEffect(() => {
-        if (allExams.length > 0 && quizResults.length > 0) {
+    }; useEffect(() => {
+        // Always update filteredExams, even if quizResults is empty
+        // This ensures pending exams will show when no quiz results exist
+        if (allExams.length > 0) {
             setFilteredExams(filterExams(allExams, quizResults));
+        } else {
+            setFilteredExams(filterExams([], quizResults)); // Pass empty array but still call filterExams for synthetic creation
         }
     }, [examFilter, allExams, quizResults]);
 
@@ -553,104 +587,121 @@ const StudentFollowup = () => {
                 }
             }
         }
-    };
+    }; const ExamSection = () => {
+        console.log("ExamSection rendering with:", {
+            filteredExamsCount: filteredExams.length,
+            quizResultsCount: quizResults.length,
+            currentFilter: examFilter,
+            allExamsCount: allExams.length
+        });
 
-    const ExamSection = () => (
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-white">الاختبارات</h3>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setExamFilter('all')}
-                        className={`px-4 py-2 rounded-lg transition-colors ${examFilter === 'all'
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-white/5 text-white/70 hover:bg-white/10'
-                            }`}
-                    >
-                        جميع الاختبارات
-                    </button>
-                    <button
-                        onClick={() => setExamFilter('completed')}
-                        className={`px-4 py-2 rounded-lg transition-colors ${examFilter === 'completed'
-                            ? 'bg-green-500 text-white'
-                            : 'bg-white/5 text-white/70 hover:bg-white/10'
-                            }`}
-                    >
-                        <div className="flex items-center gap-2">
-                            <FaCheckCircle />
-                            <span>تم الإجتياز</span>
-                        </div>
-                    </button>
-                    <button
-                        onClick={() => setExamFilter('pending')}
-                        className={`px-4 py-2 rounded-lg transition-colors ${examFilter === 'pending'
-                            ? 'bg-red-500 text-white'
-                            : 'bg-white/5 text-white/70 hover:bg-white/10'
-                            }`}
-                    >
-                        <div className="flex items-center gap-2">
-                            <FaTimesCircle />
-                            <span>لم يتم الإجتياز</span>
-                        </div>
-                    </button>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredExams.map((exam, index) => {
-                    // Group attempts for this exam
-                    const examAttempts = quizResults
-                        .filter(r => r.nameofquiz === exam.title)
-                        .sort((a, b) => b.attemptNumber - a.attemptNumber);
-
-                    const latestAttempt = examAttempts[0];
-                    const isCompleted = !!latestAttempt;
-                    const attemptsCount = examAttempts.length;
-                    const bestScore = Math.max(...examAttempts.map(a => a.quizGrade) || [0]);
-
-                    return (
-                        <div key={index}
-                            className={`p-4 rounded-xl border ${isCompleted
-                                ? 'bg-green-500/10 border-green-500/20'
-                                : 'bg-white/5 border-white/10'
+        return (
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-white">الاختبارات</h3>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setExamFilter('all')}
+                            className={`px-4 py-2 rounded-lg transition-colors ${examFilter === 'all'
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
                         >
-                            <div className="flex justify-between items-start">
-                                <div className="space-y-2">
-                                    <h4 className="text-lg font-bold text-white">
-                                        {exam.title}
-                                    </h4>
-                                    <div className="flex flex-col gap-1">
-                                        {isCompleted && (
-                                            <>
-                                                <div className="flex items-center gap-2">
-                                                    <FaClock className="text-purple-400" />
-                                                    <p className="text-sm text-white/60">
-                                                        آخر محاولة: {new Date(latestAttempt.submittedAt).toLocaleDateString('ar-EG')}
-                                                    </p>
-                                                </div>
-                                                <div className="text-sm text-white/60">
-                                                    عدد المحاولات: {attemptsCount}
-                                                </div>
-                                                <div className="text-sm text-white/60">
-                                                    أفضل نتيجة: {bestScore}/{latestAttempt.numofqus}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                                {isCompleted && (
-                                    <div className="px-3 py-1 bg-green-500/20 rounded-lg text-green-400 text-sm">
-                                        {latestAttempt.quizGrade} / {latestAttempt.numofqus}
-                                    </div>
-                                )}
+                            جميع الاختبارات
+                        </button>
+                        <button
+                            onClick={() => setExamFilter('completed')}
+                            className={`px-4 py-2 rounded-lg transition-colors ${examFilter === 'completed'
+                                ? 'bg-green-500 text-white'
+                                : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <FaCheckCircle />
+                                <span>تم الإجتياز</span>
                             </div>
-                        </div>
-                    );
-                })}
+                        </button>
+                        <button
+                            onClick={() => setExamFilter('pending')}
+                            className={`px-4 py-2 rounded-lg transition-colors ${examFilter === 'pending'
+                                ? 'bg-red-500 text-white'
+                                : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <FaTimesCircle />
+                                <span>لم يتم الإجتياز</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                {filteredExams.length === 0 && (
+                    <div className="text-center py-8 text-white/60">
+                        لا توجد اختبارات متاحة {examFilter === 'completed' ? 'تم إجتيازها' : examFilter === 'pending' ? 'قيد الانتظار' : ''}
+                    </div>
+                )}                {filteredExams.length === 0 && (
+                    <div className="text-center py-8 text-white/60">
+                        لا توجد اختبارات متاحة {examFilter === 'completed' ? 'تم إجتيازها' : examFilter === 'pending' ? 'قيد الانتظار' : ''}
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filteredExams.map((exam, index) => {
+                        // Group attempts for this exam
+                        const examAttempts = quizResults
+                            .filter(r => r.nameofquiz === exam.title)
+                            .sort((a, b) => b.attemptNumber - a.attemptNumber);
+
+                        const latestAttempt = examAttempts[0];
+                        const isCompleted = !!latestAttempt;
+                        const attemptsCount = examAttempts.length;
+                        const bestScore = Math.max(...examAttempts.map(a => a.quizGrade) || [0]);
+
+                        return (
+                            <div key={index}
+                                className={`p-4 rounded-xl border ${isCompleted
+                                    ? 'bg-green-500/10 border-green-500/20'
+                                    : 'bg-white/5 border-white/10'
+                                    }`}
+                            >
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-2">
+                                        <h4 className="text-lg font-bold text-white">
+                                            {exam.title}
+                                        </h4>
+                                        <div className="flex flex-col gap-1">
+                                            {isCompleted && (
+                                                <>
+                                                    <div className="flex items-center gap-2">
+                                                        <FaClock className="text-purple-400" />
+                                                        <p className="text-sm text-white/60">
+                                                            آخر محاولة: {new Date(latestAttempt.submittedAt).toLocaleDateString('ar-EG')}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-sm text-white/60">
+                                                        عدد المحاولات: {attemptsCount}
+                                                    </div>
+                                                    <div className="text-sm text-white/60">
+                                                        أفضل نتيجة: {bestScore}/{latestAttempt.numofqus}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {isCompleted && (
+                                        <div className="px-3 py-1 bg-green-500/20 rounded-lg text-green-400 text-sm">
+                                            {latestAttempt.quizGrade} / {latestAttempt.numofqus}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const WatchHistorySection = () => (
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">

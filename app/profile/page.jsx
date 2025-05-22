@@ -275,7 +275,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
     // Chemistry background component
     const ChemBackground = () => (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] opacity-5 mix-blend-overlay"></div>
+            <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
             <div className="absolute top-20 left-20 text-white/10 text-7xl">
                 <FaAtom className="animate-float" />
             </div>

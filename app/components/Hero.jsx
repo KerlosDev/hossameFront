@@ -25,7 +25,7 @@ const Hero = () => {
                               flex items-center justify-center animate-pulse">
                     <FaAtom className="text-5xl text-yellow-500/50 animate-spin" />
                 </div>
-                <div className="absolute inset-0 opacity-10 bg-[url('/chemistry-pattern.png')] bg-repeat mix-blend-overlay"></div>
+                <div className="absolute inset-0 opacity-10   bg-repeat mix-blend-overlay"></div>
             </div>
 
             <div className="max-w-7xl mx-auto">
@@ -108,10 +108,10 @@ const Hero = () => {
                                 {/* Animated background with molecule pattern */}
                                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 via-red-500/20 to-orange-500/20 
                                           blur-2xl transform group-hover:scale-105 transition-transform duration-500">
-                                    <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] bg-repeat opacity-5 mix-blend-overlay"></div>
+                                    <div className="absolute inset-0   bg-repeat opacity-5 mix-blend-overlay"></div>
                                 </div>
 
-                             
+
                             </div>
                         </div>
 

@@ -45,7 +45,7 @@ const Courses = () => {
             const courses = (data.courses || []).filter(course => !course.isDraft);
             setDatacourse(courses);
 
-            
+
         } catch (error) {
             console.error('Error fetching courses:', error);
             setError(error.message);
@@ -208,7 +208,7 @@ const Courses = () => {
                               flex items-center justify-center animate-pulse">
                     <FaAtom className="text-5xl text-yellow-500/50 animate-spin" />
                 </div>
-                <div className="absolute inset-0 opacity-10 bg-[url('/chemistry-pattern.png')] bg-repeat mix-blend-overlay"></div>
+                <div className="absolute inset-0 opacity-10   bg-repeat mix-blend-overlay"></div>
             </div>
 
             <div className="max-w-7xl mx-auto relative z-10">
@@ -443,15 +443,15 @@ const Courses = () => {
 
                                             {/* Gradient overlay - changes color based on enrollment status */}
                                             <div className={`absolute inset-[2px] rounded-2xl ${enrollmentStatus[item._id]
-                                                    ? 'bg-gradient-to-br from-green-500/20 to-indigo-500/20 dark:from-green-400/10 dark:to-indigo-400/10'
-                                                    : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-400/10 dark:to-teal-400/10'
+                                                ? 'bg-gradient-to-br from-green-500/20 to-indigo-500/20 dark:from-green-400/10 dark:to-indigo-400/10'
+                                                : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-400/10 dark:to-teal-400/10'
                                                 } opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm`}></div>
 
                                             {/* Content container */}
                                             <div className="relative flex items-center justify-center gap-3 px-6 py-3.5">
                                                 <span className={`font-arabicUI2 text-lg ${enrollmentStatus[item._id]
-                                                        ? 'text-green-700 dark:text-blue-200 group-hover:text-green-600 dark:group-hover:text-green-300'
-                                                        : 'text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
+                                                    ? 'text-green-700 dark:text-blue-200 group-hover:text-green-600 dark:group-hover:text-green-300'
+                                                    : 'text-slate-700 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
                                                     } transition-colors duration-300`}>
                                                     {enrollmentStatus[item._id] ? 'مشترك بالفعل' : 'اشترك الآن'}
                                                 </span>
@@ -459,8 +459,8 @@ const Courses = () => {
                                                 <div className="relative">
                                                     {enrollmentStatus[item._id] ? (
                                                         <GiCheckMark className={`text-xl ${enrollmentStatus[item._id]
-                                                                ? 'text-green-500 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300'
-                                                                : 'text-emerald-500 dark:text-emerald-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-300'
+                                                            ? 'text-green-500 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300'
+                                                            : 'text-emerald-500 dark:text-emerald-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-300'
                                                             } transform group-hover:-translate-y-1 group-hover:scale-110 transition-all duration-300`} />
                                                     ) : (
                                                         <GiTakeMyMoney className="text-xl text-emerald-500 dark:text-emerald-400 
@@ -470,8 +470,8 @@ const Courses = () => {
                                                     )}
 
                                                     <div className={`absolute inset-0 blur-sm ${enrollmentStatus[item._id]
-                                                            ? 'bg-green-400/30 dark:bg-green-300/30'
-                                                            : 'bg-emerald-400/30 dark:bg-emerald-300/30'
+                                                        ? 'bg-green-400/30 dark:bg-green-300/30'
+                                                        : 'bg-emerald-400/30 dark:bg-emerald-300/30'
                                                         } opacity-0 group-hover:opacity-100 scale-150 transition-all duration-300`}></div>
                                                 </div>
                                             </div>

@@ -116,7 +116,7 @@ const SignInPage = () => {
         <div dir='rtl' className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 p-4">
             {/* Animated background elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] opacity-5 mix-blend-overlay"></div>
+                <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
                 <div className="absolute top-20 left-20 text-white/10 text-7xl animate-float">
                     <FaAtom />
                 </div>

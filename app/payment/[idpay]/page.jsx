@@ -25,7 +25,7 @@ const Page = ({ params }) => {
     // Track if component is mounted (client-side only)
     const isMounted = useRef(false);
     const [isClient, setIsClient] = useState(false);
-    
+
     // Safe token access (client-side only)
     const [token, setToken] = useState('');
 
@@ -33,20 +33,20 @@ const Page = ({ params }) => {
     useEffect(() => {
         setIsClient(true);
         isMounted.current = true;
-        
+
         // Now safely get the token from cookies (client-side only)
         const cookieToken = Cookies.get("token");
         setToken(cookieToken || '');
-        
+
         return () => {
             isMounted.current = false;
         };
     }, []);
-    
+
     // Check for token after client-side initialization
     useEffect(() => {
         if (!isClient) return; // Skip server-side execution
-        
+
         if (!token) {
             router.replace("/sign-in");
         } else {
@@ -91,10 +91,10 @@ const Page = ({ params }) => {
             if (!res.ok) {
                 throw new Error('Failed to fetch course');
             }
-            
+
             const data = await res.json();
             console.log(data)
-            if (!data ) {
+            if (!data) {
                 setError('الكورس غير موجود');
                 return;
             }
@@ -136,8 +136,8 @@ const Page = ({ params }) => {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/active`, {
                 phoneNumber: number,
                 courseId: idpay,
-                price:courseInfo.price
-                
+                price: courseInfo.price
+
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -195,7 +195,7 @@ const Page = ({ params }) => {
             </div>
         );
     }
-    
+
     // Show loading state during initial client-side hydration
     if (!isClient) {
         return (
@@ -282,7 +282,7 @@ const Page = ({ params }) => {
         <div className="min-h-screen bg-[#0A1121] text-white font-arabicUI3">
             {/* Decorative Elements */}
             <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] opacity-5" />
+                <div className="absolute inset-0   opacity-5" />
                 <div className="absolute top-0 left-0 w-1/3 h-1/3 bg-gradient-to-br from-blue-500/20 to-transparent blur-[120px]" />
                 <div className="absolute bottom-0 right-0 w-1/3 h-1/3 bg-gradient-to-tl from-indigo-500/20 to-transparent blur-[120px]" />
             </div>

@@ -68,7 +68,7 @@ const Offer = () => {
             {/* Enhanced Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Chemistry pattern overlay */}
-                <div className="absolute inset-0 opacity-5 bg-[url('/chemistry-pattern.png')] bg-repeat mix-blend-overlay"></div>
+                <div className="absolute inset-0 opacity-5   bg-repeat mix-blend-overlay"></div>
 
                 {/* Floating molecules */}
                 <div className="absolute top-20 right-10 w-40 h-40 bg-blue-500/10 backdrop-blur-3xl rounded-full 
@@ -100,7 +100,7 @@ const Offer = () => {
                             {/* Enhanced gradient background with new effects */}
                             <div className="absolute inset-0">
                                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600/95 via-blue-700/95 to-indigo-800/95"></div>
-                                <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] animate-slide-slow bg-repeat opacity-10 mix-blend-overlay"></div>
+                                <div className="absolute inset-0   animate-slide-slow bg-repeat opacity-10 mix-blend-overlay"></div>
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
 
                                 {/* Enhanced molecular animations with new positions */}
@@ -226,7 +226,7 @@ const Offer = () => {
                               border-t border-r border-white/10">
                             {/* Chemistry-themed background */}
                             <div className="absolute inset-0">
-                                <div className="absolute inset-0 bg-[url('/chemistry-pattern.png')] opacity-5 mix-blend-overlay"></div>
+                                <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
                                 {/* Decorative elements */}
                                 <FaAtom className="absolute top-8 right-8 text-4xl text-white/10 animate-spin-slow" />
                                 <FaFlask className="absolute bottom-8 left-8 text-4xl text-white/10 animate-float" />
