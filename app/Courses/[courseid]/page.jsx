@@ -97,24 +97,32 @@ const CoursePage = () => {
                         console.error("Error checking enrollment:", error);
                         setIsEnrolled(false);
                     }
-                }                // Process chapters
+                }
+
+                // Process chapters
                 if (chaptersData.length > 0) {
                     setChapterDetails(chaptersData);
-                    const formattedChapters = chaptersData.map(chapter => ({
-                        id: chapter._id,
-                        nameofchapter: chapter.title,
-                        lessons: enrollmentStatus ? (chapter.lessons?.map(lesson => ({
-                            id: lesson._id,
-                            name: lesson.title,
-                            link: lesson.videoUrl
-                        })) || []) : [
-                            // Add default locked lessons for non-enrolled users
-                            { id: '1', name: 'الدرس الأول', locked: true },
-                            { id: '2', name: 'الدرس الثاني', locked: true },
-                            { id: '3', name: 'الدرس الثالث', locked: true },
-                            { id: '4', name: 'الدرس الرابع', locked: true }
-                        ]
-                    }));
+                    const formattedChapters = chaptersData.map(chapter => {
+                        // Check if the chapter has lessons
+                        const hasLessons = chapter.lessons && chapter.lessons.length > 0;
+
+                        return {
+                            id: chapter._id,
+                            nameofchapter: chapter.title,
+                            lessons: hasLessons
+                                ? chapter.lessons.map(lesson => ({
+                                    id: lesson._id,
+                                    name: lesson.title,
+                                    // Only include link if enrolled, otherwise it will be null
+                                    link: enrollmentStatus ? lesson.videoUrl : null,
+                                    // Lock lessons for non-enrolled users
+                                    locked: !enrollmentStatus
+                                }))
+                                : enrollmentStatus
+                                    ? [] // Empty array if enrolled but no lessons
+                                    : [{ id: '1', name: 'لا توجد دروس متاحة', locked: true }] // Placeholder if not enrolled and no lessons
+                        };
+                    });
                     setCourseVideoChapters(formattedChapters);
                 }
 
@@ -161,8 +169,6 @@ const CoursePage = () => {
         setActiveIndex2(index);
         setActiveIndex(1000);
     };
-
-
     const handleLessonClick = async (chapterIndex, lessonIndex) => {
         // ✅ لو نفس الدرس اللي شغال، بلاش تبعت تاني
         if (activeChapter === chapterIndex && activeLesson === lessonIndex) return;
@@ -176,27 +182,29 @@ const CoursePage = () => {
 
         if (!selectedLesson || !selectedChapter || !courseid || !user?.token) return;
 
-        try {
-            await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/watchHistory`,
-                {
-                    courseId: courseid,
-                    chapterId: selectedChapter._id,
-                    lessonId: selectedLesson.id,
-                    lessonTitle: selectedLesson.name
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
+        // Only record watch history if the lesson has a video URL
+        if (selectedLesson.link) {
+            try {
+                await axios.post(
+                    `${process.env.NEXT_PUBLIC_API_URL}/watchHistory`,
+                    {
+                        courseId: courseid,
+                        chapterId: selectedChapter._id,
+                        lessonId: selectedLesson.id,
+                        lessonTitle: selectedLesson.name
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${user.token}`,
+                        }
                     }
-                }
-            );
+                );
 
-            console.log('✅ تم تسجيل المشاهدة');
-        } catch (error) {
-            console.error('❌ خطأ في تسجيل المشاهدة:', error);
+                console.log('✅ تم تسجيل المشاهدة');
+            } catch (error) {
+                console.error('❌ خطأ في تسجيل المشاهدة:', error);
+            }
         }
-
     };
 
 
@@ -304,29 +312,26 @@ const CoursePage = () => {
                     {/* Main Content */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Video Section */}
-                        <div className="lg:col-span-2 space-y-6">
-                            <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-900">
-                                {currentVideoUrl && !isContentLocked && isReady ? (
-
-
-                                    <VideoPlayer
-                                        videoUrl={currentVideoUrl}
-
-                                    ></VideoPlayer>
-                                ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="text-center">
-                                            <FaLock className="text-4xl text-gray-600 mx-auto mb-4" />
-                                            <p className="text-gray-400">
-                                                {!user ? "قم بتسجيل الدخول للوصول إلى المحتوى" :
-                                                    !isEnrolled ? "اشترك في الكورس للوصول إلى المحتوى" :
+                        <div className="lg:col-span-2 space-y-6">                            <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-900">
+                            {currentVideoUrl && !isContentLocked && isReady ? (
+                                <VideoPlayer
+                                    videoUrl={currentVideoUrl}
+                                ></VideoPlayer>
+                            ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <FaLock className="text-4xl text-gray-600 mx-auto mb-4" />
+                                        <p className="text-gray-400">
+                                            {!user ? "قم بتسجيل الدخول للوصول إلى المحتوى" :
+                                                !isEnrolled ? "اشترك في الكورس للوصول إلى المحتوى" :
+                                                    !currentVideoUrl && courseVideoChapters.length > 0 ? "لا يوجد فيديو متاح لهذا الدرس" :
                                                         courseVideoChapters.length === 0 ? "لا يوجد دروس متاحة حالياً" :
                                                             "اختر درساً للمشاهدة"}
-                                            </p>
-                                        </div>
+                                        </p>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
+                        </div>
 
                             {/* Chapter and Lesson Info */}
                             <div className="bg-gray-800/50 rounded-xl p-6">

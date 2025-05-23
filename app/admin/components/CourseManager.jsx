@@ -281,10 +281,13 @@ const CourseManager = () => {
         try {
             const token = Cookies.get('token');
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/chapter`, {
-
                 title: newChapter.title,
                 lessons: [],
                 courseId: selectedCourse._id
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             setCourseChapters(prev => [...prev, response.data.chapter]);
