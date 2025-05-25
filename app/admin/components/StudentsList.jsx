@@ -209,7 +209,7 @@ export default function StudentsList() {
     // WhatsApp link generator
     const getWhatsAppLink = (number) => {
         const cleanNumber = number.replace(/\D/g, '');
-        return `https://wa.me/${cleanNumber}`;
+        return `https://wa.me/2${cleanNumber}`;
     };
 
     // Export to Excel
