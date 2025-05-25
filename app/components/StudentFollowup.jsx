@@ -285,7 +285,7 @@ const StudentFollowup = () => {
         const fullNumber = cleanNumber.startsWith('0') ?
             '20' + cleanNumber.substring(1) :
             cleanNumber;
-        return `https://wa.me/${fullNumber}`;
+        return `https://wa.me/2${fullNumber}`;
     }; const prepareStudentChartData = () => {
         if (!watchHistory || watchHistory.length === 0) {
             return {
@@ -1008,7 +1008,7 @@ const StudentFollowup = () => {
                                             {/* Contact Information */}
                                             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {whatsappNumbers[selectedStudent.email]?.studentWhatsApp && (
-                                                    <a href={`https://wa.me/${whatsappNumbers[selectedStudent.email].studentWhatsApp}`}
+                                                    <a href={`https://wa.me/2${whatsappNumbers[selectedStudent.email].studentWhatsApp}`}
                                                         target="_blank"
                                                         className="flex items-center gap-2 bg-green-500/20 hover:bg-green-500/30 px-4 py-2 rounded-lg transition-colors">
                                                         <FaWhatsapp className="text-green-400" />
@@ -1016,7 +1016,7 @@ const StudentFollowup = () => {
                                                     </a>
                                                 )}
                                                 {whatsappNumbers[selectedStudent.email]?.parentWhatsApp && (
-                                                    <a href={`https://wa.me/${whatsappNumbers[selectedStudent.email].parentWhatsApp}`}
+                                                    <a href={`https://wa.me/2${whatsappNumbers[selectedStudent.email].parentWhatsApp}`}
                                                         target="_blank"
                                                         className="flex items-center gap-2 bg-green-500/20 hover:bg-green-500/30 px-4 py-2 rounded-lg transition-colors">
                                                         <FaWhatsapp className="text-green-400" />
