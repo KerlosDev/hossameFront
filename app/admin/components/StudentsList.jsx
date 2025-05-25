@@ -723,6 +723,7 @@ export default function StudentsList() {
                     {filteredStudents.map(student => (
                         <div
                             key={student._id}
+                            dir='rtl'
                             onClick={() => setSelectedStudent(student)}
                             className={`group bg-white/5 backdrop-blur-sm rounded-2xl p-6 border transition-all cursor-pointer
                                 ${student.isBanned
@@ -763,7 +764,7 @@ export default function StudentsList() {
                                 <div className="flex items-center gap-3">
                                     <Phone size={14} className="text-white/50" />
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm text-white/70">{student.phoneNumber}</span>
+                                        <span className="text-sm text-white/70"> الطالب:{student.phoneNumber}</span>
                                         {student.phoneNumber && (
                                             <a
                                                 href={getWhatsAppLink(student.phoneNumber)}

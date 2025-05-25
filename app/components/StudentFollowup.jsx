@@ -285,7 +285,7 @@ const StudentFollowup = () => {
         const fullNumber = cleanNumber.startsWith('0') ?
             '20' + cleanNumber.substring(1) :
             cleanNumber;
-        return `https://wa.me/2${fullNumber}`;
+        return `https://wa.me/${fullNumber}`;
     }; const prepareStudentChartData = () => {
         if (!watchHistory || watchHistory.length === 0) {
             return {
