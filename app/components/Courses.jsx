@@ -184,11 +184,8 @@ const Courses = () => {
         return <div>Error: {error}</div>;
     }
 
-    const filteredCourses = filterCoursesByLevel(datacourse);
-
-    return (
-        <div dir="rtl" className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 
-                    dark:from-blue-950 dark:via-slate-900 dark:to-slate-950 py-8 sm:py-12 px-2 sm:px-4 overflow-hidden">
+    const filteredCourses = filterCoursesByLevel(datacourse); return (
+        <div dir="rtl" className="relative min-h-screen py-8 sm:py-12 px-2 sm:px-4 overflow-hidden">
             {/* Enhanced Background Elements */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 right-10 w-40 h-40 bg-blue-500/10 backdrop-blur-3xl rounded-full 

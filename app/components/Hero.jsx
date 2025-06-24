@@ -10,8 +10,7 @@ import Link from 'next/link';
 
 const Hero = () => {
     return (
-        <div className="relative min-h-screen py-8 sm:py-12 px-2 sm:px-4 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-slate-50 
-                        dark:from-blue-950 dark:via-slate-900 dark:to-slate-950">            {/* Enhanced Background Elements */}
+        <div className="relative min-h-screen py-8 sm:py-12 px-2 sm:px-4 overflow-hidden">            {/* Enhanced Background Elements */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 right-10 w-40 h-40 bg-blue-500/10 backdrop-blur-3xl rounded-full 
                               flex items-center justify-center animate-float">
@@ -120,13 +119,13 @@ const Hero = () => {
                             <div className="bg-gradient-to-br from-yellow-500/20 to-red-500/20 p-4 sm:p-6 rounded-2xl 
                                           border border-yellow-500/30 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
                                 <div className="flex flex-col sm:flex-row items-center gap-4">                                    <div className="flex-1 space-y-2">
-                                        <h3 className="text-xl sm:text-2xl font-arabicUI2 text-yellow-600 dark:text-yellow-400">
-                                            احصل على كتاب الرياضيات الآن!
-                                        </h3>
-                                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                                            كتاب شامل يغطي جميع المواضيع بأسلوب سهل وممتع
-                                        </p>
-                                    </div>
+                                    <h3 className="text-xl sm:text-2xl font-arabicUI2 text-yellow-600 dark:text-yellow-400">
+                                        احصل على كتاب الرياضيات الآن!
+                                    </h3>
+                                    <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300">
+                                        كتاب شامل يغطي جميع المواضيع بأسلوب سهل وممتع
+                                    </p>
+                                </div>
                                     <Link
                                         href="/book-order"
                                         className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full 

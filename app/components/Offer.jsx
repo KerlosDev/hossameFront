@@ -96,8 +96,7 @@ const Offer = () => {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
     }; return (
-        <div dir="rtl" className="min-h-[60vh] font-arabicUI2 bg-gradient-to-br from-blue-50 via-white to-slate-50 
-                    dark:from-blue-950 dark:via-slate-900 dark:to-slate-950 py-6 px-4 overflow-hidden relative">{/* Enhanced Background Elements - Matching Hero.jsx and Courses.jsx */}
+        <div dir="rtl" className="min-h-[60vh] font-arabicUI2 py-6 px-4 overflow-hidden relative">{/* Enhanced Background Elements - Matching Hero.jsx and Courses.jsx */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 right-10 w-40 h-40 bg-blue-500/10 backdrop-blur-3xl rounded-full 
                               flex items-center justify-center animate-float">
@@ -862,7 +861,7 @@ const Offer = () => {
                                                 </motion.div>
                                             </motion.div>
 
-                                          
+
                                         </div>
                                     </div>
                                 </motion.div>{/* Enhanced Limited Spots */}
