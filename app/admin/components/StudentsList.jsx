@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react';
-import { User, Mail, Phone, Clock, Filter, Ban, Search, MapPin, Book, AlertCircle, Download, Eye } from 'lucide-react';
+import { User, Mail, Phone, Clock, Filter, Ban, Search, MapPin, Book, AlertCircle, Download, Eye, Monitor, Smartphone, Tablet } from 'lucide-react';
 import { FaWhatsapp, FaGraduationCap } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
@@ -204,27 +204,74 @@ export default function StudentsList() {
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('ar-EG', options);
-    };
-
-    // WhatsApp link generator
+    };    // WhatsApp link generator
     const getWhatsAppLink = (number) => {
         const cleanNumber = number.replace(/\D/g, '');
         return `https://wa.me/2${cleanNumber}`;
     };
 
-    // Export to Excel
+    // Device info formatter
+    const getDeviceInfo = (deviceInfo) => {
+        if (!deviceInfo) {
+            return {
+                type: 'unknown',
+                browser: 'غير محدد',
+                os: 'غير محدد',
+                icon: Monitor
+            };
+        }
+
+        let type = 'desktop';
+        let icon = Monitor;
+
+        const userAgent = deviceInfo.userAgent || deviceInfo;
+
+        if (/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+            if (/iPad|tablet/i.test(userAgent)) {
+                type = 'tablet';
+                icon = Tablet;
+            } else {
+                type = 'mobile';
+                icon = Smartphone;
+            }
+        }
+
+        // Extract browser info
+        let browser = 'غير محدد';
+        if (/Chrome/i.test(userAgent)) browser = 'Chrome';
+        else if (/Firefox/i.test(userAgent)) browser = 'Firefox';
+        else if (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)) browser = 'Safari';
+        else if (/Edge/i.test(userAgent)) browser = 'Edge';
+
+        // Extract OS info
+        let os = 'غير محدد';
+        if (/Windows/i.test(userAgent)) os = 'Windows';
+        else if (/Mac/i.test(userAgent)) os = 'macOS';
+        else if (/Linux/i.test(userAgent)) os = 'Linux';
+        else if (/Android/i.test(userAgent)) os = 'Android';
+        else if (/iOS|iPhone|iPad/i.test(userAgent)) os = 'iOS';
+
+        return { type, browser, os, icon };
+    };    // Export to Excel
     const exportToExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(students.map(student => ({
-            'الاسم': student.name,
-            'البريد الإلكتروني': student.email,
-            'رقم الهاتف': student.phoneNumber,
-            'رقم ولي الأمر': student.parentPhoneNumber,
-            'المحافظة': student.government,
-            'المستوى': student.level,
-            'الحالة': student.isBanned ? 'محظور' : 'نشط',
-            'آخر نشاط': formatDate(student.lastActive),
-            'تاريخ التسجيل': formatDate(student.createdAt)
-        })));
+        const worksheet = XLSX.utils.json_to_sheet(students.map(student => {
+            const deviceInfo = getDeviceInfo(student.deviceInfo);
+            return {
+                'الاسم': student.name,
+                'البريد الإلكتروني': student.email,
+                'رقم الهاتف': student.phoneNumber,
+                'رقم ولي الأمر': student.parentPhoneNumber,
+                'المحافظة': student.government,
+                'المستوى': student.level,
+                'الحالة': student.isBanned ? 'محظور' : 'نشط',
+                'آخر نشاط': formatDate(student.lastActive),
+                'تاريخ التسجيل': formatDate(student.createdAt),
+                'نوع الجهاز': deviceInfo.type === 'mobile' ? 'هاتف' : deviceInfo.type === 'tablet' ? 'تابلت' : 'كمبيوتر',
+                'المتصفح': deviceInfo.browser,
+                'نظام التشغيل': deviceInfo.os,
+                'جلسة نشطة': student.hasActiveSession ? 'نعم' : 'لا'
+            };
+        }));
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
@@ -286,9 +333,9 @@ export default function StudentsList() {
             const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
             const x = cx + radius * Math.cos(-midAngle * RADIAN);
             const y = cy + radius * Math.sin(-midAngle * RADIAN);
-            
+
             if (percent < 0.05) return null; // Don't show labels for small segments
-            
+
             return (
                 <text
                     x={x}
@@ -328,8 +375,8 @@ export default function StudentsList() {
                                     animationEasing="ease-out"
                                 >
                                     {analytics.governmentDistribution.map((entry, index) => (
-                                        <Cell 
-                                            key={`cell-${index}`} 
+                                        <Cell
+                                            key={`cell-${index}`}
                                             fill={COLORS[index % COLORS.length]}
                                             className="transition-all duration-300 hover:opacity-80"
                                             strokeWidth={2}
@@ -338,8 +385,8 @@ export default function StudentsList() {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{ 
-                                        backgroundColor: '#1f2937', 
+                                    contentStyle={{
+                                        backgroundColor: '#1f2937',
                                         border: 'none',
                                         borderRadius: '8px',
                                         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
@@ -356,8 +403,8 @@ export default function StudentsList() {
                             <div className="flex flex-wrap justify-center gap-4">
                                 {analytics.governmentDistribution.map((entry, index) => (
                                     <div key={`legend-${index}`} className="flex items-center gap-2">
-                                        <div 
-                                            className="w-3 h-3 rounded-full" 
+                                        <div
+                                            className="w-3 h-3 rounded-full"
                                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                                         />
                                         <span className="text-sm text-white/70">{entry.id}</span>
@@ -472,8 +519,7 @@ export default function StudentsList() {
                                         }</span>
                                 )}
                             </div>
-                        </th>
-                        <th
+                        </th>                        <th
                             className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('lastActive')}
                         >
@@ -486,6 +532,7 @@ export default function StudentsList() {
                                 )}
                             </div>
                         </th>
+                        <th className="p-4 text-right text-white/70">الجهاز</th>
                         <th className="p-4 text-right text-white/70">الحالة</th>
                         <th className="p-4 text-right text-white/70">إجراءات</th>
                     </tr>
@@ -536,12 +583,35 @@ export default function StudentsList() {
                                     <MapPin size={14} className="text-white/50" />
                                     {student.government}
                                 </div>
-                            </td>
-                            <td className="p-4 text-white">
+                            </td>                            <td className="p-4 text-white">
                                 <div className="flex items-center gap-2">
                                     <Clock size={14} className="text-white/50" />
                                     {formatDate(student.lastActive)}
                                 </div>
+                            </td>
+                            <td className="p-4 text-white">
+                                {student.deviceInfo ? (
+                                    <div className="flex items-center gap-2">
+                                        {(() => {
+                                            const deviceInfo = getDeviceInfo(student.deviceInfo);
+                                            const DeviceIcon = deviceInfo.icon;
+                                            return (
+                                                <>
+                                                    <DeviceIcon size={14} className="text-white/50" />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs">{deviceInfo.browser}</span>
+                                                        <span className="text-xs text-white/50">{deviceInfo.os}</span>
+                                                    </div>
+                                                    {student.hasActiveSession && (
+                                                        <div className="w-2 h-2 bg-green-400 rounded-full" title="جلسة نشطة" />
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+                                ) : (
+                                    <span className="text-white/30 text-xs">لا يوجد</span>
+                                )}
                             </td>
                             <td className="p-4">
                                 <span className={`px-3 py-1.5 rounded-full text-xs  font-arabicUI3 ${student.isBanned
@@ -800,11 +870,40 @@ export default function StudentsList() {
                                 <div className="flex items-center gap-3 text-sm text-white/70">
                                     <MapPin size={14} className="text-white/50" />
                                     <span>{student.government}</span>
-                                </div>
-
-                                <div className="flex items-center gap-3 text-sm text-white/70">
+                                </div>                                <div className="flex items-center gap-3 text-sm text-white/70">
                                     <Clock size={14} className="text-white/50" />
                                     <span>آخر نشاط: {formatDate(student.lastActive)}</span>
+                                </div>
+
+                                {/* Device Information */}
+                                <div className="flex items-center gap-3 text-sm text-white/70">
+                                    {student.deviceInfo ? (
+                                        <>
+                                            {(() => {
+                                                const deviceInfo = getDeviceInfo(student.deviceInfo);
+                                                const DeviceIcon = deviceInfo.icon;
+                                                return (
+                                                    <>
+                                                        <DeviceIcon size={14} className="text-white/50" />
+                                                        <div className="flex items-center gap-2">
+                                                            <span>{deviceInfo.browser} - {deviceInfo.os}</span>
+                                                            {student.hasActiveSession && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                                                                    <span className="text-xs text-green-400">متصل</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Monitor size={14} className="text-white/50" />
+                                            <span className="text-white/50">لا يوجد معلومات جهاز</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -968,14 +1067,49 @@ export default function StudentsList() {
                                         <Clock size={16} className="text-white/50" />
                                         {formatDate(selectedStudent.createdAt)}
                                     </p>
-                                </div>
-
-                                <div>
+                                </div>                                <div>
                                     <h4 className="text-white/60 mb-1 text-sm">آخر نشاط</h4>
                                     <p className="text-white flex items-center gap-2">
                                         <Clock size={16} className="text-white/50" />
                                         {formatDate(selectedStudent.lastActive)}
                                     </p>
+                                </div>
+
+                                {/* Device Information */}
+                                <div>
+                                    <h4 className="text-white/60 mb-1 text-sm">معلومات الجهاز</h4>
+                                    {selectedStudent.deviceInfo ? (
+                                        <>
+                                            {(() => {
+                                                const deviceInfo = getDeviceInfo(selectedStudent.deviceInfo);
+                                                const DeviceIcon = deviceInfo.icon;
+                                                return (
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <DeviceIcon size={16} className="text-white/50" />
+                                                            <span className="text-white">{deviceInfo.browser} - {deviceInfo.os}</span>
+                                                            {selectedStudent.hasActiveSession && (
+                                                                <div className="flex items-center gap-2 ml-2">
+                                                                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                                                                    <span className="text-xs text-green-400 bg-green-500/20 px-2 py-1 rounded-full">جلسة نشطة</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {selectedStudent.sessionCreatedAt && (
+                                                            <p className="text-sm text-white/50">
+                                                                آخر جلسة: {formatDate(selectedStudent.sessionCreatedAt)}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+                                        </>
+                                    ) : (
+                                        <p className="text-white/50 flex items-center gap-2">
+                                            <Monitor size={16} className="text-white/50" />
+                                            لا يوجد معلومات جهاز
+                                        </p>
+                                    )}
                                 </div>
 
                                 {selectedStudent.isBanned && selectedStudent.banReason && (

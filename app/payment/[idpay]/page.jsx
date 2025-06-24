@@ -329,7 +329,7 @@ const Page = ({ params }) => {
                                             </div>
                                             <div>
                                                 <h3 className="text-lg font-medium">{courseInfo.name}</h3>
-                                                <p className="text-blue-400 text-sm">مع أ/ والتر وايت</p>
+                                                <p className="text-blue-400 text-sm">مع أ/ حسام ميرا</p>
                                             </div>
                                         </div>
 

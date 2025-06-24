@@ -58,6 +58,7 @@ module.exports = {
         arabicUI2: ['arabicUI2', 'sans-serif'],
         arabicUI3: ['arabicUI3', 'sans-serif'],
         abril: ['"Abril Fatface"', 'cursive'], // Custom font name
+        arabicUI4: ['arabicc', 'sans-serif'],
         Gaza: ['DGGaza', 'sans-serif'],
         rakkas: ['Rakkas', 'sans-serif'], // Add Rakkas font to Tailwind theme
 

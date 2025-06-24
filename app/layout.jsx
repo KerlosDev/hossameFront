@@ -3,8 +3,9 @@ import "./globals.css";
 const ArabicUI = localFont({ src: './fonts/DG-Gaza.ttf' })
 const ArabicUI2 = localFont({ src: './fonts/LANTX.otf' })
 const ArabicUI3 = localFont({ src: './fonts/Rubik.ttf' })
+const ArabicUI4 = localFont({ src: './fonts/arabicc.otf' })
 import { Anton } from 'next/font/google';
- 
+
 
 // Configure Anton font
 const anton = Anton({
@@ -22,6 +23,7 @@ const rakkas = Rakkas({
 import { Abril_Fatface } from 'next/font/google';
 import Footer from "./components/Footer";
 import Header from "./components/Header";
+import { SessionProvider } from "./components/SessionProvider";
 
 const abrilFatface = Abril_Fatface({
   subsets: ['latin'],
@@ -29,28 +31,20 @@ const abrilFatface = Abril_Fatface({
 });
 
 export const metadata = {
-  title: "Walter White",
-  description: "هدف منصتنا ان نخلي الكيمياء مجرد لعبة بالنسبالك ❤️",
+  title: "حسام ميرا رياضيات | Hossam Mira Math",
+  description: " شرح وحل تمارين مادة الرياضيات لطلاب الصفوف الثانوية الثلاثة بكل بساطة ",
 };
 
 export default function RootLayout({ children }) {
   return (
-    
-      <html lang="en">
-        <body
-          className={` dark:bg-slate-950  antialiased`}
-        >
-
-
-
-
-          <Header></Header>
+    <html lang="en">
+      <body className={` dark:bg-slate-950  antialiased`}>
+        <SessionProvider>
+          <Header />
           {children}
-
-          <Footer></Footer>
-
-        </body>
-      </html>
-     
+          <Footer />
+        </SessionProvider>
+      </body>
+    </html>
   );
 }

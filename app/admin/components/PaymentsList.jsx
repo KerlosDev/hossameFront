@@ -1,18 +1,19 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { CreditCard, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Phone, Mail } from 'lucide-react';
+import { CreditCard, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Phone, Mail, Plus } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Cookies from 'js-cookie';
+import AddEnrollment from './AddEnrollment';
 
 export default function PaymentsList() {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [sortBy, setSortBy] = useState('date');
-    const [sortOrder, setSortOrder] = useState('desc');
+    const [sortBy, setSortBy] = useState('date'); const [sortOrder, setSortOrder] = useState('desc');
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [showAddEnrollment, setShowAddEnrollment] = useState(false);
 
     // Define fetchEnrollments as a component function
     const fetchEnrollments = async () => {
@@ -137,83 +138,95 @@ export default function PaymentsList() {
         }
     };
 
-    return (
-        <div className="space-y-6">
+    const handleEnrollmentAdded = (newEnrollment) => {
+        setPayments(prev => [newEnrollment, ...prev]);
+        setShowAddEnrollment(false);
+    };    return (
+        <div className="space-y-4 sm:space-y-6">
             {/* Stats Section */}
-            <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-green-500/10 rounded-xl">
-                            <CheckCircle className="text-2xl text-green-400" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="bg-white/10 backdrop-blur-lg rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/20">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="p-2 sm:p-3 bg-green-500/10 rounded-lg sm:rounded-xl">
+                            <CheckCircle className="text-lg sm:text-2xl text-green-400" />
                         </div>
                         <div>
-                            <h3 className="text-white/80 font-arabicUI3 text-sm">المدفوعات المكتملة</h3>
-                            <p className="text-2xl font-arabicUI3 text-white">
+                            <h3 className="text-white/80 font-arabicUI3 text-xs sm:text-sm">المدفوعات المكتملة</h3>
+                            <p className="text-lg sm:text-2xl font-arabicUI3 text-white">
                                 {payments?.filter(p => p.paymentStatus === 'paid').length || 0}
                             </p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-yellow-500/10 rounded-xl">
-                            <Clock className="text-2xl text-yellow-400" />
+                <div className="bg-white/10 backdrop-blur-lg rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/20">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="p-2 sm:p-3 bg-yellow-500/10 rounded-lg sm:rounded-xl">
+                            <Clock className="text-lg sm:text-2xl text-yellow-400" />
                         </div>
                         <div>
-                            <h3 className="text-white/80 font-arabicUI3 text-sm">قيد المعالجة</h3>
-                            <p className="text-2xl font-arabicUI3 text-white">
+                            <h3 className="text-white/80 font-arabicUI3 text-xs sm:text-sm">قيد المعالجة</h3>
+                            <p className="text-lg sm:text-2xl font-arabicUI3 text-white">
                                 {payments?.filter(p => p.paymentStatus === 'pending').length || 0}
                             </p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-red-500/10 rounded-xl">
-                            <XCircle className="text-2xl text-red-400" />
+                <div className="bg-white/10 backdrop-blur-lg rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/20">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="p-2 sm:p-3 bg-red-500/10 rounded-lg sm:rounded-xl">
+                            <XCircle className="text-lg sm:text-2xl text-red-400" />
                         </div>
                         <div>
-                            <h3 className="text-white/80 font-arabicUI3 text-sm">المدفوعات الفاشلة</h3>
-                            <p className="text-2xl font-arabicUI3 text-white">
+                            <h3 className="text-white/80 font-arabicUI3 text-xs sm:text-sm">المدفوعات الفاشلة</h3>
+                            <p className="text-lg sm:text-2xl font-arabicUI3 text-white">
                                 {payments?.filter(p => p.paymentStatus === 'failed').length || 0}
                             </p>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Payments Table */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20">
+            </div>            {/* Payments Table */}
+            <div className="bg-white/10 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/20">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                            <CreditCard className="text-white" size={24} />
+                        <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <CreditCard className="text-white" size={20} sm-size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-arabicUI2 text-white">المدفوعات</h2>
-                            <p className="text-white/60 text-sm">إدارة وتتبع المدفوعات</p>
+                            <h2 className="text-lg sm:text-xl font-arabicUI2 text-white">المدفوعات</h2>
+                            <p className="text-white/60 text-xs sm:text-sm">إدارة وتتبع المدفوعات</p>
                         </div>
                     </div>
 
                     {/* Sort Controls */}
-                    <div className="flex items-center gap-4">
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors"
-                        >
-                            <option value="date">تاريخ الدفع</option>
-                            <option value="amount">المبلغ</option>
-                        </select>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
                         <button
-                            onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-                            className="bg-white/5 border border-white/10 rounded-xl p-2 text-white hover:bg-white/10 transition-colors"
+                            onClick={() => setShowAddEnrollment(true)}
+                            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg sm:rounded-xl transition-colors text-sm sm:text-base"
                         >
-                            <ChevronDown
-                                className={`transform transition-transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`}
-                            />
+                            <Plus size={14} sm-size={16} />
+                            إضافة اشتراك
                         </button>
+
+                        <div className="flex gap-2">
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="flex-1 sm:flex-none bg-white/5 border border-white/10 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors text-sm sm:text-base"
+                            >
+                                <option value="date">تاريخ الدفع</option>
+                                <option value="amount">المبلغ</option>
+                            </select>
+                            <button
+                                onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+                                className="bg-white/5 border border-white/10 rounded-lg sm:rounded-xl p-2 text-white hover:bg-white/10 transition-colors"
+                            >
+                                <ChevronDown
+                                    size={16} sm-size={20}
+                                    className={`transform transition-transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`}
+                                />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -304,9 +317,17 @@ export default function PaymentsList() {
                                 </tr>
                             ))}
                         </tbody>
-                    </table>
-                </div>
+                    </table>                </div>
             </div>
+
+            {/* Add Enrollment Modal */}
+            {showAddEnrollment && (
+                <AddEnrollment
+                    onEnrollmentAdded={handleEnrollmentAdded}
+                    onClose={() => setShowAddEnrollment(false)}
+                />
+            )}
+
             <ToastContainer position="top-right" dir="rtl" />
         </div>
     );

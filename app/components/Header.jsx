@@ -1,16 +1,18 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import ThemeToggle from './ThemeToggle'
 import { useRouter } from 'next/navigation'
 import { PiStudentBold } from "react-icons/pi";
-import { FaBookBookmark } from "react-icons/fa6";
-import { GiMolecule, GiChemicalDrop } from "react-icons/gi";
-import { FaAtom } from "react-icons/fa";
+import { TbMathPi } from "react-icons/tb";
+import { TbMathFunction, TbMathSymbols } from "react-icons/tb";
+import { PiMathOperationsBold } from "react-icons/pi";
 import { RiMenu4Fill } from "react-icons/ri";
 import { IoClose, IoNotifications, IoPersonCircle } from "react-icons/io5";
 import NotificationButton from './NotificationButton';
 import { LuUser, LuLogOut, LuUserCircle, LuChevronDown } from 'react-icons/lu';
+import sessionManager from '../utils/sessionManager';
 
 const Header = () => {
 
@@ -28,15 +30,36 @@ const Header = () => {
         }
         return '0';
     });
-    const [showMobileNotifications, setShowMobileNotifications] = useState(false);
-
-    useEffect(() => {
+    const [showMobileNotifications, setShowMobileNotifications] = useState(false); useEffect(() => {
         // Check if user is logged in on component mount
         checkUserLogin();
+
+        // Set up session manager listener
+        const unsubscribe = sessionManager.addListener((event, data) => {
+            if (event === 'login') {
+                checkUserLogin();
+            } else if (event === 'logout') {
+                setIsLoggedIn(false);
+                setUsername('');
+                setIsAdmin(false);
+                setNotifications([]);
+                setUnreadCount(0);
+            }
+        });
 
         // Set up event listeners for auth state changes
         window.addEventListener('storage', checkUserLogin);
         window.addEventListener('auth_state_change', checkUserLogin);
+
+        // Listen for session invalidation events
+        const handleSessionInvalidated = (event) => {
+            setIsLoggedIn(false);
+            setUsername('');
+            setIsAdmin(false);
+            setNotifications([]);
+            setUnreadCount(0);
+        };
+        window.addEventListener('session_invalidated', handleSessionInvalidated);
 
         // Custom event dispatch for login success
         const handleLoginSuccess = () => {
@@ -45,8 +68,10 @@ const Header = () => {
         window.addEventListener('login_success', handleLoginSuccess);
 
         return () => {
+            unsubscribe();
             window.removeEventListener('storage', checkUserLogin);
             window.removeEventListener('auth_state_change', checkUserLogin);
+            window.removeEventListener('session_invalidated', handleSessionInvalidated);
             window.removeEventListener('login_success', handleLoginSuccess);
         };
     }, []);
@@ -58,29 +83,14 @@ const Header = () => {
             const interval = setInterval(fetchNotifications, 300000);
             return () => clearInterval(interval);
         }
-    }, [isLoggedIn]);
-
-    // Function to get cookie by name
-    const getCookie = (name) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-    }; const checkUserLogin = () => {
+    }, [isLoggedIn]); const checkUserLogin = () => {
         try {
-            const token = getCookie('token');
-            const username = decodeURIComponent(decodeURIComponent(getCookie('username') || ''));
+            const userData = sessionManager.getUserData();
 
-            if (token && username) {
-                // Decode the JWT token to get user role
-                const tokenParts = token.split('.');
-                if (tokenParts.length === 3) {
-                    const payload = JSON.parse(atob(tokenParts[1]));
-                    setIsAdmin(payload.role === 'admin');
-                }
-
-                setUsername(username);
+            if (userData) {
+                setUsername(userData.username);
                 setIsLoggedIn(true);
+                setIsAdmin(userData.role === 'admin');
                 return;
             }
 
@@ -95,13 +105,12 @@ const Header = () => {
         }
     }; const fetchNotifications = async () => {
         try {
-            const token = getCookie('token');
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+            const response = await sessionManager.makeAuthenticatedRequest(
+                `${process.env.NEXT_PUBLIC_API_URL}/notifications`,
+                {
+                    method: 'GET'
                 }
-            });
+            );
 
             const data = await response.json();
 
@@ -125,6 +134,10 @@ const Header = () => {
                 setUnreadCount(0);
             }
         } catch (error) {
+            if (error.message === 'SESSION_INVALID') {
+                // Session manager will handle this automatically
+                return;
+            }
             console.error("Error fetching notifications:", error);
             setNotifications([]);
             setUnreadCount(0);
@@ -162,60 +175,63 @@ const Header = () => {
     const handleCoursesClick = () => {
         router.push("/profile?tab=courses");
         setIsMobileMenuOpen(false);
-    };
-
-    const handleProfileClick = () => {
+    }; const handleProfileClick = () => {
         router.push("/profile");
         setUserDropdownOpen(false);
     }
 
-    const handleSignOut = () => {
-        // Remove all auth-related cookies
-        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=strict';
-        document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=strict';
-        document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=strict';
+    const handleSignOut = async () => {
+        try {
+            // Use session manager to handle logout
+            await sessionManager.logout();
 
-        // Clear state
-        setIsLoggedIn(false);
-        setUsername('');
-        setUserDropdownOpen(false);
-        setNotifications([]);
-        setUnreadCount(0);
+            // Clear state (session manager listener will also handle this)
+            setIsLoggedIn(false);
+            setUsername('');
+            setUserDropdownOpen(false);
+            setNotifications([]);
+            setUnreadCount(0);
+            setIsAdmin(false);
 
-        // Clear local storage
-        localStorage.removeItem('lastReadTime');
-        localStorage.setItem('userSignOut', Date.now().toString());
-
-        // Redirect with a smooth transition
-        router.push('/');
+            // Redirect with a smooth transition
+            router.push('/');
+        } catch (error) {
+            console.error('Error during logout:', error);
+            // Fallback: clear session anyway
+            sessionManager.clearSession();
+            router.push('/');
+        }
     }
 
-    return (
-        <header dir='rtl' className="sticky top-0 z-[100] bg-gradient-to-b from-white/80 to-white/60 dark:from-slate-900/80 dark:to-slate-900/60 
+    return (        <header dir='rtl' className="sticky top-0 z-[100] bg-gradient-to-b from-white/80 to-white/60 dark:from-slate-900/80 dark:to-slate-900/60 
                           backdrop-blur-xl border-b border-blue-500/10 dark:border-blue-500/5">
-            {/* Chemistry-themed background decorations */}
+            {/* Math-themed background decorations */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-2 right-1/4 opacity-20">
-                    <GiMolecule className="text-3xl text-blue-500 animate-spin-slow" />
+                    <TbMathPi className="text-3xl text-blue-500 animate-spin-slow" />
                 </div>
                 <div className="absolute -bottom-2 left-1/3 opacity-20">
-                    <FaAtom className="text-2xl text-yellow-500 animate-pulse" />
+                    <TbMathSymbols className="text-2xl text-yellow-500 animate-pulse" />
                 </div>
                 <div className="absolute top-1/2 right-1/2 transform -translate-y-1/2 opacity-20">
-                    <GiChemicalDrop className="text-2xl text-red-500 animate-bounce" />
+                    <TbMathFunction className="text-2xl text-red-500 animate-bounce" />
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-2 sm:px-4 relative">
-                <div className="flex justify-between items-center h-14 sm:h-16 md:h-20">
-                    {/* Logo with enhanced chemistry animation */}
+                <div className="flex justify-between items-center h-14 sm:h-16 md:h-20">                    {/* Logo with enhanced math animation */}
                     <Link href='/' className='shrink-0 group'>
                         <div className="flex items-center gap-2 sm:gap-3">
-                            <div className="relative">
-                                <div className="relative z-10 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12
+                            <div className="relative">                                <div className="relative z-10 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12
                                               bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl
                                               transform group-hover:scale-110 transition-all duration-500">
-                                    <FaBookBookmark className="text-2xl sm:text-3xl text-white" />
+                                    <Image 
+                                        src="/pi.png" 
+                                        alt="Pi Symbol" 
+                                        width={24} 
+                                        height={24} 
+                                        className="text-2xl sm:text-3xl filter brightness-0 invert"
+                                    />
                                     <div className="absolute inset-0 bg-blue-500/20 rounded-xl blur-xl 
                                                   opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
                                 </div>
@@ -223,14 +239,14 @@ const Header = () => {
                                               opacity-0 group-hover:opacity-30 transition-all duration-500"></div>
                             </div>
                             <div className="flex flex-col">
-                                <h2 className="font-arabicUI text-lg sm:text-2xl font-bold 
+                                <h2 className="font-arabicUI2 text-lg sm:text-2xl font-bold 
                                              bg-clip-text text-transparent bg-gradient-to-r 
                                              from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-600
                                              transition-all duration-300">
-                                    والتر وايت
+                                    حسام ميرا
                                 </h2>
                                 <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-arabicUI2">
-                                    منصة تعلم الكيمياء
+                                    مدرس الرياضيات
                                 </span>
                             </div>
                         </div>

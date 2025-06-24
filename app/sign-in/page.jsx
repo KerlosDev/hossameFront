@@ -5,23 +5,21 @@ import { GiMolecule, GiChemicalDrop } from "react-icons/gi";
 import { FaAtom, FaEnvelope, FaLock } from "react-icons/fa";
 import Cookies from "js-cookie";
 import { useRouter } from 'next/navigation';
+import sessionManager from '../utils/sessionManager';
 
 const SignInPage = () => {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         rememberMe: false
-    });
-    const [errors, setErrors] = useState({});
+    }); const [errors, setErrors] = useState({});
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-
-    // منع المستخدم اللي داخل فعلاً من الوصول لصفحة اللوجين
+    const [sessionWarning, setSessionWarning] = useState('');    // منع المستخدم اللي داخل فعلاً من الوصول لصفحة اللوجين
     useEffect(() => {
-        const token = Cookies.get("token");
-        if (token) {
-            router.replace("/"); // أو "/dashboard"
+        if (sessionManager.isAuthenticated()) {
+            router.replace("/");
         }
     }, []); const validateForm = () => {
         const newErrors = {};        // Email validation
@@ -55,11 +53,10 @@ const SignInPage = () => {
                 [name]: ''
             }));
         }
-    };
-
-    const handleSubmit = async (e) => {
+    }; const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setSessionWarning('');
 
         // Validate form before submission
         if (!validateForm()) {
@@ -83,18 +80,21 @@ const SignInPage = () => {
             const data = await response.json();
 
             if (response.ok) {
-                // Save token and username in cookies
-                Cookies.set("token", data.token, {
-                    expires: formData.rememberMe ? 30 : 1 // 30 days if remember me is checked, 1 day otherwise
-                });
-                Cookies.set("username", encodeURIComponent(data.user.name), {
-                    expires: formData.rememberMe ? 30 : 1
-                });
+                // Use session manager to handle login
+                sessionManager.setSession(data.token, data.user, formData.rememberMe);
 
+                // Show session warning if user was logged out from another device
+                if (data.wasLoggedOutFromOtherDevice) {
+                    setSessionWarning('تم تسجيل الخروج من الجهاز الآخر بنجاح');
+                }
+
+                // Dispatch event for other components
                 window.dispatchEvent(new Event("login_success"));
 
-
-                router.replace("/");
+                // Redirect after a short delay to show the warning message
+                setTimeout(() => {
+                    router.replace("/");
+                }, data.wasLoggedOutFromOtherDevice ? 2000 : 100);
             } else {
                 setError(data.message || "❌ البريد الإلكتروني أو كلمة المرور غير صحيحة");
             }
@@ -139,7 +139,7 @@ const SignInPage = () => {
                          bg-white/5 backdrop-blur-lg border border-white/10 hover:border-white/20 
                          transform hover:scale-105 transition-all duration-500">
                         <IoMdFlask className="text-3xl text-blue-300" />
-                        <span className="font-arabicUI2 text-xl text-blue-300">منصة والتر وايت</span>
+                        <span className="font-arabicUI2 text-xl text-blue-300">منصة حسام ميرا</span>
                     </div>
 
                     <h1 className="text-4xl lg:text-5xl font-arabicUI2 font-bold text-white leading-tight">
@@ -182,12 +182,17 @@ const SignInPage = () => {
                             </div>
                             <h2 className="text-2xl font-arabicUI2 font-bold text-white mb-2">تسجيل الدخول</h2>
                             <p className="text-white/60 font-arabicUI2">عد إلى حسابك واستمر في رحلة التعلم</p>
-                        </div>
-
-                        {/* Error Message */}
+                        </div>                        {/* Error Message */}
                         {error && (
                             <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-white font-arabicUI2 text-center">
                                 {error}
+                            </div>
+                        )}
+
+                        {/* Session Warning Message */}
+                        {sessionWarning && (
+                            <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-xl text-white font-arabicUI2 text-center">
+                                {sessionWarning}
                             </div>
                         )}
 

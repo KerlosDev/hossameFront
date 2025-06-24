@@ -38,11 +38,11 @@ const Footer = () => {
                         <Link href="/" className="flex items-center gap-2">
                             <GiChemicalTank className="text-3xl text-teal-500" />
                             <span className="text-2xl text-white font-arabicUI2">
-                                منصة والتر وايت
+                                منصة حسام ميرا 
                             </span>
                         </Link>
                         <p className="text-gray-400 text-sm">
-                            المنصة الأولى لتعليم الكيمياء بطريقة مبسطة وممتعة
+                            المنصة الأولى لتعليم الرياضيات بطريقة مبسطة وممتعة
                         </p>
                     </div>
 
@@ -83,7 +83,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p dir='rtl' className="text-gray-400 text-sm">
-                        © {new Date().getFullYear()} منصة والتر وايت - جميع الحقوق محفوظة
+                        © {new Date().getFullYear()} منصة حسام ميرا - جميع الحقوق محفوظة
                     </p>
                      <a  href="https://kerlos.site/"
                         className="group hover:scale-110 ease-in-out flex items-center gap-2 px-4 py-2 rounded-xl overflow-hidden relative 

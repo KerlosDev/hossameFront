@@ -6,6 +6,7 @@ import { FaAtom, FaUser, FaEnvelope, FaLock, FaPhoneAlt, FaUsers, FaMapMarkerAlt
 import { BsGenderAmbiguous } from "react-icons/bs";
 import Cookies from "js-cookie";
 import { useRouter } from 'next/navigation';
+import sessionManager from '../utils/sessionManager';
 
 const Page = () => {
     const [formData, setFormData] = useState({
@@ -19,12 +20,10 @@ const Page = () => {
         password: '',
         confirmPassword: ''
     });
-    const router = useRouter();
-    // ⛔ منع المستخدم اللي داخل فعلاً من الوصول لصفحة اللوجين
+    const router = useRouter();    // ⛔ منع المستخدم اللي داخل فعلاً من الوصول لصفحة اللوجين
     useEffect(() => {
-        const token = Cookies.get("token");
-        if (token) {
-            router.replace("/"); // أو "/dashboard"
+        if (sessionManager.isAuthenticated()) {
+            router.replace("/");
         }
     }, []); const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1); // For multi-step form
@@ -144,16 +143,10 @@ const Page = () => {
                 })
             });
 
-            const data = await response.json();
+            const data = await response.json(); if (response.ok) {
+                // Use session manager to handle signup login
+                sessionManager.setSession(data.token, data.user, true); // Default to remember me for signup
 
-            if (response.ok) {
-                // Save token and username in cookies
-                Cookies.set("token", data.token, { expires: 30 });
-                Cookies.set("username", data.user.name, { expires: 30 });
-
-                Cookies.set("username", encodeURIComponent(data.user.name), {
-                    expires: 30
-                });
                 alert("✅ تم التسجيل بنجاح!");
                 router.replace("/");
             } else {
@@ -207,7 +200,7 @@ const Page = () => {
                          bg-white/5 backdrop-blur-lg border border-white/10 hover:border-white/20 
                          transform hover:scale-105 transition-all duration-500">
                         <IoMdFlask className="text-3xl text-blue-300" />
-                        <span className="font-arabicUI2 text-xl text-blue-300">منصة والتر وايت</span>
+                        <span className="font-arabicUI2 text-xl text-blue-300">منصة حسام ميرا</span>
                     </div>
 
                     <h1 className="text-4xl lg:text-5xl font-arabicUI2 font-bold text-white leading-tight">
