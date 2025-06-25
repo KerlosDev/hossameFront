@@ -1,106 +1,130 @@
-import React from 'react';
 import Link from 'next/link';
-import { FaFacebook, FaYoutube, FaTelegram, FaDiscord } from "react-icons/fa";
-import { BsWhatsapp } from "react-icons/bs";
-import { GiChemicalTank } from "react-icons/gi";
+import { FaYoutube, FaFacebook, FaWhatsapp, FaCalculator } from 'react-icons/fa';
+import { BsBook, BsGraphUp } from 'react-icons/bs';
 
 const Footer = () => {
-    const links = [
-        {
-            title: "روابط سريعة", items: [
-                { name: "الرئيسية", href: "/" },
-                { name: "الدورات", href: "/courses" },
-                { name: "المواد", href: "/subjects" },
-            ]
-        },
-        {
-            title: "معلومات التواصل", items: [
-
-                { name: "واتساب", href: "tel:+201080506463" },
-            ]
-        },
-    ];
-
-    const socials = [
-        { icon: <FaFacebook size={20} />, href: "#", label: "Facebook" },
-        { icon: <FaYoutube size={20} />, href: "#", label: "Youtube" },
-        { icon: <FaTelegram size={20} />, href: "#", label: "Telegram" },
-        { icon: <BsWhatsapp size={20} />, href: "#", label: "WhatsApp" },
-        { icon: <FaDiscord size={20} />, href: "#", label: "Discord" },
-    ];
-
-    return (
-        <footer dir="rtl" className="bg-gradient-to-b font-arabicUI3 from-slate-900  to-slate-950">
-            <div className="max-w-7xl mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {/* Brand Section */}
-                    <div className="space-y-4">
-                        <Link href="/" className="flex items-center gap-2">
-                            <GiChemicalTank className="text-3xl text-teal-500" />
-                            <span className="text-2xl text-white font-arabicUI2">
-                                منصة حسام ميرا 
-                            </span>
-                        </Link>
-                        <p className="text-gray-400 text-sm">
-                            المنصة الأولى لتعليم الرياضيات بطريقة مبسطة وممتعة
-                        </p>
-                    </div>
-
-                    {/* Quick Links */}
-                    {links.map((section, idx) => (
-                        <div key={idx} className="space-y-4">
-                            <h3 className="text-white font-arabicUI2 text-lg">{section.title}</h3>
-                            <ul className="space-y-2">
-                                {section.items.map((item, index) => (
-                                    <li key={index}>
-                                        <Link href={item.href}
-                                            className="text-gray-400 hover:text-teal-400 transition-colors">
-                                            {item.name}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-
-                    {/* Social Media */}
-                    <div className="space-y-4">
-                        <h3 className="text-white font-arabicUI2 text-lg">تابعنا</h3>
-                        <div className="flex gap-4">
-                            {socials.map((social, idx) => (
-                                <a key={idx}
-                                    href={social.href}
-                                    aria-label={social.label}
-                                    className="p-2 bg-slate-800 rounded-lg hover:bg-blue-500 
-                                             text-gray-400 hover:text-white transition-all">
-                                    {social.icon}
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Bottom Bar */}
-                <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p dir='rtl' className="text-gray-400 text-sm">
-                        © {new Date().getFullYear()} منصة حسام ميرا - جميع الحقوق محفوظة
-                    </p>
-                     <a  href="https://kerlos.site/"
-                        className="group hover:scale-110 ease-in-out flex items-center gap-2 px-4 py-2 rounded-xl overflow-hidden relative 
-                                   backdrop-blur border border-green-500/20
-                                  bg-green-500/10 transition-all duration-300">
-                        <span className="text-sm font-medium     text-green-400 transition-colors">
-                            by Kerlos Hany
-                        </span>
-                        <span className="animate-pulse text-red-500">❤️</span>
-                        <span className="text-sm font-medium     text-green-400 transition-colors">
-                            Developed with
-                        </span>
-                    </a>
-                </div>
+  return (
+    <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white py-12 mt-auto">
+      <div className="container mx-auto px-4">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          {/* About Section */}
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold">Hossam Mera MATH</h3>
+            <p className="text-gray-300">منصة تعليمية متكاملة للرياضيات تقدم محتوى عالي الجودة لجميع المراحل الثانوية</p>
+            <div className="flex space-x-4 rtl:space-x-reverse">
+              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                <FaYoutube className="w-6 h-6" />
+              </a>
+              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                <FaFacebook className="w-6 h-6" />
+              </a>
+              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                <FaWhatsapp className="w-6 h-6" />
+              </a>
             </div>
-        </footer>
-    );
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold">روابط سريعة</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/Courses" className="text-gray-300 hover:text-white transition-colors flex items-center gap-2">
+                  <BsBook className="w-4 h-4" />
+                  <span>الدورات التعليمية</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/quiz" className="text-gray-300 hover:text-white transition-colors flex items-center gap-2">
+                  <BsGraphUp className="w-4 h-4" />
+                  <span>الإختبارات</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/profile" className="text-gray-300 hover:text-white transition-colors flex items-center gap-2">
+                  <FaCalculator className="w-4 h-4" />
+                  <span>حسابي</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Educational Stages */}
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold">المراحل الدراسية</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/Courses" className="text-gray-300 hover:text-white transition-colors">
+                  الصف الأول الثانوي
+                </Link>
+              </li>
+              <li>
+                <Link href="/Courses" className="text-gray-300 hover:text-white transition-colors">
+                  الصف الثاني الثانوي
+                </Link>
+              </li>
+              <li>
+                <Link href="/Courses" className="text-gray-300 hover:text-white transition-colors">
+                  الصف الثالث الثانوي
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold">تواصل معنا</h4>
+            <div className="space-y-2 text-gray-300">
+              <p className="flex items-center gap-2">
+                <span>رقم الهاتف:</span>
+                <a href="tel:+20123456789" className="hover:text-white transition-colors">
+                  +20 123 456 789
+                </a>
+              </p>
+              <p className="flex items-center gap-2">
+                <span>البريد الإلكتروني:</span>
+                <a href="mailto:info@hossammera.math" className="hover:text-white transition-colors">
+                  info@hossammera.math
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-800 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm mb-4 md:mb-0">
+              &copy; {new Date().getFullYear()} Hossam Mera MATH. جميع الحقوق محفوظة
+            </p>
+            <a
+              href="https://kerlos.site"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm"
+            >
+              <span>Developed by Kerlos Hany</span>
+              <svg
+                className="w-4 h-4 mr-2 rtl:ml-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;
