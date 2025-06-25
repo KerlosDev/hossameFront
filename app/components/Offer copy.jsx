@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FiClock, FiBookOpen, FiUsers, FiStar, FiArrowRight, FiArrowLeft, FiTag, FiZap } from 'react-icons/fi';
 import { FaCalculator, FaSquareRootAlt, FaInfinity, FaChartLine, FaPrint } from "react-icons/fa";
 import { MdFunctions } from "react-icons/md";
@@ -28,43 +28,19 @@ const offerData = {
         "وصول مدى الحياة",
         "شهادة إتمام معتمدة"
     ],
-    endDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+    endDate: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
     isLimited: true,
     spotsLeft: 23
 };
 
 const Offer = () => {
-    const [timeLeft, setTimeLeft] = useState({
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0
-    });
-
-    const calculateTimeLeft = () => {
-        const difference = +offerData.endDate - +new Date();
-
-        if (difference > 0) {
-            return {
-                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((difference / 1000 / 60) % 60),
-                seconds: Math.floor((difference / 1000) % 60)
-            };
-        }
-
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    // Static countdown values instead of dynamic calculation
+    const timeLeft = {
+        days: 2,
+        hours: 14,
+        minutes: 35,
+        seconds: 42
     };
-
-    useEffect(() => {
-        setTimeLeft(calculateTimeLeft());
-
-        const timer = setInterval(() => {
-            setTimeLeft(calculateTimeLeft());
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
 
     // Use the static offer data
     const offer = offerData;
@@ -311,7 +287,9 @@ const Offer = () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>                                                        {/* Dynamic Countdown Display */}
+                                        </div>
+
+                                        {/* Static Countdown Display */}
                                         <div className="relative max-w-3xl mx-auto">
                                             {/* Background glow */}
                                             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 
@@ -397,17 +375,21 @@ const Offer = () => {
                                                             </div>
                                                         );
                                                     })}
-                                                </div>                                                {/* Progress bar */}
+                                                </div>
+
+                                                {/* Progress bar */}
                                                 <div className="mt-4 sm:mt-8 relative h-1 sm:h-2 bg-gray-200/50 dark:bg-gray-700/50 rounded-full overflow-hidden">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 
                                                                   rounded-full shadow-lg"
                                                         style={{
-                                                            width: `${Math.max(10, ((timeLeft.days * 24 * 60 * 60 + timeLeft.hours * 60 * 60 + timeLeft.minutes * 60 + timeLeft.seconds) / (24 * 60 * 60)) * 100)}%`
+                                                            width: `${Math.max(10, ((timeLeft.days * 24 * 60 * 60 + timeLeft.hours * 60 * 60 + timeLeft.minutes * 60 + timeLeft.seconds) / (10 * 60)) * 100)}%`
                                                         }}
                                                     />
                                                 </div>
                                             </div>
-                                        </div>                                        {/* Dynamic Urgency Message */}
+                                        </div>
+
+                                        {/* Static Urgency Message */}
                                         <div className="mt-4 sm:mt-8 relative inline-block">
                                             <div className="absolute inset-0 bg-gradient-to-r from-red-500/30 to-orange-500/30 
                                                           rounded-xl sm:rounded-2xl blur-lg scale-110"></div>
@@ -420,14 +402,7 @@ const Offer = () => {
                                                     <div className="text-center">
                                                         <div className="text-sm sm:text-lg font-bold bg-gradient-to-r from-red-600 to-orange-600 
                                                                       bg-clip-text text-transparent font-arabicUI2">
-                                                            {timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0
-                                                                ? "انتهى العرض"
-                                                                : timeLeft.days === 0 && timeLeft.hours === 0
-                                                                    ? "العرض ينتهي خلال دقائق!"
-                                                                    : timeLeft.days === 0
-                                                                        ? "العرض ينتهي اليوم!"
-                                                                        : "عرض محدود الوقت"
-                                                            }
+                                                            عرض محدود الوقت
                                                         </div>
                                                         <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-arabicUI3">
                                                             احجز مكانك الآن

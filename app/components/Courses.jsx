@@ -1,15 +1,14 @@
 'use client'
 import "../globals.css";
 import React, { useEffect, useState, useMemo } from 'react'
-import { FaBookmark, FaPlay, FaAtom, FaFlask, FaMicroscope } from "react-icons/fa";
-import { GiMolecule, GiChemicalDrop } from "react-icons/gi";
-import { IoMdFlask } from "react-icons/io";
+import { FaBookmark, FaPlay, FaCalculator, FaChartLine } from "react-icons/fa";
+import { TbMathFunction, TbMathIntegral } from "react-icons/tb";
+import { PiMathOperationsFill } from "react-icons/pi";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AiFillStar } from "react-icons/ai";
 import { BsBook, BsGraphUp } from "react-icons/bs";
 import { FaBook } from "react-icons/fa6";
-import Cookies from "js-cookie";
 import { GiTakeMyMoney, GiCheckMark } from 'react-icons/gi';
 
 const Courses = () => {
@@ -96,7 +95,7 @@ const Courses = () => {
         {
             id: 'الصف الثالث الثانوي',
             name: 'الصف الثالث الثانوي',
-            icon: FaAtom,
+            icon: FaCalculator,
             gradient: 'from-amber-500 to-orange-600'
         }
     ], []);
@@ -106,25 +105,37 @@ const Courses = () => {
         return courses.filter(course => course.level === activeLevel);
     }; if (loading) {
         return (
-            <div dir="rtl" className="relative min-h-screen bg-gradient-to-br  
-                        from-blue-950 via-slate-900 to-slate-950 py-8 sm:py-12 px-2 sm:px-4 overflow-hidden">
-                {/* Background Elements */}
-                <div className="absolute inset-0 overflow-hidden opacity-50">
-                    <div className="absolute top-20 right-10 w-40 h-40 bg-blue-500/10 backdrop-blur-3xl rounded-full animate-float">
-                        <div className="w-full h-full animate-spin-slow"></div>
+            <div dir="rtl" className="relative min-h-screen py-8 sm:py-12 px-2 sm:px-4 overflow-hidden">
+                {/* Enhanced Background Elements - Same as main component */}
+                <div className="absolute inset-0 overflow-hidden">
+                    <div className="absolute top-20 right-10 w-40 h-40 bg-blue-500/10 backdrop-blur-3xl rounded-full 
+                                  flex items-center justify-center animate-float">
+                        <div className="w-16 h-16 bg-blue-500/20 rounded-full animate-pulse"></div>
                     </div>
-                    <div className="absolute top-40 left-20 w-48 h-48 bg-red-500/10 backdrop-blur-3xl rounded-full animate-float-delayed"></div>
-                    <div className="absolute left-10 bottom-10 w-48 h-48 bg-green-500/10 backdrop-blur-3xl rounded-full animate-float-delayed"></div>
+                    <div className="absolute top-40 left-20 w-48 h-48 bg-red-500/10 backdrop-blur-3xl rounded-full 
+                                  flex items-center justify-center animate-float-delayed">
+                        <div className="w-20 h-20 bg-red-500/20 rounded-full animate-pulse"></div>
+                    </div>
+                    <div className="absolute left-10 bottom-10 w-48 h-48 bg-green-500/10 backdrop-blur-3xl rounded-full 
+                                  flex items-center justify-center animate-float-delayed">
+                        <div className="w-20 h-20 bg-green-500/20 rounded-full animate-pulse"></div>
+                    </div>
+                    <div className="absolute bottom-20 right-1/4 w-32 h-32 bg-yellow-500/10 backdrop-blur-3xl rounded-full 
+                                  flex items-center justify-center animate-pulse">
+                        <div className="w-12 h-12 bg-yellow-500/20 rounded-full animate-spin"></div>
+                    </div>
+                    <div className="absolute inset-0 opacity-10 bg-repeat mix-blend-overlay"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto relative z-10">
                     {/* Header Section Skeleton */}
                     <div className="text-center mb-8 sm:mb-16">
-                        <div className="inline-flex items-center gap-2 sm:gap-4 px-4 sm:px-8 py-2 sm:py-4  bg-slate-800/30 backdrop-blur-xl rounded-2xl
-                                    border border-blue-500/20 mb-6 animate-pulse">
-                            <div className="h-10 w-32  bg-slate-700 rounded-lg"></div>
+                        <div className="inline-flex items-center gap-2 sm:gap-4 px-4 sm:px-8 py-2 sm:py-4 bg-white/30 dark:bg-slate-800/30 backdrop-blur-xl rounded-2xl
+                                      border border-blue-500/20 mb-6">
+                            <div className="h-8 sm:h-12 w-32 sm:w-48 bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300 dark:from-slate-600 dark:via-slate-700 dark:to-slate-600 rounded-lg animate-pulse"></div>
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/30 rounded-full animate-spin"></div>
                         </div>
-                        <div className="h-6 w-64 mx-auto bg-slate-700 rounded-lg animate-pulse mt-4"></div>
+                        <div className="h-5 sm:h-6 w-48 sm:w-80 mx-auto bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300 dark:from-slate-600 dark:via-slate-700 dark:to-slate-600 rounded-lg animate-pulse"></div>
                     </div>
 
                     {/* Level Selection Skeleton */}
@@ -132,7 +143,11 @@ const Courses = () => {
                         <div className="max-w-3xl mx-auto">
                             <div className="flex flex-wrap justify-center gap-3 p-2 bg-white/10 dark:bg-slate-800/10 backdrop-blur-xl rounded-2xl">
                                 {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="h-12 w-32 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse"></div>
+                                    <div key={i} className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/50 dark:bg-slate-800/50">
+                                        <div className="w-5 h-5 bg-gradient-to-r from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 rounded animate-pulse"></div>
+                                        <div className={`h-4 bg-gradient-to-r from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 rounded animate-pulse ${i === 1 ? 'w-20' : i === 2 ? 'w-32' : i === 3 ? 'w-36' : 'w-40'
+                                            }`}></div>
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -141,39 +156,120 @@ const Courses = () => {
                     {/* Course Grid Skeleton */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 rtl-grid">
                         {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="animate-pulse bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-xl overflow-hidden">
-                                {/* Image Skeleton */}
-                                <div className="h-48 bg-slate-200 dark:bg-slate-700"></div>
+                            <div key={i} className="group relative bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl
+                                          rounded-xl sm:rounded-2xl overflow-hidden border border-blue-500/20 
+                                          transform hover:scale-105 transition-all duration-500">
 
-                                {/* Content Skeleton */}
-                                <div className="p-4 space-y-4">
-                                    <div className="h-8 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                                {/* Price Ribbon Skeleton */}
+                                <div className="absolute -left-12 top-4 -rotate-45 z-20 py-1 w-40 text-center
+                                              bg-gradient-to-r from-yellow-400/60 to-yellow-500/60 animate-pulse">
+                                    <div className="h-4 w-16 bg-white/40 rounded mx-auto"></div>
+                                </div>
+
+                                {/* Image Section Skeleton */}
+                                <div className="relative h-48 overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                                    <div className="w-full h-full bg-gradient-to-br from-slate-300 via-slate-200 to-slate-300 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 animate-pulse"></div>
+
+                                    {/* Level Badge Skeleton */}
+                                    <div className="absolute bottom-4 left-4 z-20">
+                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/20 backdrop-blur-md border border-blue-400/30">
+                                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                            <div className="h-3 w-24 bg-blue-300/60 rounded animate-pulse"></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Top Badge Skeleton */}
+                                    <div className="absolute top-4 right-4 z-20 px-4 py-1.5 rounded-full bg-gradient-to-r from-green-500/60 to-emerald-600/60">
+                                        <div className="h-3 w-20 bg-white/40 rounded animate-pulse"></div>
+                                    </div>
+
+                                    {/* Math Icon Skeleton */}
+                                    <div className="absolute top-4 left-4">
+                                        <div className="w-8 h-8 bg-blue-500/30 rounded animate-bounce"></div>
+                                    </div>
+                                </div>
+
+                                {/* Content Section Skeleton */}
+                                <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                                    {/* Course Title Skeleton */}
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-6 sm:h-8 flex-1 bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300 dark:from-slate-600 dark:via-slate-700 dark:to-slate-600 rounded-lg animate-pulse"></div>
+                                        <div className="w-6 h-6 bg-blue-500/30 rounded animate-pulse"></div>
+                                    </div>
+
+                                    {/* Description Skeleton */}
                                     <div className="space-y-2">
-                                        <div className="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded"></div>
-                                        <div className="h-4 w-5/6 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                        <div className="h-4 w-full bg-gradient-to-r from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 rounded animate-pulse"></div>
+                                        <div className="h-4 w-5/6 bg-gradient-to-r from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 rounded animate-pulse"></div>
+                                        <div className="h-4 w-3/4 bg-gradient-to-r from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 rounded animate-pulse"></div>
                                     </div>
 
                                     {/* Features Grid Skeleton */}
                                     <div className="grid grid-cols-3 gap-2 my-4">
                                         {[1, 2, 3].map((j) => (
-                                            <div key={j} className="h-16 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                                            <div key={j} className="flex flex-col items-center p-2 bg-blue-500/5 rounded-lg">
+                                                <div className={`w-5 h-5 mb-1 rounded animate-pulse ${j === 1 ? 'bg-blue-500/40' : j === 2 ? 'bg-red-500/40' : 'bg-yellow-500/40'
+                                                    }`}></div>
+                                                <div className={`h-2 rounded animate-pulse ${j === 1 ? 'w-12 bg-blue-500/30' : j === 2 ? 'w-16 bg-red-500/30' : 'w-10 bg-yellow-500/30'
+                                                    }`}></div>
+                                            </div>
                                         ))}
                                     </div>
 
                                     {/* Timeline Skeleton */}
-                                    <div className="space-y-2">
-                                        <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
-                                        <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                                    <div className="flex flex-col space-y-2">
+                                        {[1, 2].map((j) => (
+                                            <div key={j} className={`flex items-center gap-2 py-1.5 px-3 rounded-lg border-r-2 ${j === 1 ? 'bg-gradient-to-r from-blue-50/80 to-transparent dark:from-blue-900/20 border-blue-500/50'
+                                                    : 'bg-gradient-to-r from-emerald-50/80 to-transparent dark:from-emerald-900/20 border-emerald-500/50'
+                                                }`}>
+                                                <div className={`w-4 h-4 rounded animate-pulse ${j === 1 ? 'bg-blue-500/40' : 'bg-emerald-500/40'
+                                                    }`}></div>
+                                                <div className={`h-3 w-24 rounded animate-pulse ${j === 1 ? 'bg-blue-400/30' : 'bg-emerald-400/30'
+                                                    }`}></div>
+                                                <div className={`h-3 w-20 rounded animate-pulse ml-auto ${j === 1 ? 'bg-blue-500/40' : 'bg-emerald-500/40'
+                                                    }`}></div>
+                                            </div>
+                                        ))}
                                     </div>
 
                                     {/* Buttons Skeleton */}
-                                    <div className="flex gap-3 mt-6">
-                                        <div className="h-12 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
-                                        <div className="h-12 w-1/3 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                                    <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                                        {/* View Course Button Skeleton */}
+                                        <div className="flex-[2] relative">
+                                            <div className="h-12 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 dark:from-slate-800 dark:to-slate-900 
+                                                          border-2 border-blue-400/30 shadow-[6px_6px_12px_rgba(0,0,0,0.15),-6px_-6px_12px_rgba(255,255,255,0.8)]
+                                                          dark:shadow-[6px_6px_12px_rgba(0,0,0,0.3),-6px_-6px_12px_rgba(30,41,59,0.5)]">
+                                                <div className="flex items-center justify-center gap-3 h-full px-6">
+                                                    <div className="h-4 w-24 bg-slate-400/40 dark:bg-slate-500/40 rounded animate-pulse"></div>
+                                                    <div className="w-3 h-3 bg-blue-500/40 rounded animate-pulse"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Subscribe Button Skeleton */}
+                                        <div className="flex-1 relative">
+                                            <div className="h-12 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-slate-800 dark:to-slate-900 
+                                                          border-2 border-emerald-400/30 shadow-[6px_6px_12px_rgba(0,0,0,0.15),-6px_-6px_12px_rgba(255,255,255,0.8)]
+                                                          dark:shadow-[6px_6px_12px_rgba(0,0,0,0.3),-6px_-6px_12px_rgba(30,41,59,0.5)]">
+                                                <div className="flex items-center justify-center gap-3 h-full px-6">
+                                                    <div className="h-4 w-16 bg-slate-400/40 dark:bg-slate-500/40 rounded animate-pulse"></div>
+                                                    <div className="w-4 h-4 bg-emerald-500/40 rounded animate-pulse"></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
+                    </div>
+
+                    {/* Loading Text */}
+                    <div className="text-center mt-12">
+                        <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 dark:bg-slate-800/20 backdrop-blur-xl rounded-2xl">
+                            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-lg font-arabicUI2 text-slate-700 dark:text-slate-300">جاري تحميل الكورسات...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -190,11 +286,11 @@ const Courses = () => {
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 right-10 w-40 h-40 bg-blue-500/10 backdrop-blur-3xl rounded-full 
                               flex items-center justify-center animate-float">
-                    <GiMolecule className="text-6xl text-blue-500/50 animate-spin-slow" />
+                    <TbMathFunction className="text-6xl text-blue-500/50 animate-spin-slow" />
                 </div>
                 <div className="absolute top-40 left-20 w-48 h-48 bg-red-500/10 backdrop-blur-3xl rounded-full 
                               flex items-center justify-center animate-float-delayed">
-                    <FaFlask className="text-7xl text-red-500/50 animate-bounce" />
+                    <FaCalculator className="text-7xl text-red-500/50 animate-bounce" />
                 </div>
                 <div className="absolute left-10 bottom-10 w-48 h-48 bg-green-500/10 backdrop-blur-3xl rounded-full 
                               flex items-center justify-center animate-float-delayed">
@@ -203,9 +299,9 @@ const Courses = () => {
                 {/* New decorative elements */}
                 <div className="absolute bottom-20 right-1/4 w-32 h-32 bg-yellow-500/10 backdrop-blur-3xl rounded-full 
                               flex items-center justify-center animate-pulse">
-                    <FaAtom className="text-5xl text-yellow-500/50 animate-spin" />
+                    <TbMathIntegral className="text-5xl text-yellow-500/50 animate-spin" />
                 </div>
-                <div className="absolute inset-0 opacity-10   bg-repeat mix-blend-overlay"></div>
+                <div className="absolute inset-0 opacity-10 bg-repeat mix-blend-overlay"></div>
             </div>
 
             <div className="max-w-7xl mx-auto relative z-10">
@@ -214,10 +310,10 @@ const Courses = () => {
                     <div className="inline-flex items-center gap-2 sm:gap-4 px-4 sm:px-8 py-2 sm:py-4 bg-white/30 dark:bg-slate-800/30 backdrop-blur-xl rounded-2xl
                                   border border-blue-500/20 mb-6">
                         <h1 className="text-3xl sm:text-5xl font-arabicUI2 text-slate-800 dark:text-white">الكورسات</h1>
-                        <FaAtom className="text-3xl sm:text-4xl text-blue-500 animate-spin-slow" />
+                        <FaCalculator className="text-3xl sm:text-4xl text-blue-500 animate-spin-slow" />
                     </div>
                     <p className="text-base sm:text-xl text-slate-600 dark:text-slate-300 font-arabicUI3 mt-4">
-                        اختر الكورس المناسب وابدأ رحلة تعلم الفيزياء
+                        اختر الكورس المناسب وابدأ رحلة تعلم الرياضيات
                     </p>
                 </div>
                 {/* Level Selection Tabs */}
@@ -319,9 +415,9 @@ const Courses = () => {
                                 </div>
                                 {/* Course Title - Overlay */}
                                 <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-blue-500/10 to-transparent" />
-                                {/* Physics Icon */}
+                                {/* Math Icon */}
                                 <div className="absolute top-4 left-4">
-                                    <FaAtom className="text-3xl text-blue-500 animate-bounce" />
+                                    <FaCalculator className="text-3xl text-blue-500 animate-bounce" />
                                 </div>
                             </div>
                             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
@@ -330,7 +426,7 @@ const Courses = () => {
                                     <h2 className="text-xl sm:text-2xl font-arabicUI2 text-slate-800 dark:text-white group-hover:text-blue-500
                                                  transition-colors mb-4">
                                         {item?.name}
-                                        <FaAtom className="inline-block mr-2 text-blue-500" />
+                                        <FaCalculator className="inline-block mr-2 text-blue-500" />
                                     </h2>
                                 </Link>
                                 {/* Course Description */}
@@ -338,18 +434,18 @@ const Courses = () => {
                                     {item?.description}
                                 </p>
                                 {/* Course Features */}
-                                <div className="grid grid-cols-3 gap-2 my-4">
+                                <div className="grid grid-cols-3 gap-2 font-arabicUI3 my-4">
                                     <div className="flex flex-col items-center p-2 bg-blue-500/5 rounded-lg">
-                                        <FaAtom className="text-blue-500 mb-1" />
-                                        <span className="text-xs text-slate-600 dark:text-slate-300">تجارب عملية</span>
+                                        <TbMathFunction className="text-blue-500 mb-1" />
+                                        <span className="text-xs text-slate-600 dark:text-slate-300">معادلات</span>
                                     </div>
                                     <div className="flex flex-col items-center p-2 bg-red-500/5 rounded-lg">
-                                        <FaFlask className="text-red-500 mb-1" />
-                                        <span className="text-xs text-slate-600 dark:text-slate-300">شرح تفاعلي</span>
+                                        <FaChartLine className="text-red-500 mb-1" />
+                                        <span className="text-xs text-slate-600 dark:text-slate-300">رسوم بيانية</span>
                                     </div>
                                     <div className="flex flex-col items-center p-2 bg-yellow-500/5 rounded-lg">
-                                        <FaMicroscope className="text-yellow-500 mb-1" />
-                                        <span className="text-xs text-slate-600 dark:text-slate-300">اختبارات</span>
+                                        <PiMathOperationsFill className="text-yellow-500 mb-1" />
+                                        <span className="text-xs text-slate-600 dark:text-slate-300">تمارين</span>
                                     </div>
                                 </div>
                                 {/* Course Stats */}
