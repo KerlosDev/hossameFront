@@ -63,12 +63,10 @@ export default function StudentsList() {
                 levelDistribution: []
             });
         }
-    };
-
-    // Effect to fetch analytics data
+    };    // Effect to fetch initial analytics data
     useEffect(() => {
         fetchAnalytics();
-    }, [students]); // Refresh when students data changes
+    }, []); // Only fetch once on component mount
 
     // Add new state for sorting
     const [sortConfig, setSortConfig] = useState({
@@ -165,13 +163,11 @@ export default function StudentsList() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
-            if (data.status === 'success') {
-                // Refresh both the students list and analytics data
-                await Promise.all([
-                    fetchStudents(),
-                    fetchAnalytics()
-                ]);
+            const data = await response.json(); if (data.status === 'success') {
+                // First update the students list
+                await fetchStudents();
+                // Then update analytics since the ban status changed
+                await fetchAnalytics();
 
                 setShowBanConfirm(false);
                 setBanReason('');
@@ -464,7 +460,7 @@ export default function StudentsList() {
 
     // Table View Component
     const TableView = () => (
-        <div className="overflow-x-auto font-arabicUI3 rounded-2xl bg-white/5 border border-white/10">
+        <div className="overflow-x-auto font-arabicUI3 text-xs rounded-2xl bg-white/5 border border-white/10">
             <table className="w-full">
                 <thead>
                     <tr className="border-b border-white/10">

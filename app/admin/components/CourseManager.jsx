@@ -566,12 +566,7 @@ const CourseManager = () => {
                             isCompleted={currentStep > 2}
                         />
                         <div className="w-12 h-0.5 bg-gray-700" />
-                        <StepIndicator
-                            step={3}
-                            label="الإعدادات والامتحانات"
-                            isActive={currentStep === 3}
-                            isCompleted={currentStep > 3}
-                        />
+                        
                     </div>
 
                     {/* Mobile Step Indicators */}

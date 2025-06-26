@@ -8,6 +8,15 @@ import Cookies from "js-cookie";
 import { useRouter } from 'next/navigation';
 import sessionManager from '../utils/sessionManager';
 
+// All Egyptian governorates
+const egyptGovernments = [
+    "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "البحر الأحمر", "البحيرة",
+    "الفيوم", "الغربية", "الإسماعيلية", "المنوفية", "المنيا", "القليوبية",
+    "الوادي الجديد", "السويس", "أسوان", "أسيوط", "بني سويف", "بورسعيد",
+    "دمياط", "الشرقية", "جنوب سيناء", "كفر الشيخ", "مطروح", "الأقصر",
+    "قنا", "شمال سيناء", "سوهاج"
+];
+
 const Page = () => {
     const [formData, setFormData] = useState({
         name: '',
@@ -20,22 +29,159 @@ const Page = () => {
         password: '',
         confirmPassword: ''
     });
-    const router = useRouter();    // ⛔ منع المستخدم اللي داخل فعلاً من الوصول لصفحة اللوجين
+    const [errors, setErrors] = useState({});
+    const [stepErrors, setStepErrors] = useState({
+        step1: false,
+        step2: false,
+        step3: false
+    }); const router = useRouter();    // ⛔ منع المستخدم اللي داخل فعلاً من الوصول لصفحة اللوجين
+    const [loading, setLoading] = useState(false);
+    const [step, setStep] = useState(1); // For multi-step form
+
     useEffect(() => {
         if (sessionManager.isAuthenticated()) {
             router.replace("/");
         }
-    }, []); const [loading, setLoading] = useState(false);
-    const [step, setStep] = useState(1); // For multi-step form
-    const [errors, setErrors] = useState({});
+    }, []);
+
+    const validateField = (name, value) => {
+        let error = '';
+
+        switch (name) {
+            case 'email':
+                if (!value) {
+                    error = 'البريد الإلكتروني مطلوب';
+                } else if (!/^[\w-\.]+@gmail\.com$/.test(value)) {
+                    error = 'يجب استخدام بريد Gmail فقط';
+                }
+                break;
+
+            case 'phoneNumber':
+            case 'parentPhone':
+                if (!value) {
+                    error = 'رقم الهاتف مطلوب';
+                } else if (!/^01[0125][0-9]{8}$/.test(value)) {
+                    error = 'رقم الهاتف يجب أن يكون 11 رقم ويبدأ ب 01';
+                }
+                break;
+
+            case 'password':
+                if (!value) {
+                    error = 'كلمة المرور مطلوبة';
+                } else if (value.length < 8) {
+                    error = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+                } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(value)) {
+                    error = 'كلمة المرور يجب أن تحتوي على أحرف وأرقام';
+                }
+                break;
+
+            case 'confirmPassword':
+                if (!value) {
+                    error = 'تأكيد كلمة المرور مطلوب';
+                } else if (value !== formData.password) {
+                    error = 'كلمة المرور وتأكيدها غير متطابقين';
+                }
+                break;
+        }
+
+        return error;
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Instant validation
+        const error = validateField(name, value);
+        setErrors(prev => ({
+            ...prev,
+            [name]: error
+        }));
+
+        // Special validation for parent phone being different from student phone
+        if (name === 'parentPhone' && value === formData.phoneNumber) {
+            setErrors(prev => ({
+                ...prev,
+                parentPhone: 'رقم هاتف ولي الأمر يجب أن يكون مختلف عن رقم هاتف الطالب'
+            }));
+        } else if (name === 'phoneNumber' && value === formData.parentPhone) {
+            setErrors(prev => ({
+                ...prev,
+                phoneNumber: 'رقم هاتف الطالب يجب أن يكون مختلف عن رقم هاتف ولي الأمر'
+            }));
+        }
+    };
+
+    const validateStep = (stepNumber) => {
+        let isValid = true;
+        const newErrors = {};
+
+        if (stepNumber === 1) {
+            if (!formData.name || formData.name.length < 3) {
+                newErrors.name = 'الاسم يجب أن يكون 3 أحرف على الأقل';
+                isValid = false;
+            }
+            if (!formData.email || !/^[\w-\.]+@gmail\.com$/.test(formData.email)) {
+                newErrors.email = 'يجب استخدام بريد Gmail فقط';
+                isValid = false;
+            }
+            if (!formData.gender) {
+                newErrors.gender = 'النوع مطلوب';
+                isValid = false;
+            }
+        } if (stepNumber === 2) {
+            if (!formData.phoneNumber || !/^01[0125][0-9]{8}$/.test(formData.phoneNumber)) {
+                newErrors.phoneNumber = 'رقم الهاتف يجب أن يكون 11 رقم ويبدأ ب 01';
+                isValid = false;
+            }
+            if (!formData.parentPhone || !/^01[0125][0-9]{8}$/.test(formData.parentPhone)) {
+                newErrors.parentPhone = 'رقم هاتف ولي الأمر يجب أن يكون 11 رقم ويبدأ ب 01';
+                isValid = false;
+            }
+            if (formData.phoneNumber === formData.parentPhone) {
+                newErrors.parentPhone = 'رقم هاتف ولي الأمر يجب أن يكون مختلف عن رقم هاتف الطالب';
+                isValid = false;
+            }
+            if (!formData.level) {
+                newErrors.level = 'المرحلة مطلوبة';
+                isValid = false;
+            }
+            if (!formData.government) {
+                newErrors.government = 'المحافظة مطلوبة';
+                isValid = false;
+            }
+        }
+
+        if (stepNumber === 3) {
+            if (!formData.password) {
+                newErrors.password = 'كلمة المرور مطلوبة';
+                isValid = false;
+            } else if (formData.password.length < 8) {
+                newErrors.password = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+                isValid = false;
+            } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(formData.password)) {
+                newErrors.password = 'كلمة المرور يجب أن تحتوي على أحرف وأرقام';
+                isValid = false;
+            }
+
+            if (!formData.confirmPassword) {
+                newErrors.confirmPassword = 'تأكيد كلمة المرور مطلوب';
+                isValid = false;
+            } else if (formData.password !== formData.confirmPassword) {
+                newErrors.confirmPassword = 'كلمة المرور وتأكيدها غير متطابقين';
+                isValid = false;
+            }
+        }
+
+        setErrors(newErrors);
+        setStepErrors(prev => ({ ...prev, [`step${stepNumber}`]: !isValid }));
+        return isValid;
     };
 
     const nextStep = () => {
-        setStep(step + 1);
+        if (validateStep(step)) {
+            setStep(step + 1);
+        }
     };
 
     const prevStep = () => {
@@ -110,15 +256,15 @@ const Page = () => {
         }
 
         return newErrors;
-    };
-
-    const handleSubmit = async (e) => {
+    }; const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const errors = validateForm();
-        if (Object.keys(errors).length > 0) {
-            // هنا ممكن تضيف كود لعرض الأخطاء للمستخدم
-            // زي استخدام useState لتخزين الأخطاء وعرضها جنب الحقول
+        // Validate all fields before submission
+        const step1Valid = validateStep(1);
+        const step2Valid = validateStep(2);
+        const step3Valid = validateStep(3);
+
+        if (!step1Valid || !step2Valid || !step3Valid) {
             alert('من فضلك صحح الأخطاء في النموذج');
             return;
         }
@@ -353,33 +499,37 @@ const Page = () => {
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                             <FaPhoneAlt className="text-blue-300 group-focus-within:text-white transition-colors" />
-                                        </div>
-                                        <input
+                                        </div>                                        <input
                                             type="tel"
                                             name="phoneNumber"
                                             value={formData.phoneNumber}
                                             dir='rtl'
                                             onChange={handleChange}
                                             placeholder="رقم الهاتف"
-                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            className={`pr-10 w-full py-3 bg-white/10 border ${errors.phoneNumber ? 'border-red-400' : 'border-white/20'} rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all`}
                                             required
                                         />
+                                        {errors.phoneNumber && (
+                                            <p className="mt-1 text-red-400 text-sm font-arabicUI2">{errors.phoneNumber}</p>
+                                        )}
                                     </div>
 
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                             <FaUsers className="text-blue-300 group-focus-within:text-white transition-colors" />
-                                        </div>
-                                        <input
+                                        </div>                                        <input
                                             type="tel"
                                             name="parentPhone"
                                             value={formData.parentPhone}
                                             onChange={handleChange}
                                             dir='rtl'
                                             placeholder="رقم هاتف ولي الأمر"
-                                            className="pr-10 w-full py-3 bg-white/10 border border-white/20 rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all"
+                                            className={`pr-10 w-full py-3 bg-white/10 border ${errors.parentPhone ? 'border-red-400' : 'border-white/20'} rounded-xl placeholder-white/50 text-white font-arabicUI3 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all`}
                                             required
                                         />
+                                        {errors.parentPhone && (
+                                            <p className="mt-1 text-red-400 text-sm font-arabicUI2">{errors.parentPhone}</p>
+                                        )}
                                     </div>
 
                                     <div className="relative group">
@@ -537,6 +687,8 @@ const Page = () => {
             </div>
         </div>
     );
-};
-
+}
 export default Page;
+
+
+    

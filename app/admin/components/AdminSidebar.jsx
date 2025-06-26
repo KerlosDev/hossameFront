@@ -64,14 +64,9 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
             icon: <FileText size={20} />,
             tab: 'books'
         },
+        
         {
             id: 10,
-            label: "الإعدادات",
-            icon: <SettingsIcon size={20} />,
-            tab: 'settings'
-        },
-        {
-            id: 11,
             label: "إدارة الإشعارات",
             icon: <Bell size={20} />,
             tab: 'notifications'

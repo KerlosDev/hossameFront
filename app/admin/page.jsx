@@ -3,28 +3,23 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import axios from 'axios';
 import { Users, Book, BarChart2, CreditCard, CheckCircle, AlertTriangle } from 'lucide-react';
-import { FaAtom } from "react-icons/fa";
-import { GiMolecule } from "react-icons/gi";
-import { IoMdFlask } from "react-icons/io";
+import { FaSquareRootAlt, FaPrint, FaInfinity } from "react-icons/fa";
 import AdminSidebar from './components/AdminSidebar';
 import DashboardStats from './components/DashboardStats';
 import StudentsList from './components/StudentsList';
 import PaymentsList from './components/PaymentsList';
-import SettingsPanel from './components/SettingsPanel';
 import ExamAnalysis from './components/ExamAnalysis';
 import CourseManager from './components/CourseManager';
 import ExamManage from './components/ExamManage';
 import StudentFollowup from '../components/StudentFollowup';
 import OffersManagement from './components/OffersManagement';
 import NotFound from '../not-found';
-import BooksManager from './components/BooksManager';
 import AdminBooks from '../components/AdminBooks';
 import NotificationManagement from './components/NotificationManagement';
 
 
-export default function ChemistryLMSAdmin() {
+export default function MathLMSAdmin() {
     const [isAdmin, setIsAdmin] = useState(null); // To track admin status
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -38,7 +33,7 @@ export default function ChemistryLMSAdmin() {
     // Admin profile data
     const [adminData, setAdminData] = useState({
         name: "احمد السيد",
-        email: "admin@chemistry-lms.com",
+        email: "admin@math-lms.com",
         phoneNumber: "0123456789",
         role: "مسؤول النظام",
         joinedDate: "2023-05-15T00:00:00.000Z",
@@ -114,18 +109,18 @@ export default function ChemistryLMSAdmin() {
         setShowLogoutConfirm(false);
     };
 
-    // Chemistry background component
-    const ChemBackground = () => (
+    // Math background component
+    const MathBackground = () => (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
             <div className="absolute top-20 left-20 text-white/10 text-7xl">
-                <FaAtom className="animate-float" />
+                <FaPrint className="animate-float" />
             </div>
             <div className="absolute bottom-40 right-20 text-white/10 text-8xl">
-                <GiMolecule className="animate-spin-slow" />
+                <FaInfinity className="animate-spin-slow" />
             </div>
             <div className="absolute top-1/2 left-1/3 text-white/10 text-6xl">
-                <IoMdFlask className="animate-bounce-slow" />
+                <FaSquareRootAlt className="animate-bounce-slow" />
             </div>
             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-pulse"></div>
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full filter blur-3xl animate-pulse-delayed"></div>
@@ -146,8 +141,8 @@ export default function ChemistryLMSAdmin() {
 
     return (
         <div className="min-h-screen p-8 relative">
-            {/* Chemistry-themed animated background */}
-            <ChemBackground />
+            {/* Math-themed animated background */}
+            <MathBackground />
 
             <div className="relative z-10">
             
@@ -186,9 +181,7 @@ export default function ChemistryLMSAdmin() {
                             <PaymentsList />
                         )}
 
-                        {activeTab === 'settings' && (
-                            <SettingsPanel />
-                        )}
+                        
                         {activeTab === 'notifications' && (
                             <NotificationManagement />
                         )}
