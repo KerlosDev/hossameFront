@@ -134,7 +134,7 @@ const Hero = () => {
                                 <div className="mb-6">
                                     <h1 className="text-3xl sm:text-4xl lg:text-5xl font-arabicUI3 
                                                  text-slate-800 dark:text-slate-200 mb-2">
-                                        أهلاً وسهلاً بدفعة{' '}
+                                        أهلاً بدفعة{' '}
                                         <span className="inline-block text-5xl sm:text-6xl lg:text-7xl text-red-500 
                                                        font-bold transform hover:scale-110 transition-transform duration-300
                                                        bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
@@ -145,8 +145,7 @@ const Hero = () => {
                                         <FaChartLine className="text-3xl text-blue-500 animate-pulse" />
                                         <h3 className="text-xl sm:text-2xl lg:text-3xl font-arabicUI3 
                                                      text-slate-600 dark:text-slate-300">
-                                            منهج الرياضيات المتطور والحديث
-                                        </h3>
+شرح الرياضيات بالنظام الجديد                                        </h3>
                                         <MdVideoLibrary className="text-3xl text-green-500 animate-bounce" />
                                     </div>
                                 </div>
@@ -164,9 +163,7 @@ const Hero = () => {
                                             <span className="text-sm font-arabicUI3 text-blue-700 dark:text-blue-300 font-semibold">
                                                 حلول تفاعلية متقدمة
                                             </span>
-                                            <span className="text-xs text-slate-600 dark:text-slate-400">
-                                                أساليب حديثة ومبتكرة
-                                            </span>
+                                             
                                         </div>
                                     </div>
 
@@ -181,9 +178,7 @@ const Hero = () => {
                                             <span className="text-sm font-arabicUI3 text-red-700 dark:text-red-300 font-semibold">
                                                 شرح مبسط وواضح
                                             </span>
-                                            <span className="text-xs text-slate-600 dark:text-slate-400">
-                                                فهم عميق للمفاهيم
-                                            </span>
+                                             
                                         </div>
                                     </div>
 
@@ -199,9 +194,7 @@ const Hero = () => {
                                             <span className="text-sm font-arabicUI3 text-green-700 dark:text-green-300 font-semibold">
                                                 أمثلة متنوعة شاملة
                                             </span>
-                                            <span className="text-xs text-slate-600 dark:text-slate-400">
-                                                تطبيقات عملية متعددة
-                                            </span>
+                                             
                                         </div>
                                     </div>
                                 </div>
