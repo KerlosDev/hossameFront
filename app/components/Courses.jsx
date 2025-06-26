@@ -404,15 +404,7 @@ const Courses = () => {
                                         {item.level}
                                     </div>
                                 </div>
-                                {/* Price Tag - Floating Style */}
-                                <div className={`absolute top-4 right-4 z-20 px-4 py-1.5 rounded-full
-                                ${item.isFree ?
-                                        'bg-gradient-to-r from-green-500 to-emerald-600 text-white' :
-                                        'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-800'}
-                                font-arabicUI2 text-sm backdrop-blur-md shadow-lg
-                                transform group-hover:scale-105 transition-transform duration-300`}>
-                                    المراجعة النهائية
-                                </div>
+                               
                                 {/* Course Title - Overlay */}
                                 <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-blue-500/10 to-transparent" />
                                 {/* Math Icon */}

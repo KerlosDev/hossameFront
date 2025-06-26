@@ -3,7 +3,7 @@ import { AlertCircle, Clock } from 'lucide-react';
 
 export default function CountdownTimer() {
   // Target date: June 8, 2025
-  const targetDate = new Date('2025-06-08T00:00:00');
+  const targetDate = new Date('2026-06-08T00:00:00');
   
   // State for countdown values
   const [timeLeft, setTimeLeft] = useState({

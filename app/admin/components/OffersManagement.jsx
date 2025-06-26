@@ -5,8 +5,37 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
+
+// Add courses state and fetch function
+const useOfferManagement = () => {
+    const [courses, setCourses] = useState([]); const fetchCourses = async () => {
+        try {
+            const token = Cookies.get('token');
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/course`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCourses(data.courses || data);
+            }
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCourses();
+    }, []);
+
+    return { courses };
+};
+
 // Extract OfferModal outside main component
-const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formData, onFormChange, onNextStep, onPrevStep, formErrors, handleAddFeature, handleRemoveFeature, handleFeatureChange }) => (
+const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formData, onFormChange, onNextStep, onPrevStep, formErrors, handleAddFeature, handleRemoveFeature, handleFeatureChange, courses, onCourseSelect }) => (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]">
         <div className="min-h-screen px-4 text-center">
             {/* This element is to trick the browser into centering the modal contents. */}
@@ -118,7 +147,58 @@ const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formDa
                                 )}                                    {currentStep === 2 && (
                                     // Step 2 content
                                     <div className="space-y-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-4">
+                                            <label className="block text-white/70 text-sm">اختر الكورسات المتضمنة في العرض</label>
+                                            <div className="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto">
+                                                {courses?.map((course) => (
+                                                    <div
+                                                        key={course._id}
+                                                        className={`p-4 rounded-xl border ${formData.courseLinks.includes(course._id)
+                                                            ? 'border-blue-500 bg-blue-500/10'
+                                                            : 'border-white/10 bg-white/5'
+                                                            } cursor-pointer transition-all hover:border-blue-500/50`}
+                                                        onClick={() => onCourseSelect(course._id)}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2 rounded-lg bg-white/10">
+                                                                <Book className="text-white" size={20} />
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <h4 className="text-white font-medium">{course.name}</h4>
+                                                                <p className="text-gray-400 text-sm">{course.description}</p>
+                                                                {course.price && (
+                                                                    <p className="text-blue-400 text-sm mt-1">
+                                                                        السعر: {course.price} جنيه
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            <div className={`p-2 rounded-lg ${formData.courseLinks.includes(course._id)
+                                                                ? 'bg-blue-500 text-white'
+                                                                : 'bg-white/10 text-gray-400'
+                                                                }`}>
+                                                                {formData.courseLinks.includes(course._id) ? (
+                                                                    <Check size={16} />
+                                                                ) : (
+                                                                    <Plus size={16} />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {formErrors.courseLinks && (
+                                                <p className="text-red-500 text-sm">{formErrors.courseLinks}</p>
+                                            )}
+                                        </div>
+
+                                        <div className="bg-indigo-500/10 rounded-xl p-4 border border-indigo-500/20">
+                                            <p className="text-white/70 text-sm">الكورسات المحددة:</p>
+                                            <p className="text-2xl font-bold text-indigo-400">
+                                                {formData.courseLinks.length} كورس
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                                             <div className="space-y-4">
                                                 <label className="block text-white/70 text-sm">السعر قبل الخصم</label>
                                                 <div className="relative">
@@ -380,6 +460,7 @@ const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formDa
 ));
 
 const OffersManagement = () => {
+    const { courses } = useOfferManagement();
     const [offers, setOffers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -405,10 +486,11 @@ const OffersManagement = () => {
         isLimited: false,
         spotsLeft: '',
         stage: 'DRAFT',
-        section: 'FIRST_SEC'
+        section: 'FIRST_SEC',
+        courseLinks: [],
     }); const steps = [
-        { title: 'معلومات أساسية', icon: <Flag size={20} /> },
-        { title: 'التسعير والإحصائيات', icon: <DollarSign size={20} /> },
+        { title: 'معلومات العرض الأساسية', icon: Tag },
+        { title: 'اختيار الكورسات', icon: Book },
         { title: 'المميزات', icon: <Star size={20} /> },
         { title: 'إعدادات العرض', icon: <Star size={20} /> }
     ];
@@ -562,7 +644,9 @@ const OffersManagement = () => {
             endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             isLimited: false,
             spotsLeft: '',
-            stage: 'DRAFT'
+            stage: 'DRAFT',
+            section: 'FIRST_SEC',
+            courseLinks: [],
         });
     };
 
@@ -646,6 +730,9 @@ const OffersManagement = () => {
                 if (!formData.rating || formData.rating < 0 || formData.rating > 5) {
                     errors.rating = 'التقييم يجب أن يكون بين 0 و 5';
                 }
+                if (formData.courseLinks.length === 0) {
+                    errors.courseLinks = 'يجب اختيار كورس واحد على الأقل';
+                }
                 break;
             case 3:
                 if (!formData.features || formData.features.length === 0) {
@@ -673,254 +760,223 @@ const OffersManagement = () => {
         setShowEditModal(true);
     }, []);
 
-    return (
-        <div className="p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-white/10 shadow-2xl">
-            {/* Header Section */}
-            <div className="flex justify-between items-center mb-12 bg-gradient-to-r from-gray-800/80 to-gray-900/90 p-4 rounded-xl border border-white/10">
-                <h2 className="text-2xl font-bold text-white font-arabicUI3">إدارة العروض</h2>
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300"
-                >
-                    <Plus className="stroke-2" /> إضافة عرض جديد
-                </button>
-            </div>
+    const handleCourseSelect = (courseId) => {
+        setFormData(prev => {
+            const courseLinks = prev.courseLinks.includes(courseId)
+                ? prev.courseLinks.filter(id => id !== courseId)
+                : [...prev.courseLinks, courseId];
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {[{
-                    label: 'إجمالي العروض',
-                    value: offers.length,
-                    icon: Tag,
-                    color: 'from-blue-600/20 to-blue-400/20',
-                    iconColor: 'text-blue-400',
-                    borderColor: 'border-blue-500/20'
-                },
-                {
-                    label: 'العروض المنشورة',
-                    value: offers.filter(o => o.stage === 'PUBLISHED').length,
-                    icon: Check,
-                    color: 'from-green-600/20 to-green-400/20',
-                    iconColor: 'text-green-400',
-                    borderColor: 'border-green-500/20'
-                },
-                {
-                    label: 'المسودات',
-                    value: offers.filter(o => o.stage === 'DRAFT').length,
-                    icon: Edit,
-                    color: 'from-yellow-600/20 to-yellow-400/20',
-                    iconColor: 'text-yellow-400',
-                    borderColor: 'border-yellow-500/20'
-                },
-                {
-                    label: 'العروض المنتهية',
-                    value: offers.filter(o => o.stage === 'EXPIRED').length,
-                    icon: Clock,
-                    color: 'from-red-600/20 to-red-400/20',
-                    iconColor: 'text-red-400',
-                    borderColor: 'border-red-500/20'
-                }].map((stat, index) => (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        key={index}
-                        className={`relative overflow-hidden bg-gradient-to-br ${stat.color} 
-                            backdrop-blur-xl rounded-xl p-6 border ${stat.borderColor}
-                            hover:shadow-lg hover:shadow-white/5 transition-all duration-300`}
-                    >
+            // Update the courses count
+            return {
+                ...prev,
+                courseLinks,
+                courses: courseLinks.length
+            };
+        });
+    };
+
+    return (
+        <div className="min-h-screen font-arabicUI3 ">
+            {/* Header Section */}
+            <div className="border-b border-white/10 bg-gray-900/50 backdrop-blur-xl sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
-                            <div className={`p-3 rounded-lg bg-white/5 ${stat.iconColor}`}>
-                                <stat.icon className="stroke-2" size={20} />
+                            <div className="p-3 rounded-xl bg-indigo-500/20 text-indigo-400">
+                                <Tag size={20} />
                             </div>
                             <div>
-                                <p className="text-gray-400 text-sm font-medium">{stat.label}</p>
-                                <h3 className="text-3xl font-arabicUI3 text-white mt-1">
-                                    {stat.value}
-                                </h3>
+                                <h1 className="text-2xl font-bold text-white">إدارة العروض</h1>
+                                <p className="text-gray-400 text-sm">قم بإدارة وتنظيم العروض الخاصة بك</p>
                             </div>
                         </div>
-                        <div className="absolute bottom-0 right-0 transform translate-x-2 translate-y-2">
-                            <stat.icon className={`${stat.iconColor} opacity-10`} size={64} />
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
-
-            {/* Search and Filter Section */}
-            <div className="flex gap-4 mb-8 bg-gradient-to-r from-gray-800/50 to-gray-900/50 p-4 rounded-xl border border-white/10">
-                <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="بحث عن عرض..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white 
-                                 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    />
-                </div>
-                <select
-                    value={filterStage}
-                    onChange={(e) => setFilterStage(e.target.value)}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white 
-                             focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                >
-                    <option value="all">جميع الحالات</option>
-                    <option value="PUBLISHED">منشور</option>
-                    <option value="DRAFT">مسودة</option>
-                    <option value="EXPIRED">منتهي</option>
-                </select>
-            </div>
-
-            {/* Offers Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {loading ? (
-                    Array(3).fill(0).map((_, index) => (
-                        <div key={index} className="animate-pulse bg-white/5 rounded-xl p-6 border border-white/10">
-                            <div className="h-6 bg-white/10 rounded mb-4"></div>
-                            <div className="h-20 bg-white/10 rounded mb-4"></div>
-                            <div className="h-6 bg-white/10 rounded w-1/2"></div>
-                        </div>
-                    ))
-                ) : (
-                    filteredOffers.map(offer => (
-                        <motion.div
-                            key={offer._id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="group relative bg-gradient-to-br from-gray-800/80 to-gray-900/90 backdrop-blur-xl 
-                                     rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2
-                                     hover:shadow-blue-500/30 border border-white/10 hover:border-blue-500/50"
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 
+                            hover:to-blue-600 text-white rounded-xl transition-all duration-300 flex items-center 
+                            gap-2 justify-center md:w-auto w-full"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 opacity-0 
-                                          group-hover:opacity-100 transition-opacity duration-500"/>
+                            <Plus size={20} />
+                            إضافة عرض جديد
+                        </button>
+                    </div>
 
-                            <div className="p-6 relative z-10">
-                                <div className="flex justify-between items-start mb-4">                                    <div>
-                                    <h3 className="text-xl font-arabicUI3 text-white group-hover:text-blue-400 
-                                                     transition-colors duration-300">
-                                        {offer.title}
-                                    </h3>
-                                    <p className="text-gray-400 mt-1">{offer.subtitle}</p>
-                                </div>
-                                    <div className={`px-3 py-1 rounded-full text-xs font-medium 
-                                        ${offer.stage === 'PUBLISHED' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                                            offer.stage === 'DRAFT' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
-                                                'bg-red-500/20 text-red-400 border-red-500/30'}
-                                        border backdrop-blur-md`}>
-                                        {offer.stage === 'PUBLISHED' ? 'منشور' :
-                                            offer.stage === 'DRAFT' ? 'مسودة' :
-                                                'مؤرشف'}
+                    {/* Filters Section */}
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="relative">
+                            <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                            <input
+                                type="text"
+                                placeholder="البحث عن العروض..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-4 pr-12 py-2 bg-white/5 border border-white/10 rounded-xl text-white 
+                                placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                            />
+                        </div>                        <select
+                            value={filterStage}
+                            onChange={(e) => setFilterStage(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white 
+                            focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                            [&>option]:text-gray-900"
+                        >
+                            <option value="all" className="text-gray-900">جميع الحالات</option>
+                            <option value="DRAFT" className="text-gray-900">مسودة</option>
+                            <option value="PUBLISHED" className="text-gray-900">منشور</option>
+                            <option value="ARCHIVED" className="text-gray-900">مؤرشف</option>
+                        </select>
+                        <select
+                            value={filterSection}
+                            onChange={(e) => setFilterSection(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white 
+                            focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                            [&>option]:text-gray-900"
+                        >
+                            <option value="all" className="text-gray-900">جميع المراحل</option>
+                            <option value="FIRST_SEC" className="text-gray-900">الصف الأول الثانوي</option>
+                            <option value="SECOND_SEC" className="text-gray-900">الصف الثاني الثانوي</option>
+                            <option value="THIRD_SEC" className="text-gray-900">الصف الثالث الثانوي</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {/* Content Section */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="animate-pulse">
+                                <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+                                    <div className="h-6 bg-white/10 rounded w-3/4 mb-4"></div>
+                                    <div className="h-4 bg-white/10 rounded w-1/2 mb-6"></div>
+                                    <div className="space-y-2">
+                                        <div className="h-4 bg-white/10 rounded w-full"></div>
+                                        <div className="h-4 bg-white/10 rounded w-5/6"></div>
                                     </div>
                                 </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex items-center gap-2">
-                                            <Tags size={16} className="text-blue-400" />
-                                            <span className="text-white font-medium">{offer.originalPrice} جنيه</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-red-400 line-through">{offer.discountPrice} جنيه</span>
-                                            <span className="text-green-400 text-sm">({offer.discountPercentage}% خصم)</span>
-                                        </div>
-                                    </div>                                    <div className="flex items-center gap-4">
-                                        <div className="flex items-center gap-2">
-                                            <Book size={14} className="text-indigo-400" />
-                                            <span className="text-gray-400 text-sm">{offer.courses} كورس</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Users size={14} className="text-yellow-400" />
-                                            <span className="text-gray-400 text-sm">{offer.students} طالب</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <StarIcon size={14} className="text-orange-400" />
-                                            <span className="text-gray-400 text-sm">{offer.rating}</span>
-                                        </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredOffers.map((offer) => (
+                            <div
+                                key={offer._id}
+                                className="group bg-white/5 hover:bg-white/10 rounded-2xl p-6 border border-white/10 
+                                transition-all duration-300 hover:border-indigo-500/50"
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 
+                                        transition-colors">{offer.title}</h3>
+                                        <p className="text-gray-400 text-sm mt-1">{offer.subtitle}</p>
                                     </div>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <Book size={14} className="text-purple-400" />
-                                        <span className="text-gray-400 text-sm">
-                                            {offer.section === 'FIRST_SEC' ? 'الصف الأول الثانوي' :
-                                                offer.section === 'SECOND_SEC' ? 'الصف الثاني الثانوي' :
-                                                    'الصف الثالث الثانوي'}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex items-center justify-between text-sm text-gray-400">
-                                        <div className="flex items-center gap-2">
-                                            <Clock size={14} />
-                                            <span>{new Date(offer.createdAt).toLocaleDateString('ar-EG')}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 
-                                              transition-opacity duration-300">
-                                    <div className="flex gap-2">
+                                    <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => handleOpenEditModal(offer)}
-                                            className="p-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-400 
-                                                     rounded-lg transition-colors"
+                                            onClick={() => {
+                                                setCurrentOffer(offer);
+                                                setFormData({
+                                                    ...offer,
+                                                    endDate: new Date(offer.endDate).toISOString().split('T')[0]
+                                                });
+                                                setShowEditModal(true);
+                                            }}
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-blue-400 
+                                            hover:text-blue-300"
                                         >
                                             <Edit size={16} />
                                         </button>
                                         <button
                                             onClick={() => handleDeleteOffer(offer._id)}
-                                            className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 
-                                                     rounded-lg transition-colors"
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-red-400 
+                                            hover:text-red-300"
                                         >
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))
-                )}
-            </div>            {/* Add Offer Modal */}
-            <AnimatePresence mode="wait">
-                {showAddModal && (
-                    <OfferModal
-                        isEdit={false}
-                        onSubmit={handleAddOffer}
-                        onClose={handleCloseAddModal}
-                        currentStep={currentStep}
-                        steps={steps}
-                        formData={formData}
-                        onFormChange={handleFormChange}
-                        onNextStep={handleNextStep}
-                        onPrevStep={handlePrevStep}
-                        formErrors={formErrors}
-                        handleAddFeature={handleAddFeature}
-                        handleRemoveFeature={handleRemoveFeature}
-                        handleFeatureChange={handleFeatureChange}
-                    />
-                )}
-            </AnimatePresence>
 
-            {/* Edit Offer Modal */}
-            <AnimatePresence mode="wait">
-                {showEditModal && (
-                    <OfferModal
-                        isEdit={true}
-                        onSubmit={handleEditOffer}
-                        onClose={handleCloseEditModal}
-                        currentStep={currentStep}
-                        steps={steps}
-                        formData={formData}
-                        onFormChange={handleFormChange}
-                        onNextStep={handleNextStep}
-                        onPrevStep={handlePrevStep}
-                        formErrors={formErrors}
-                        handleAddFeature={handleAddFeature}
-                        handleRemoveFeature={handleRemoveFeature}
-                        handleFeatureChange={handleFeatureChange}
-                    />
+                                <div className="space-y-4">
+                                    <p className="text-gray-300 text-sm line-clamp-2">{offer.description}</p>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-white/5 rounded-xl p-3">
+                                            <p className="text-gray-400 text-xs">السعر قبل</p>
+                                            <p className="text-white font-bold mt-1">{offer.originalPrice} جنيه</p>
+                                        </div>
+                                        <div className="bg-indigo-500/10 rounded-xl p-3">
+                                            <p className="text-indigo-400 text-xs">السعر بعد</p>
+                                            <p className="text-indigo-400 font-bold mt-1">{offer.discountPrice} جنيه</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`px-3 py-1 rounded-full text-xs ${offer.stage === 'PUBLISHED' ? 'bg-green-500/20 text-green-400' :
+                                                offer.stage === 'DRAFT' ? 'bg-yellow-500/20 text-yellow-400' :
+                                                    'bg-gray-500/20 text-gray-400'
+                                                }`}>
+                                                {offer.stage === 'PUBLISHED' ? 'منشور' :
+                                                    offer.stage === 'DRAFT' ? 'مسودة' : 'مؤرشف'}
+                                            </div>
+                                            <div className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs">
+                                                {offer.section === 'FIRST_SEC' ? 'الأول الثانوي' :
+                                                    offer.section === 'SECOND_SEC' ? 'الثاني الثانوي' : 'الثالث الثانوي'}
+                                            </div>
+                                        </div>
+                                        {offer.isLimited && (
+                                            <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs">
+                                                {offer.spotsLeft} مقعد متبقي
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
-            </AnimatePresence>
+
+                {!loading && filteredOffers.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/20 
+                        text-indigo-400 mb-4">
+                            <Search size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">لا توجد عروض</h3>
+                        <p className="text-gray-400">لم يتم العثور على أي عروض تطابق معايير البحث الخاصة بك</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Add/Edit Modal */}
+            {(showAddModal || showEditModal) && (
+                <OfferModal
+                    isEdit={showEditModal}
+                    onClose={() => {
+                        showEditModal ? handleCloseEditModal() : handleCloseAddModal();
+                        setCurrentStep(1);
+                    }}
+                    onSubmit={showEditModal ? handleEditOffer : handleAddOffer}
+                    currentStep={currentStep}
+                    steps={steps}
+                    formData={formData}
+                    onFormChange={handleFormChange}
+                    onNextStep={handleNextStep}
+                    onPrevStep={handlePrevStep}
+                    formErrors={formErrors}
+                    handleAddFeature={handleAddFeature}
+                    handleRemoveFeature={handleRemoveFeature}
+                    handleFeatureChange={handleFeatureChange}
+                    courses={courses}
+                    onCourseSelect={(courseId) => {
+                        const updatedCourseLinks = formData.courseLinks.includes(courseId)
+                            ? formData.courseLinks.filter(id => id !== courseId)
+                            : [...formData.courseLinks, courseId];
+                        handleFormChange('courseLinks', updatedCourseLinks);
+                    }}
+                />
+            )}
         </div>
     );
 };

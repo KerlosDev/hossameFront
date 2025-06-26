@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { IoMdFlask } from "react-icons/io";
-import { GiMolecule, GiChemicalDrop } from "react-icons/gi";
-import { FaAtom, FaUser, FaEnvelope, FaLock, FaPhoneAlt, FaUsers, FaMapMarkerAlt, FaGraduationCap, FaChevronDown } from "react-icons/fa";
+import { IoMdCalculator } from "react-icons/io";
+import { PiMathOperations, PiFunction } from "react-icons/pi";
+import { FaSquareRootAlt, FaUser, FaEnvelope, FaLock, FaPhoneAlt, FaUsers, FaMapMarkerAlt, FaGraduationCap, FaChevronDown } from "react-icons/fa";
 import { BsGenderAmbiguous } from "react-icons/bs";
 import Cookies from "js-cookie";
 import { useRouter } from 'next/navigation';
@@ -18,6 +18,7 @@ const egyptGovernments = [
 ];
 
 const Page = () => {
+    const [mounted, setMounted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -39,10 +40,13 @@ const Page = () => {
     const [step, setStep] = useState(1); // For multi-step form
 
     useEffect(() => {
+        setMounted(true);
         if (sessionManager.isAuthenticated()) {
             router.replace("/");
         }
     }, []);
+
+    if (!mounted) return null;
 
     const validateField = (name, value) => {
         let error = '';
@@ -321,74 +325,69 @@ const Page = () => {
 
     return (
         <div dir='rtl' className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 p-4">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
-                <div className="absolute top-20 left-20 text-white/10 text-7xl animate-float">
-                    <FaAtom />
+            {/* Animated background elements */}            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute inset-0 opacity-5 mix-blend-overlay"></div>
+                <div className="absolute top-20 left-20 text-white/10 text-5xl sm:text-7xl animate-float">
+                    <FaSquareRootAlt />
                 </div>
-                <div className="absolute bottom-40 right-20 text-white/10 text-8xl animate-spin-slow">
-                    <GiMolecule />
+                <div className="absolute bottom-40 right-20 text-white/10 text-6xl sm:text-8xl animate-spin-slow">
+                    <PiMathOperations />
                 </div>
-                <div className="absolute top-1/2 left-1/3 text-white/10 text-6xl animate-bounce-slow">
-                    <IoMdFlask />
+                <div className="absolute top-1/2 left-1/3 text-white/10 text-4xl sm:text-6xl animate-bounce-slow">
+                    <PiFunction />
                 </div>
                 {/* Gradient orbs */}
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full filter blur-3xl animate-pulse-delayed"></div>
-            </div>
-
-            {/* Main container */}
-            <div className="relative w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 p-8">
-                {/* Left side - Content */}
-                <div className="w-full lg:w-1/2 text-center lg:text-right space-y-6">
+                <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-1/4 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-500/20 rounded-full filter blur-3xl animate-pulse-delayed"></div>
+            </div>            {/* Main container */}
+            <div className="relative w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-6 sm:gap-8 p-0 sm:p-8">{/* Left side - Content */}
+                <div className="w-full lg:w-1/2 text-center lg:text-right space-y-6 px-4 lg:px-0">
                     <div className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-2xl
                          bg-white/5 backdrop-blur-lg border border-white/10 hover:border-white/20 
                          transform hover:scale-105 transition-all duration-500">
-                        <IoMdFlask className="text-3xl text-blue-300" />
+                        <IoMdCalculator className="text-3xl text-blue-300" />
                         <span className="font-arabicUI2 text-xl text-blue-300">منصة حسام ميرا</span>
                     </div>
 
-                    <h1 className="text-4xl lg:text-5xl font-arabicUI2 font-bold text-white leading-tight">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-arabicUI2 font-bold text-white leading-tight">
                         انضم إلى منصة
                         <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
-                            تعلم الكيمياء
+                            عالم الرياضيات
                         </span>
                     </h1>
 
-                    <p className="text-lg lg:text-xl font-arabicUI2 text-white/80 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                        فالمنصة دي كان هدفي اخلي الكيمياء بالنسبالك لعبة مش مجرد ماده هتاخدها وبعد متخلص ثانوية عامه
+                    <p className="text-base sm:text-lg lg:text-xl font-arabicUI2 text-white/80 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        فالمنصة دي كان هدفي اخلي الرياضيات بالنسبالك لعبة مش مجرد ماده هتاخدها وبعد متخلص ثانوية عامه
                         <span className="text-blue-300"> ترميها لا بالعكس </span>
                         انت هتبقي عايز تكمل فيها لان احنا خليناها عادة مش مجرد ماده ❤️
                     </p>
 
-                    <div className="flex flex-wrap gap-4 justify-center lg:justify-end mt-6">
+                    <div className="flex flex-wrap gap-3 sm:gap-4 justify-center lg:justify-end mt-6">
                         <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm p-3 rounded-xl">
-                            <GiChemicalDrop className="text-purple-300 text-2xl" />
-                            <span className="font-arabicUI2 text-white/90">تجارب معملية</span>
+                            <PiMathOperations className="text-purple-300 text-2xl" />
+                            <span className="font-arabicUI2 text-white/90">تمارين تفاعلية</span>
                         </div>
                         <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm p-3 rounded-xl">
-                            <FaAtom className="text-blue-300 text-2xl" />
+                            <FaSquareRootAlt className="text-blue-300 text-2xl" />
                             <span className="font-arabicUI2 text-white/90">شرح مبسط</span>
                         </div>
                         <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm p-3 rounded-xl">
-                            <IoMdFlask className="text-teal-300 text-2xl" />
-                            <span className="font-arabicUI2 text-white/90">نماذج توضيحية</span>
+                            <PiFunction className="text-teal-300 text-2xl" />
+                            <span className="font-arabicUI2 text-white/90">حلول نموذجية</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Right side - Sign Up Form */}
-                <div className="w-full lg:w-1/2">
-                    <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl transition-all hover:shadow-blue-500/20">
+                {/* Right side - Sign Up Form */}                <div className="w-full lg:w-1/2 px-4 lg:px-0">
+                    <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl transition-all hover:shadow-blue-500/20">
                         <div className="mb-6 text-center">
                             <div className="flex justify-center mb-3">
                                 <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500">
-                                    <IoMdFlask className="text-3xl text-white" />
+                                    <IoMdCalculator className="text-3xl text-white" />
                                 </div>
                             </div>
                             <h2 className="text-2xl font-arabicUI2 font-bold text-white mb-2">سجل معنا الآن</h2>
-                            <p className="text-white/60 font-arabicUI2">ابدأ رحلتك مع عالم الكيمياء الممتع</p>
+                            <p className="text-white/60 font-arabicUI2">ابدأ رحلتك مع عالم الرياضيات الممتع</p>
 
                             {/* Progress Bar */}
                             <div className="mt-6 mb-4 flex justify-between items-center">
@@ -691,4 +690,3 @@ const Page = () => {
 export default Page;
 
 
-    

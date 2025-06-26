@@ -202,7 +202,7 @@ export default function ExamAnalysis() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 font-arabicUI3">
             {/* رأس الصفحة */}
             
 

@@ -8,22 +8,7 @@ import axios from 'axios';
 import Link from 'next/link';
 
 // Chemistry background component reused from main profile
-const ChemBackground = () => (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
-        <div className="absolute top-20 left-20 text-white/10 text-7xl">
-            <FaAtom className="animate-float" />
-        </div>
-        <div className="absolute bottom-40 right-20 text-white/10 text-8xl">
-            <GiMolecule className="animate-spin-slow" />
-        </div>
-        <div className="absolute top-1/2 left-1/3 text-white/10 text-6xl">
-            <FaFlask className="animate-bounce-slow" />
-        </div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full filter blur-3xl animate-pulse-delayed"></div>
-    </div>
-);
+ 
 
 export default function MyCourses({ onBack }) {
     const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -128,26 +113,7 @@ export default function MyCourses({ onBack }) {
                     </button>
                 </Link>
 
-                <div className="grid grid-cols-3 gap-4 mt-8 w-full max-w-lg mx-auto">
-                    <div className="p-4 bg-white/5 rounded-xl flex flex-col items-center justify-center text-center">
-                        <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center mb-2">
-                            <FaFlask className="text-green-400" size={20} />
-                        </div>
-                        <span className="text-white/80 text-sm">كيمياء</span>
-                    </div>
-                    <div className="p-4 bg-white/5 rounded-xl flex flex-col items-center justify-center text-center">
-                        <div className="h-12 w-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
-                            <FaAtom className="text-blue-400" size={20} />
-                        </div>
-                        <span className="text-white/80 text-sm">فيزياء</span>
-                    </div>
-                    <div className="p-4 bg-white/5 rounded-xl flex flex-col items-center justify-center text-center">
-                        <div className="h-12 w-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
-                            <FaMicroscope className="text-purple-400" size={20} />
-                        </div>
-                        <span className="text-white/80 text-sm">أحياء</span>
-                    </div>
-                </div>
+                 
             </div>
         </div>
     );
@@ -244,8 +210,7 @@ export default function MyCourses({ onBack }) {
 
     return (
         <div className="min-h-screen font-arabicUI3 relative" dir="rtl">
-            <ChemBackground />
-
+ 
             <div className="relative z-20 container mx-auto px-4 py-8">
                 {/* Back to profile button */}
                 {!selectedCourse && (

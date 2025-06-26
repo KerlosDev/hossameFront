@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GiMolecule, GiChemicalDrop } from 'react-icons/gi';
+import { FaSquareRootAlt, FaCalculator ,FaInfinity} from 'react-icons/fa';
 import { FaAtom } from 'react-icons/fa';
 import { IoMdFlask } from "react-icons/io";
 
@@ -22,7 +22,7 @@ const ChemBackground = () => {
         { top: 80, left: 70, rotate: 270 }
     ];
 
-    const icons = [GiMolecule, FaAtom, IoMdFlask, GiChemicalDrop];
+    const icons = [FaSquareRootAlt, FaSquareRootAlt,FaInfinity, FaSquareRootAlt, FaCalculator];
 
     return (
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">

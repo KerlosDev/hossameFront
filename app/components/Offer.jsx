@@ -1,12 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
-import ChemBackground from './ChemBackground';
 import { FiClock, FiBookOpen, FiUsers, FiStar, FiArrowRight, FiArrowLeft, FiTag, FiZap } from 'react-icons/fi';
 import { FaCalculator, FaSquareRootAlt, FaInfinity, FaChartLine, FaPrint } from "react-icons/fa";
 import { MdFunctions } from "react-icons/md";
 import { TbMathSymbols, TbMathIntegral } from "react-icons/tb";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { IoMdClose } from 'react-icons/io';
+import { useRouter } from 'next/navigation';
 
 // Move offer data outside component to prevent recreation on every render
 // Default offer data in case of loading or error
@@ -34,6 +34,7 @@ const sectionLabels = {
 };
 
 const Offer = () => {
+    const router = useRouter();
     const [offers, setOffers] = useState({});
     const [activeSection, setActiveSection] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -141,6 +142,13 @@ const Offer = () => {
         }
     };
 
+    const handleOpenOffer = (courseLinks) => {
+        // Navigate to the first course by default
+        if (courseLinks && courseLinks.length > 0) {
+            router.push(`/Courses/${courseLinks[0]._id}`);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[200px]">
@@ -170,27 +178,8 @@ const Offer = () => {
 
     return (
         <div className="relative min-h-screen bg-gray-900">
-            <ChemBackground />
 
-            {/* Section Buttons */}
-            {Object.keys(offers).length > 1 && (
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-                    <div className="flex gap-2 bg-gray-800/80 backdrop-blur-sm p-2 rounded-xl border border-white/10">
-                        {Object.keys(offers).map((section) => (
-                            <button
-                                key={section}
-                                onClick={() => setActiveSection(section)}
-                                className={`px-4 py-2 rounded-lg transition-all duration-300 ${activeSection === section
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                                    }`}
-                            >
-                                {getSectionLabel(section)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
+
 
             {/* Your existing offer display code here, but use activeOffer instead of offer */}
             <div dir="rtl" className="min-h-[60vh] font-arabicUI2 py-3 sm:py-6 px-2 sm:px-4 overflow-hidden relative">
@@ -228,6 +217,8 @@ const Offer = () => {
                             احصل على أفضل العروض لتعلم الرياضيات مع حسام ميرا
                         </p>
                     </div>
+                    {/* Section Buttons */}
+                   
                     {/* Main Offer Card */}
                     <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-lg sm:rounded-xl md:rounded-2xl shadow-2xl overflow-hidden 
                                   border border-blue-500/20 relative">
@@ -622,17 +613,19 @@ const Offer = () => {
                                                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/30 via-orange-500/30 to-red-500/30 
                                                                   rounded-xl sm:rounded-2xl blur-lg scale-110"></div>
 
-                                                    <div className="relative bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 
-                                                                  text-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-2xl border border-orange-400/50 overflow-hidden">
+                                                    <div
+                                                        onClick={() => handleOpenOffer(activeOffer.courseLinks)}
+                                                        className="relative bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 
+                                                                  text-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-2xl border border-orange-400/50 
+                                                                  overflow-hidden cursor-pointer hover:scale-[1.02] transform transition-transform 
+                                                                  duration-300 hover:shadow-xl"
+                                                    >
                                                         <div className="relative z-10 text-center">
                                                             <div className="flex items-center justify-center gap-2 sm:gap-4 mb-1 sm:mb-2">
                                                                 <span className="text-xl sm:text-3xl">💎</span>
                                                                 <div>
-                                                                    <div className="text-lg sm:text-2xl font-black font-arabicUI2">
-                                                                        وفر ${activeOffer.originalPrice - activeOffer.discountPrice} اليوم!
-                                                                    </div>
-                                                                    <div className="text-sm sm:text-lg opacity-90 font-arabicUI3">
-                                                                        خصم {activeOffer.discountPercentage}% حصري
+                                                                    <div className="text-sm sm:text-4xl opacity-90 font-arabicUI3">
+                                                                        فتح العرض
                                                                     </div>
                                                                 </div>
                                                                 <span className="text-xl sm:text-3xl">🎯</span>

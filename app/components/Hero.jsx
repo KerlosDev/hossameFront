@@ -91,14 +91,7 @@ const Hero = () => {
                                         <MdSchool className="text-2xl text-blue-500 animate-pulse" />
                                     </div>
 
-                                    <div className="flex justify-center sm:justify-start items-center gap-2">
-                                        <BsCheckCircleFill className="text-green-500 text-lg" />
-                                        <span className="text-base sm:text-lg lg:text-xl font-arabicUI2 
-                                                       text-slate-600 dark:text-slate-400">
-                                            15+ سنة خبرة في التدريس والتميز الأكاديمي
-                                        </span>
-                                    </div>
-
+                                   
                                     <div className="flex justify-center sm:justify-start items-center gap-2">
                                         <FaTrophy className="text-yellow-500 text-lg animate-spin-slow" />
                                         <span className="text-base sm:text-lg font-arabicUI3 
@@ -112,15 +105,15 @@ const Hero = () => {
                                 <div className="flex justify-center sm:justify-start items-center gap-4 mt-4 flex-wrap">
                                     <div className="flex items-center gap-2 bg-blue-500/20 px-3 py-1 rounded-full border border-blue-500/40">
                                         <FaGraduationCap className="text-blue-600 text-sm" />
-                                        <span className="text-sm font-arabicUI3 text-blue-700 dark:text-blue-300">تعليم متميز</span>
+                                        <span className="text-sm font-arabicUI3 text-blue-700 dark:text-blue-300">اولي ثانوي </span>
                                     </div>
                                     <div className="flex items-center gap-2 bg-green-500/20 px-3 py-1 rounded-full border border-green-500/40">
                                         <FaUsers className="text-green-600 text-sm" />
-                                        <span className="text-sm font-arabicUI3 text-green-700 dark:text-green-300">خبرة واسعة</span>
+                                        <span className="text-sm font-arabicUI3 text-green-700 dark:text-green-300">تانية ثانوي</span>
                                     </div>
                                     <div className="flex items-center gap-2 bg-purple-500/20 px-3 py-1 rounded-full border border-purple-500/40">
                                         <FaStar className="text-purple-600 text-sm animate-pulse" />
-                                        <span className="text-sm font-arabicUI3 text-purple-700 dark:text-purple-300">نتائج مضمونة</span>
+                                        <span className="text-sm font-arabicUI3 text-purple-700 dark:text-purple-300">تالتة ثانوي</span>
                                     </div>
                                 </div>
                             </div>

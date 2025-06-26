@@ -38,7 +38,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:bg-slate-950 dark:via-slate-900 dark:to-slate-950 antialiased`}>
+      <body className={`bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 antialiased`}>
         <SessionProvider>
           <Header />
           {children}

@@ -110,7 +110,7 @@ export default function EnhancedCourseOverview() {
       return sum + (exam.correctAnswers / exam.totalQuestions * 100);
     }, 0);
 
-    const averageScore = totalScores / studentData.results.length;
+    const averageScore = studentData.results.length > 0 ? totalScores / studentData.results.length : 0;
 
     // Get unique exam titles
     const uniqueExamTitles = [...new Set(studentData.results.map(result => result.examTitle))];
@@ -143,15 +143,14 @@ export default function EnhancedCourseOverview() {
 
 
     // Create skill data based on exam performance
-    const mathScore = studentData.results
-      .filter(exam => exam.examTitle === "Math Final")
-      .reduce((avg, exam) => avg + (exam.correctAnswers / exam.totalQuestions * 100), 0) /
-      studentData.results.filter(exam => exam.examTitle === "Math Final").length;
+    const mathExams = studentData.results.filter(exam => exam.examTitle === "Math Final");
+    const chemistryExams = studentData.results.filter(exam => exam.examTitle === "امتحان كيمياء");
 
-    const chemistryScore = studentData.results
-      .filter(exam => exam.examTitle === "امتحان كيمياء")
-      .reduce((avg, exam) => avg + (exam.correctAnswers / exam.totalQuestions * 100), 0) /
-      studentData.results.filter(exam => exam.examTitle === "امتحان كيمياء").length;
+    const mathScore = mathExams.length > 0 ?
+      mathExams.reduce((avg, exam) => avg + (exam.correctAnswers / exam.totalQuestions * 100), 0) / mathExams.length : 0;
+
+    const chemistryScore = chemistryExams.length > 0 ?
+      chemistryExams.reduce((avg, exam) => avg + (exam.correctAnswers / exam.totalQuestions * 100), 0) / chemistryExams.length : 0;
 
     const skillsData = [
       { name: "الرياضيات", value: Math.round(mathScore) || 70 },
@@ -485,7 +484,7 @@ export default function EnhancedCourseOverview() {
 
                 <div className="space-y-4">
                   {studentData.results.slice(-3).reverse().map((exam, index) => {
-                    const score = Math.round(exam.correctAnswers / exam.totalQuestions * 100);
+                    const score = Math.round(exam.correctAnswers / exam.totalQuestions * 100) || 0;
                     const examDate = new Date(exam.examDate);
                     const formattedDate = examDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
@@ -499,8 +498,8 @@ export default function EnhancedCourseOverview() {
                           </div>
                         </div>
                         <div className={`px-3 py-1 rounded-full text-xs ${score >= 70 ? 'bg-green-500/20 text-green-300' :
-                            score >= 50 ? 'bg-yellow-500/20 text-yellow-300' :
-                              'bg-red-500/20 text-red-300'
+                          score >= 50 ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-red-500/20 text-red-300'
                           }`}>
                           {score}%
                         </div>

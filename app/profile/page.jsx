@@ -7,10 +7,8 @@ import {
 } from 'lucide-react';
 import { IoMdFlask } from "react-icons/io";
 import { GiMolecule, GiChemicalDrop } from "react-icons/gi";
-import { FaAtom, FaFlask, FaMicroscope, FaPlay } from "react-icons/fa";
+import { FaAtom, FaCalculator, FaFlask, FaInfinity, FaMicroscope, FaPlay, FaSquareRootAlt } from "react-icons/fa";
 import { HiOutlineAcademicCap } from "react-icons/hi";
-import { BiTime } from "react-icons/bi";
-import { BsBookmarkStar } from "react-icons/bs";
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import Settings from '../../app/components/Settings'; // Import the Settings component
@@ -187,33 +185,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
             gradient: "from-blue-600 to-indigo-600"
         }
     ];
-
-    const achievements = [
-        {
-            id: 1,
-            title: "مستكشف الكيمياء",
-            description: "أكملت أول درس",
-            icon: <FaFlask className="text-2xl text-yellow-500" />,
-            unlocked: true,
-            progress: 100
-        },
-        {
-            id: 2,
-            title: "عالم المختبر",
-            description: "شاركت في 5 تجارب",
-            icon: <FaMicroscope className="text-2xl text-indigo-500" />,
-            unlocked: false,
-            progress: 60
-        },
-        {
-            id: 3,
-            title: "نجم الاختبارات",
-            description: "حصلت على 100% في 3 اختبارات",
-            icon: <GiMolecule className="text-2xl text-blue-500" />,
-            unlocked: false,
-            progress: 30
-        }
-    ];
+ 
 
     const menuItems = [
         {
@@ -267,7 +239,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
         Cookies.remove('phone');
 
         // Redirect to login page
-        window.location.href = '/login';
+        window.location.href = '/sign-in';
 
         setShowLogoutConfirm(false);
     };
@@ -277,13 +249,13 @@ export default function ChemistryLMSProfile({ searchParams }) {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
             <div className="absolute top-20 left-20 text-white/10 text-7xl">
-                <FaAtom className="animate-float" />
+                <FaSquareRootAlt className="animate-float" />
             </div>
             <div className="absolute bottom-40 right-20 text-white/10 text-8xl">
-                <GiMolecule className="animate-spin-slow" />
+                <FaInfinity className="animate-spin-slow" />
             </div>
             <div className="absolute top-1/2 left-1/3 text-white/10 text-6xl">
-                <IoMdFlask className="animate-bounce-slow" />
+                <FaCalculator className="animate-bounce-slow" />
             </div>
             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-pulse"></div>
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full filter blur-3xl animate-pulse-delayed"></div>
@@ -439,44 +411,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
             </div>
 
             {/* Achievements Section */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500">
-                <h3 className="text-xl font-arabicUI2 text-white mb-6 flex items-center gap-2">
-                    <Award className="text-yellow-500" />
-                    الإنجازات
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {achievements.map(achievement => (
-                        <div key={achievement.id}
-                            className={`relative group p-6 rounded-xl border transition-all duration-500 ${achievement.unlocked ?
-                                'bg-white/10 border-white/20 hover:border-white/40' :
-                                'bg-white/5 border-white/10'}`}
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className={`p-3 rounded-lg ${achievement.unlocked ? 'bg-white/10' : 'bg-white/5'} 
-                        group-hover:scale-110 transition-transform duration-500`}>
-                                    {achievement.icon}
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="font-bold text-white mb-1">{achievement.title}</h4>
-                                    <p className="text-sm text-white/60 mb-3">{achievement.description}</p>
-                                    <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
-                                        <div
-                                            className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ${achievement.unlocked ? 'bg-yellow-500' : 'bg-blue-600'}`}
-                                            style={{ width: `${achievement.progress}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                                {achievement.unlocked && (
-                                    <div className="absolute top-2 right-2 text-yellow-500">
-                                        <Award size={16} />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
+           
 
         </>
     );

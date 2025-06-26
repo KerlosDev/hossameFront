@@ -623,7 +623,7 @@ const CourseManager = () => {
     );
 
     return (
-        <div className="p-6 bg-gradient-to-br  font-arabicUI3 from-gray-900 to-gray-800 rounded-lg shadow-lg min-h-screen">
+        <div className="p-6   font-arabicUI3   rounded-lg shadow-lg min-h-screen">
             {/* Header Section */}
             <div className="flex justify-between items-center mb-6 bg-gradient-to-r from-gray-800/80 to-gray-900/90 p-4 rounded-xl border border-white/10">
                 <h2 className="text-2xl font-arabicUI3 text-white  ">إدارة الكورسات</h2>
