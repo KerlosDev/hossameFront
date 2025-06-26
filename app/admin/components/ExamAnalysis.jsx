@@ -204,47 +204,7 @@ export default function ExamAnalysis() {
     return (
         <div className="space-y-6">
             {/* رأس الصفحة */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
-                <h2 className="text-2xl font-bold mb-2">تحليل الامتحانات</h2>
-                <p className="text-blue-100">تحليل شامل لأداء الطلاب في الامتحانات</p>
-
-                {/* أزرار التصفية والتحكم */}
-                <div className="flex flex-wrap gap-4 mt-4">
-                    <select
-                        value={selectedTimeRange}
-                        onChange={(e) => setSelectedTimeRange(e.target.value)}
-                        className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
-                    >
-                        <option value="week">آخر أسبوع</option>
-                        <option value="month">آخر شهر</option>
-                        <option value="year">آخر سنة</option>
-                    </select>
-
-                    <select
-                        value={selectedCourse}
-                        onChange={(e) => setSelectedCourse(e.target.value)}
-                        className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
-                    >
-                        <option value="all">جميع الكورسات</option>
-                        <option value="organic">الكيمياء العضوية</option>
-                        <option value="inorganic">الكيمياء غير العضوية</option>
-                        <option value="analytical">الكيمياء التحليلية</option>
-                        <option value="physical">الكيمياء الفيزيائية</option>
-                        <option value="nuclear">الكيمياء النووية</option>
-                    </select>
-
-                    <select
-                        value={selectedLevel}
-                        onChange={(e) => setSelectedLevel(e.target.value)}
-                        className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
-                    >
-                        <option value="all">جميع المستويات</option>
-                        <option value="first">الصف الأول الثانوي</option>
-                        <option value="second">الصف الثاني الثانوي</option>
-                        <option value="third">الصف الثالث الثانوي</option>
-                    </select>
-                </div>
-            </div>
+            
 
             {loading ? (
                 // Loading skeleton

@@ -1,12 +1,12 @@
 'use client'
 import { useState, useEffect, useCallback, memo } from 'react';
-import { Trash2, Edit, Plus, Search, Tag, Clock, Circle, Check, X, ArrowRight, ArrowLeft, DollarSign, Star, ListPlus, Flag } from 'lucide-react';
+import { Trash2, Edit, Plus, Search, Tag, Clock, Circle, Check, X, ArrowRight, ArrowLeft, DollarSign, Star, ListPlus, Flag, Tags, Book, Users, StarIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 // Extract OfferModal outside main component
-const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formData, onFormChange, onNextStep, onPrevStep, formErrors }) => (
+const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formData, onFormChange, onNextStep, onPrevStep, formErrors, handleAddFeature, handleRemoveFeature, handleFeatureChange }) => (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]">
         <div className="min-h-screen px-4 text-center">
             {/* This element is to trick the browser into centering the modal contents. */}
@@ -56,66 +56,83 @@ const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formDa
                     <form onSubmit={(e) => e.preventDefault()} className="max-h-[calc(100vh-200px)] overflow-y-auto">
                         <div className="p-6 space-y-6">
                             <AnimatePresence mode="wait">
-                                <div key={currentStep}>
-                                    {currentStep === 1 && (
-                                        // Step 1 content
-                                        <div className="space-y-6">
-                                            <div className="space-y-4">
-                                                <label className="block text-white/70 text-sm">عنوان العرض</label>
-                                                <input
-                                                    type="text"
-                                                    value={formData.name}
-                                                    onChange={(e) => onFormChange('name', e.target.value)}
-                                                    className={`w-full px-4 py-3 bg-white/5 border ${formErrors.name ? 'border-red-500' : 'border-white/10'} rounded-xl text-white`}
-                                                />
-                                                {formErrors.name && <p className="text-red-500 text-sm">{formErrors.name}</p>}
-                                            </div>
-                                            <div className="space-y-4">
-                                                <label className="block text-white/70 text-sm">اسم الدكتور</label>
-                                                <input
-                                                    type="text"
-                                                    value={formData.docname}
-                                                    onChange={(e) => onFormChange('docname', e.target.value)}
-                                                    className={`w-full px-4 py-3 bg-white/5 border ${formErrors.docname ? 'border-red-500' : 'border-white/10'} rounded-xl text-white`}
-                                                />
-                                                {formErrors.docname && <p className="text-red-500 text-sm">{formErrors.docname}</p>}
-                                            </div>                                <div className="space-y-4">
-                                                <label className="block text-white/70 text-sm">رابط الكورس</label>
-                                                <input
-                                                    type="url"
-                                                    placeholder="https://..."
-                                                    value={formData.courseLink}
-                                                    onChange={(e) => onFormChange('courseLink', e.target.value)}
-                                                    className={`w-full px-4 py-3 bg-white/5 border ${formErrors.courseLink ? 'border-red-500' : 'border-white/10'} rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all`}
-                                                    required
-                                                />
-                                                {formErrors.courseLink && <p className="text-red-500 text-sm">{formErrors.courseLink}</p>}
-                                            </div>
-                                            <div className="space-y-4">
-                                                <label className="block text-white/70 text-sm">حالة العرض</label>
-                                                <select
-                                                    value={formData.stage}
-                                                    onChange={(e) => onFormChange('stage', e.target.value)}
-                                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
-                                                >
-                                                    <option value="DRAFT">مسودة</option>
-                                                    <option value="PUBLISHED">نشر</option>
-                                                    {isEdit && <option value="EXPIRED">منتهي</option>}
-                                                </select>
-                                            </div>
+                                <div key={currentStep}>                                    {currentStep === 1 && (
+                                    // Step 1 content
+                                    <div className="space-y-6">
+                                        <div className="space-y-4">
+                                            <label className="block text-white/70 text-sm">عنوان العرض</label>
+                                            <input
+                                                type="text"
+                                                value={formData.title}
+                                                onChange={(e) => onFormChange('title', e.target.value)}
+                                                className={`w-full px-4 py-3 bg-white/5 border ${formErrors.title ? 'border-red-500' : 'border-white/10'} rounded-xl text-white`}
+                                                placeholder="مثال: عرض خاص - مجموعة إتقان الرياضيات"
+                                            />
+                                            {formErrors.title && <p className="text-red-500 text-sm">{formErrors.title}</p>}
                                         </div>
-                                    )}
-                                    {currentStep === 2 && (
-                                        // Step 2 content
-                                        <div className="space-y-6">
+                                        <div className="space-y-4">
+                                            <label className="block text-white/70 text-sm">العنوان الفرعي</label>
+                                            <input
+                                                type="text"
+                                                value={formData.subtitle}
+                                                onChange={(e) => onFormChange('subtitle', e.target.value)}
+                                                className={`w-full px-4 py-3 bg-white/5 border ${formErrors.subtitle ? 'border-red-500' : 'border-white/10'} rounded-xl text-white`}
+                                                placeholder="مثال: حسام ميرا يقدم"
+                                            />
+                                            {formErrors.subtitle && <p className="text-red-500 text-sm">{formErrors.subtitle}</p>}
+                                        </div>
+                                        <div className="space-y-4">
+                                            <label className="block text-white/70 text-sm">وصف العرض</label>
+                                            <textarea
+                                                value={formData.description}
+                                                onChange={(e) => onFormChange('description', e.target.value)}
+                                                className={`w-full px-4 py-3 bg-white/5 border ${formErrors.description ? 'border-red-500' : 'border-white/10'} rounded-xl text-white min-h-[100px]`}
+                                                placeholder="وصف تفصيلي للعرض..."
+                                            />
+                                            {formErrors.description && <p className="text-red-500 text-sm">{formErrors.description}</p>}
+                                        </div>                                        <div className="space-y-4">
+                                            <label className="block text-white/70 text-sm">المرحلة الدراسية</label>
+                                            <select
+                                                value={formData.section}
+                                                onChange={(e) => onFormChange('section', e.target.value)}
+                                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                            >
+                                                <option value="FIRST_SEC">الصف الأول الثانوي</option>
+                                                <option value="SECOND_SEC">الصف الثاني الثانوي</option>
+                                                <option value="THIRD_SEC">الصف الثالث الثانوي</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <label className="block text-white/70 text-sm">حالة العرض</label>
+                                            <select
+                                                value={formData.stage}
+                                                onChange={(e) => onFormChange('stage', e.target.value)}
+                                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                            >
+                                                <option value="DRAFT">مسودة</option>
+                                                <option value="PUBLISHED">نشر</option>
+                                                <option value="ARCHIVED">أرشيف</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}                                    {currentStep === 2 && (
+                                    // Step 2 content
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-4">
                                                 <label className="block text-white/70 text-sm">السعر قبل الخصم</label>
                                                 <div className="relative">
                                                     <input
                                                         type="number"
                                                         placeholder="0"
-                                                        value={formData.pricebefore}
-                                                        onChange={(e) => onFormChange('pricebefore', e.target.value)}
+                                                        value={formData.originalPrice}
+                                                        onChange={(e) => {
+                                                            onFormChange('originalPrice', e.target.value);
+                                                            if (formData.discountPrice) {
+                                                                const percentage = Math.round(((e.target.value - formData.discountPrice) / e.target.value) * 100);
+                                                                onFormChange('discountPercentage', percentage);
+                                                            }
+                                                        }}
                                                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all pl-16"
                                                         required
                                                     />
@@ -128,61 +145,147 @@ const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formDa
                                                     <input
                                                         type="number"
                                                         placeholder="0"
-                                                        value={formData.priceafter}
-                                                        onChange={(e) => onFormChange('priceafter', e.target.value)}
+                                                        value={formData.discountPrice}
+                                                        onChange={(e) => {
+                                                            onFormChange('discountPrice', e.target.value);
+                                                            if (formData.originalPrice) {
+                                                                const percentage = Math.round(((formData.originalPrice - e.target.value) / formData.originalPrice) * 100);
+                                                                onFormChange('discountPercentage', percentage);
+                                                            }
+                                                        }}
                                                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all pl-16"
                                                         required
                                                     />
                                                     <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50">جنيه</span>
                                                 </div>
                                             </div>
-                                            {formData.pricebefore && formData.priceafter && (
-                                                <div className="bg-indigo-500/10 rounded-xl p-4 border border-indigo-500/20">
-                                                    <p className="text-white/70 text-sm">نسبة الخصم:</p>
-                                                    <p className="text-2xl font-bold text-indigo-400">
-                                                        {Math.round(((formData.pricebefore - formData.priceafter) / formData.pricebefore) * 100)}%
-                                                    </p>
-                                                </div>
-                                            )}
                                         </div>
-                                    )}
-                                    {currentStep === 3 && (
-                                        // Step 3 content
-                                        <div className="space-y-6">
-                                            {['first', 'second', 'third', 'fourth'].map((feature, index) => (
-                                                <div key={feature} className="space-y-4">
-                                                    <label className="block text-white/70 text-sm">ميزة {index + 1}</label>
-                                                    <div className="relative">
+
+                                        {formData.originalPrice && formData.discountPrice && (
+                                            <div className="bg-indigo-500/10 rounded-xl p-4 border border-indigo-500/20">
+                                                <p className="text-white/70 text-sm">نسبة الخصم:</p>
+                                                <p className="text-2xl font-bold text-indigo-400">
+                                                    {formData.discountPercentage}%
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                                            <div className="space-y-4">
+                                                <label className="block text-white/70 text-sm">عدد الكورسات</label>
+                                                <input
+                                                    type="number"
+                                                    value={formData.courses}
+                                                    onChange={(e) => onFormChange('courses', e.target.value)}
+                                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                                    min="1"
+                                                />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="block text-white/70 text-sm">عدد الطلاب</label>
+                                                <input
+                                                    type="number"
+                                                    value={formData.students}
+                                                    onChange={(e) => onFormChange('students', e.target.value)}
+                                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                                    min="0"
+                                                />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="block text-white/70 text-sm">التقييم</label>
+                                                <input
+                                                    type="number"
+                                                    value={formData.rating}
+                                                    onChange={(e) => onFormChange('rating', Math.min(5, Math.max(0, e.target.value)))}
+                                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                                    min="0"
+                                                    max="5"
+                                                    step="0.1"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}                                    {currentStep === 3 && (
+                                    // Step 3 content
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-lg font-medium text-white">المميزات</h3>
+                                            <button
+                                                type="button"
+                                                onClick={handleAddFeature}
+                                                className="px-4 py-2 bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30 transition-colors flex items-center gap-2"
+                                            >
+                                                <Plus size={16} />
+                                                إضافة ميزة
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {formData.features.map((feature, index) => (
+                                                <div key={index} className="flex items-center gap-4">
+                                                    <div className="relative flex-1">
                                                         <Star className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/20" size={20} />
                                                         <input
                                                             type="text"
                                                             placeholder={`أدخل الميزة ${index + 1} هنا...`}
-                                                            value={formData[feature]}
-                                                            onChange={(e) => onFormChange(feature, e.target.value)}
+                                                            value={feature}
+                                                            onChange={(e) => handleFeatureChange(index, e.target.value)}
                                                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all pr-12"
                                                         />
                                                     </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveFeature(index)}
+                                                        className="p-2 hover:bg-white/5 rounded-lg transition-colors text-red-400 hover:text-red-300"
+                                                    >
+                                                        <Trash2 size={20} />
+                                                    </button>
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
-                                    {currentStep === 4 && (
-                                        // Step 4 content
-                                        <div className="space-y-6">
-                                            <div className="space-y-4">
-                                                <label className="block text-white/70 text-sm">المميزات الإضافية</label>
-                                                <div className="relative">
-                                                    <textarea
-                                                        placeholder="اكتب كل ميزة في سطر جديد..."
-                                                        value={formData.fetures}
-                                                        onChange={(e) => onFormChange('fetures', e.target.value)}
-                                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all min-h-[200px]"
-                                                    />
-                                                </div>
-                                                <p className="text-white/50 text-sm">اكتب كل ميزة في سطر جديد للحصول على أفضل تنسيق</p>
-                                            </div>
+                                    </div>
+                                )}                                    {currentStep === 4 && (
+                                    // Step 4 content
+                                    <div className="space-y-6">
+                                        <div className="space-y-4">
+                                            <label className="block text-white/70 text-sm">تاريخ انتهاء العرض</label>
+                                            <input
+                                                type="date"
+                                                value={formData.endDate}
+                                                onChange={(e) => onFormChange('endDate', e.target.value)}
+                                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                                min={new Date().toISOString().split('T')[0]}
+                                            />
                                         </div>
-                                    )}
+
+                                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl">
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.isLimited}
+                                                    onChange={(e) => onFormChange('isLimited', e.target.checked)}
+                                                    className="sr-only peer"
+                                                />
+                                                <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                <span className="mr-3 text-sm font-medium text-white">العرض محدود</span>
+                                            </label>
+                                        </div>
+
+                                        {formData.isLimited && (
+                                            <div className="space-y-4">
+                                                <label className="block text-white/70 text-sm">عدد المقاعد المتبقية</label>
+                                                <input
+                                                    type="number"
+                                                    value={formData.spotsLeft}
+                                                    onChange={(e) => onFormChange('spotsLeft', e.target.value)}
+                                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                                    min="0"
+                                                    placeholder="عدد المقاعد المتاحة..."
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 </div>
                             </AnimatePresence>
                         </div>
@@ -282,30 +385,32 @@ const OffersManagement = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentOffer, setCurrentOffer] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterStage, setFilterStage] = useState('all');
+    const [searchQuery, setSearchQuery] = useState(''); const [filterStage, setFilterStage] = useState('all');
+    const [filterSection, setFilterSection] = useState('all');
     const [currentStep, setCurrentStep] = useState(1);
     const [formErrors, setFormErrors] = useState({});
 
     const router = useRouter(); const [formData, setFormData] = useState({
-        name: '',
-        docname: '',
-        courseLink: '',
-        pricebefore: '',
-        priceafter: '',
-        first: '',
-        second: '',
-        third: '',
-        fourth: '',
-        fetures: '',
-        stage: 'DRAFT'
-    });
-
-    const steps = [
+        title: '',
+        subtitle: '',
+        description: '',
+        originalPrice: '',
+        discountPrice: '',
+        discountPercentage: '',
+        courses: '',
+        students: '',
+        rating: 5,
+        features: [],
+        endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        isLimited: false,
+        spotsLeft: '',
+        stage: 'DRAFT',
+        section: 'FIRST_SEC'
+    }); const steps = [
         { title: 'معلومات أساسية', icon: <Flag size={20} /> },
-        { title: 'التسعير', icon: <DollarSign size={20} /> },
+        { title: 'التسعير والإحصائيات', icon: <DollarSign size={20} /> },
         { title: 'المميزات', icon: <Star size={20} /> },
-        { title: 'المميزات الإضافية', icon: <ListPlus size={20} /> }
+        { title: 'إعدادات العرض', icon: <Star size={20} /> }
     ];
 
     const nextStep = () => {
@@ -398,12 +503,11 @@ const OffersManagement = () => {
                 fetchOffers();
                 resetForm();
             } else {
-                // Show alert with error message
-                alert(data.message || 'رابط الكورس مطلوب. يرجى إضافة رابط صحيح.');
+                setFormErrors({ ...formErrors, submit: data.message });
             }
         } catch (error) {
             console.error('Error editing offer:', error);
-            alert('حدث خطأ أثناء تحديث العرض. يرجى المحاولة مرة أخرى.');
+            setFormErrors({ ...formErrors, submit: 'حدث خطأ أثناء تحديث العرض. يرجى المحاولة مرة أخرى.' });
         }
     }; const handleDeleteOffer = async (offerId) => {
         if (window.confirm('هل أنت متأكد من حذف هذا العرض؟')) {
@@ -424,39 +528,40 @@ const OffersManagement = () => {
                 console.error('Error deleting offer:', error);
             }
         }
-    };
-
-    const handleAddFeature = () => {
+    }; const handleAddFeature = useCallback(() => {
         setFormData(prev => ({
             ...prev,
             features: [...prev.features, '']
         }));
-    };
+    }, []);
 
-    const handleRemoveFeature = (index) => {
+    const handleRemoveFeature = useCallback((index) => {
         setFormData(prev => ({
             ...prev,
             features: prev.features.filter((_, i) => i !== index)
         }));
-    };
+    }, []);
 
-    const handleFeatureChange = (index, value) => {
+    const handleFeatureChange = useCallback((index, value) => {
         setFormData(prev => ({
             ...prev,
             features: prev.features.map((feature, i) => i === index ? value : feature)
         }));
-    }; const resetForm = () => {
+    }, []); const resetForm = () => {
         setFormData({
-            name: '',
-            docname: '',
-            courseLink: '',
-            pricebefore: '',
-            priceafter: '',
-            first: '',
-            second: '',
-            third: '',
-            fourth: '',
-            fetures: '',
+            title: '',
+            subtitle: '',
+            description: '',
+            originalPrice: '',
+            discountPrice: '',
+            discountPercentage: '',
+            courses: '',
+            students: '',
+            rating: 5,
+            features: [],
+            endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            isLimited: false,
+            spotsLeft: '',
             stage: 'DRAFT'
         });
     };
@@ -488,10 +593,12 @@ const OffersManagement = () => {
 
     // Filter offers using debounced value
     const filteredOffers = offers.filter(offer => {
-        const matchesSearch = (offer.name?.toLowerCase() || '').includes(debouncedSearchQuery.toLowerCase()) ||
-            (offer.docname?.toLowerCase() || '').includes(debouncedSearchQuery.toLowerCase());
+        const matchesSearch = (offer.title?.toLowerCase() || '').includes(debouncedSearchQuery.toLowerCase()) ||
+            (offer.subtitle?.toLowerCase() || '').includes(debouncedSearchQuery.toLowerCase()) ||
+            (offer.description?.toLowerCase() || '').includes(debouncedSearchQuery.toLowerCase());
         const matchesStage = filterStage === 'all' || offer.stage === filterStage;
-        return matchesSearch && matchesStage;
+        const matchesSection = filterSection === 'all' || offer.section === filterSection;
+        return matchesSearch && matchesStage && matchesSection;
     });
 
     // Use useCallback for modal handlers
@@ -499,50 +606,59 @@ const OffersManagement = () => {
         setShowAddModal(false);
         resetForm();
         setCurrentStep(1);
-    }, []);
-
-    const handleCloseEditModal = useCallback(() => {
+    }, []); const handleCloseEditModal = useCallback(() => {
         setShowEditModal(false);
         resetForm();
         setCurrentStep(1);
+        setFormErrors({});
     }, []);
 
     const handleFormChange = useCallback((field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-    }, []);
-
-    const handleNextStep = useCallback(() => {
+    }, []); const handleNextStep = useCallback(() => {
         const errors = validateForm(currentStep);
         setFormErrors(errors);
 
         if (Object.keys(errors).length === 0) {
-            setCurrentStep(prev => Math.min(prev + 1, steps.length));
+            nextStep();
         }
     }, [currentStep, formData, steps.length]);
 
     const handlePrevStep = useCallback(() => {
         setCurrentStep(prev => Math.max(prev - 1, 1));
-    }, []);
-
-    const validateForm = (step) => {
+    }, []); const validateForm = (step) => {
         const errors = {};
         switch (step) {
             case 1:
-                if (!formData.name?.trim()) errors.name = 'عنوان العرض مطلوب';
-                if (!formData.docname?.trim()) errors.docname = 'اسم الدكتور مطلوب';
-                if (!formData.courseLink?.trim()) errors.courseLink = 'رابط الكورس مطلوب';
-                if (!formData.courseLink?.startsWith('http')) errors.courseLink = 'يجب أن يبدأ الرابط بـ http:// أو https://';
+                if (!formData.title?.trim()) errors.title = 'عنوان العرض مطلوب';
+                if (!formData.subtitle?.trim()) errors.subtitle = 'العنوان الفرعي مطلوب';
+                if (!formData.description?.trim()) errors.description = 'وصف العرض مطلوب';
+                if (!formData.section) errors.section = 'اختيار المرحلة مطلوب';
                 break;
             case 2:
-                if (!formData.pricebefore) errors.pricebefore = 'السعر قبل الخصم مطلوب';
-                if (!formData.priceafter) errors.priceafter = 'السعر بعد الخصم مطلوب';
-                if (Number(formData.priceafter) >= Number(formData.pricebefore)) {
-                    errors.priceafter = 'يجب أن يكون السعر بعد الخصم أقل من السعر قبل الخصم';
+                if (!formData.originalPrice) errors.originalPrice = 'السعر الأصلي مطلوب';
+                if (!formData.discountPrice) errors.discountPrice = 'سعر الخصم مطلوب';
+                if (Number(formData.discountPrice) >= Number(formData.originalPrice)) {
+                    errors.discountPrice = 'يجب أن يكون سعر الخصم أقل من السعر الأصلي';
+                }
+                if (!formData.courses) errors.courses = 'عدد الكورسات مطلوب';
+                if (!formData.students && formData.students !== 0) errors.students = 'عدد الطلاب مطلوب';
+                if (!formData.rating || formData.rating < 0 || formData.rating > 5) {
+                    errors.rating = 'التقييم يجب أن يكون بين 0 و 5';
                 }
                 break;
             case 3:
-                if (!formData.first?.trim()) errors.first = 'الميزة الأولى مطلوبة';
-                if (!formData.second?.trim()) errors.second = 'الميزة الثانية مطلوبة';
+                if (!formData.features || formData.features.length === 0) {
+                    errors.features = 'يجب إضافة ميزة واحدة على الأقل';
+                } else if (formData.features.some(feature => !feature.trim())) {
+                    errors.features = 'جميع الميزات يجب أن تحتوي على نص';
+                }
+                break;
+            case 4:
+                if (!formData.endDate) errors.endDate = 'تاريخ انتهاء العرض مطلوب';
+                if (formData.isLimited && !formData.spotsLeft) {
+                    errors.spotsLeft = 'يجب تحديد عدد المقاعد المتاحة';
+                }
                 break;
         }
         return errors;
@@ -679,34 +795,57 @@ const OffersManagement = () => {
                         >
                             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 opacity-0 
                                           group-hover:opacity-100 transition-opacity duration-500"/>
-                            
+
                             <div className="p-6 relative z-10">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h3 className="text-xl font-arabicUI3 text-white group-hover:text-blue-400 
+                                <div className="flex justify-between items-start mb-4">                                    <div>
+                                    <h3 className="text-xl font-arabicUI3 text-white group-hover:text-blue-400 
                                                      transition-colors duration-300">
-                                            {offer.name}
-                                        </h3>
-                                        <p className="text-gray-400 mt-1">د. {offer.docname}</p>
-                                    </div>
+                                        {offer.title}
+                                    </h3>
+                                    <p className="text-gray-400 mt-1">{offer.subtitle}</p>
+                                </div>
                                     <div className={`px-3 py-1 rounded-full text-xs font-medium 
                                         ${offer.stage === 'PUBLISHED' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                                          offer.stage === 'DRAFT' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
-                                          'bg-red-500/20 text-red-400 border-red-500/30'}
+                                            offer.stage === 'DRAFT' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                                                'bg-red-500/20 text-red-400 border-red-500/30'}
                                         border backdrop-blur-md`}>
-                                        {offer.stage}
+                                        {offer.stage === 'PUBLISHED' ? 'منشور' :
+                                            offer.stage === 'DRAFT' ? 'مسودة' :
+                                                'مؤرشف'}
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center gap-2">
-                                            <Tag size={16} className="text-blue-400" />
-                                            <span className="text-white font-medium">{offer.pricebefore} جنيه</span>
+                                            <Tags size={16} className="text-blue-400" />
+                                            <span className="text-white font-medium">{offer.originalPrice} جنيه</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-red-400 line-through">{offer.priceafter} جنيه</span>
+                                            <span className="text-red-400 line-through">{offer.discountPrice} جنيه</span>
+                                            <span className="text-green-400 text-sm">({offer.discountPercentage}% خصم)</span>
                                         </div>
+                                    </div>                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <Book size={14} className="text-indigo-400" />
+                                            <span className="text-gray-400 text-sm">{offer.courses} كورس</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Users size={14} className="text-yellow-400" />
+                                            <span className="text-gray-400 text-sm">{offer.students} طالب</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <StarIcon size={14} className="text-orange-400" />
+                                            <span className="text-gray-400 text-sm">{offer.rating}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <Book size={14} className="text-purple-400" />
+                                        <span className="text-gray-400 text-sm">
+                                            {offer.section === 'FIRST_SEC' ? 'الصف الأول الثانوي' :
+                                                offer.section === 'SECOND_SEC' ? 'الصف الثاني الثانوي' :
+                                                    'الصف الثالث الثانوي'}
+                                        </span>
                                     </div>
 
                                     <div className="flex items-center justify-between text-sm text-gray-400">
@@ -741,9 +880,7 @@ const OffersManagement = () => {
                         </motion.div>
                     ))
                 )}
-            </div>
-
-            {/* Add Offer Modal */}
+            </div>            {/* Add Offer Modal */}
             <AnimatePresence mode="wait">
                 {showAddModal && (
                     <OfferModal
@@ -757,6 +894,9 @@ const OffersManagement = () => {
                         onNextStep={handleNextStep}
                         onPrevStep={handlePrevStep}
                         formErrors={formErrors}
+                        handleAddFeature={handleAddFeature}
+                        handleRemoveFeature={handleRemoveFeature}
+                        handleFeatureChange={handleFeatureChange}
                     />
                 )}
             </AnimatePresence>
@@ -775,6 +915,9 @@ const OffersManagement = () => {
                         onNextStep={handleNextStep}
                         onPrevStep={handlePrevStep}
                         formErrors={formErrors}
+                        handleAddFeature={handleAddFeature}
+                        handleRemoveFeature={handleRemoveFeature}
+                        handleFeatureChange={handleFeatureChange}
                     />
                 )}
             </AnimatePresence>
