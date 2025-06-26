@@ -195,8 +195,7 @@ const StudentFollowup = () => {
                 );                // Process exams
                 const processedExams = coursesData.flatMap(course => {
                     if (!course.exams || !Array.isArray(course.exams)) {
-                        console.log(`Course ${course.name} has no exams or invalid exams data`);
-                        return [];
+                         return [];
                     }
                     return course.exams.map(exam => ({
                         id: exam._id,
@@ -210,8 +209,7 @@ const StudentFollowup = () => {
 
                 setAllCourses(processedCourses);
                 setAllChapters(processedChapters);
-                console.log(`Loaded ${processedExams.length} exams from courses data`);
-                setAllExams(processedExams);
+                 setAllExams(processedExams);
             }
         } catch (error) {
             console.error('Error fetching course data:', error);
@@ -442,11 +440,7 @@ const StudentFollowup = () => {
         }, {});
 
         const completedExamIds = new Set(Object.keys(latestAttempts));
-
-        // Add debugging to check exam titles
-        console.log("Completed exams:", [...completedExamIds]);
-        console.log("Available exams:", allExams.map(exam => exam.title));
-
+ 
         // If we have no exams data but have quiz results, create synthetic exam objects from quiz results
         if (allExams.length === 0 && quizResults.length > 0) {
             console.log("Creating synthetic exam objects from quiz results");

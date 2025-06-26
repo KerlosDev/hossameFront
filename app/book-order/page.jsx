@@ -117,8 +117,7 @@ export default function BookOrder() {
                 totalPrice: calculatedTotalPrice
             };
 
-            console.log('Sending order data:', orderData); // Debug log
-
+ 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/book-orders`, {
                 method: 'POST',
                 headers: {
@@ -135,8 +134,7 @@ export default function BookOrder() {
             }
 
             const data = await response.json();
-            console.log('Order created:', data); // Debug log
-
+ 
             setShowSuccess(true);
             toast.success('تم تقديم الطلب بنجاح');
             setFormData({

@@ -200,7 +200,7 @@ const CoursePage = () => {
                     }
                 );
 
-                console.log('✅ تم تسجيل المشاهدة');
+            
             } catch (error) {
                 console.error('❌ خطأ في تسجيل المشاهدة:', error);
             }

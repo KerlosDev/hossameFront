@@ -62,38 +62,32 @@ const Offer = () => {
                 }
 
                 const responseData = await response.json();
-                console.log('API Response:', responseData);
-
+ 
                 // Check if the response has the expected structure
                 if (responseData.status === 'success' && Array.isArray(responseData.offers)) {
                     const publishedOffers = responseData.offers;
                     // Handle array response
                     const offersBySection = {};
                     publishedOffers.forEach(offer => {
-                        console.log('Processing offer:', offer);
-                        // Check if the offer is published and has required fields
+                         // Check if the offer is published and has required fields
                         if (offer && offer.stage === 'PUBLISHED' && offer.section) {
                             offersBySection[offer.section] = offer;
                         }
                     });
 
-                    console.log('Processed offers by section:', offersBySection);
-
+ 
                     // Only set error if there are no valid offers
                     if (Object.keys(offersBySection).length === 0) {
-                        console.log('No valid offers found');
-                        setError('No active offers available');
+                         setError('No active offers available');
                     } else {
-                        console.log('Setting offers state with:', offersBySection);
-                        setError(null);
+                         setError(null);
                         setOffers(offersBySection);
                         // Set active section to the first available section
                         const availableSections = Object.keys(offersBySection);
                         setActiveSection(availableSections[0]);
                     }
                 } else {
-                    console.log('Invalid response format:', responseData);
-                    setError('Invalid data format received from server');
+                     setError('Invalid data format received from server');
                 }
             } catch (err) {
                 console.error('Error fetching offers:', err);
