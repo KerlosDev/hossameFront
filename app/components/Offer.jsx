@@ -323,7 +323,7 @@ const Offer = () => {
                                         </div>
                                         <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm sm:text-base">
                                             <FiUsers className="ml-1 sm:ml-2 text-green-500" />
-                                            <span className="font-semibold">{activeOffer.students.toLocaleString()}</span> طالب
+                                            <span className="font-semibold">{Number.isFinite(Number(activeOffer.students)) ? Number(activeOffer.students).toLocaleString() : '0'}</span> طالب
                                         </div>
                                         <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm sm:text-base">
                                             <FiStar className="ml-1 sm:ml-2 text-yellow-500" />
