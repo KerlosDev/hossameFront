@@ -81,7 +81,7 @@ const Hero = () => {
 
                                 {/* Professional Titles */}
                                 <div className="space-y-3">
-                                    <div className="flex justify-center sm:justify-start items-center gap-3">
+                                  {/*   <div className="flex justify-center sm:justify-start items-center gap-3">
                                         <FaAward className="text-2xl text-yellow-500 animate-bounce" />
                                         <h2 className="text-xl sm:text-2xl lg:text-3xl font-arabicUI3 
                                                      bg-gradient-to-l from-purple-600 via-blue-600 to-cyan-600 
@@ -89,14 +89,14 @@ const Hero = () => {
                                             خبير الرياضيات الأول والمعلم المتميز
                                         </h2>
                                         <MdSchool className="text-2xl text-blue-500 animate-pulse" />
-                                    </div>
+                                    </div>*/}
 
-                                   
+
                                     <div className="flex justify-center sm:justify-start items-center gap-2">
                                         <FaTrophy className="text-yellow-500 text-lg animate-spin-slow" />
                                         <span className="text-base sm:text-lg font-arabicUI3 
                                                        text-slate-700 dark:text-slate-300">
-                                            مدرس معتمد • خبير في المناهج الحديثة
+                                            هنحول الرياضيات لمادة ممتعة وسهلة
                                         </span>
                                     </div>
                                 </div>
@@ -145,7 +145,7 @@ const Hero = () => {
                                         <FaChartLine className="text-3xl text-blue-500 animate-pulse" />
                                         <h3 className="text-xl sm:text-2xl lg:text-3xl font-arabicUI3 
                                                      text-slate-600 dark:text-slate-300">
-شرح الرياضيات بالنظام الجديد                                        </h3>
+                                            شرح الرياضيات بالنظام الجديد                                        </h3>
                                         <MdVideoLibrary className="text-3xl text-green-500 animate-bounce" />
                                     </div>
                                 </div>
@@ -163,7 +163,7 @@ const Hero = () => {
                                             <span className="text-sm font-arabicUI3 text-blue-700 dark:text-blue-300 font-semibold">
                                                 حلول تفاعلية متقدمة
                                             </span>
-                                             
+
                                         </div>
                                     </div>
 
@@ -178,7 +178,7 @@ const Hero = () => {
                                             <span className="text-sm font-arabicUI3 text-red-700 dark:text-red-300 font-semibold">
                                                 شرح مبسط وواضح
                                             </span>
-                                             
+
                                         </div>
                                     </div>
 
@@ -194,7 +194,7 @@ const Hero = () => {
                                             <span className="text-sm font-arabicUI3 text-green-700 dark:text-green-300 font-semibold">
                                                 أمثلة متنوعة شاملة
                                             </span>
-                                             
+
                                         </div>
                                     </div>
                                 </div>
