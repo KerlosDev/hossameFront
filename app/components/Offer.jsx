@@ -151,21 +151,9 @@ const Offer = () => {
         );
     }
 
-    if (error) {
-        return (
-            <div className="text-center p-4 bg-red-50 text-red-600 rounded-lg">
-                {error}
-            </div>
-        );
-    }
-
-    // If no offers are available
-    if (!offers || Object.keys(offers).length === 0) {
-        return (
-            <div className="text-center p-4 bg-gray-50 text-gray-600 rounded-lg">
-                لا توجد عروض متاحة حالياً
-            </div>
-        );
+    // If there's an error or no offers are available, don't render anything
+    if (error || !offers || Object.keys(offers).length === 0) {
+        return null;
     }
 
     const activeOffer = offers[activeSection] || defaultOfferData;
@@ -208,7 +196,7 @@ const Offer = () => {
                             <FiZap className="text-xl sm:text-3xl md:text-4xl text-red-500" />
                         </div>
                         <p className="text-sm sm:text-base md:text-xl text-slate-600 dark:text-slate-300 font-arabicUI3 px-2">
-                            احصل على أفضل العروض لتعلم الرياضيات مع حسام ميرة
+                            احصل على أفضل العروض لتعلم الكيمياء مع شهد هاني
                         </p>
                     </div>
                     {/* Section Buttons */}
