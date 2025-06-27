@@ -106,7 +106,7 @@ const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formDa
                                                 value={formData.subtitle}
                                                 onChange={(e) => onFormChange('subtitle', e.target.value)}
                                                 className={`w-full px-4 py-3 bg-white/5 border ${formErrors.subtitle ? 'border-red-500' : 'border-white/10'} rounded-xl text-white`}
-                                                placeholder="مثال: حسام ميرا يقدم"
+                                                placeholder="مثال: حسام ميرة يقدم"
                                             />
                                             {formErrors.subtitle && <p className="text-red-500 text-sm">{formErrors.subtitle}</p>}
                                         </div>
@@ -126,7 +126,7 @@ const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formDa
                                                 onChange={(e) => onFormChange('section', e.target.value)}
                                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
                                             >
-                                                <option value="FIRST_SEC">الصف الأول الثانوي</option>
+                                                <option  value="FIRST_SEC">الصف الأول الثانوي</option>
                                                 <option value="SECOND_SEC">الصف الثاني الثانوي</option>
                                                 <option value="THIRD_SEC">الصف الثالث الثانوي</option>
                                             </select>

@@ -151,7 +151,7 @@ const CoursePage = () => {
     useEffect(() => {
         // Update the document title when courseInfo changes
         if (courseInfo.nameofcourse) {
-            document.title = `${courseInfo.nameofcourse} - منصة حسام ميرا `;
+            document.title = `${courseInfo.nameofcourse} - منصة حسام ميرة `;
         }
     }, [courseInfo]);
 
@@ -200,7 +200,7 @@ const CoursePage = () => {
                     }
                 );
 
-            
+
             } catch (error) {
                 console.error('❌ خطأ في تسجيل المشاهدة:', error);
             }
@@ -218,7 +218,7 @@ const CoursePage = () => {
         return (
             <>
                 <Head>
-                    <title>جاري التحميل... - حسام ميرا</title>
+                    <title>جاري التحميل... - حسام ميرة</title>
                 </Head>
                 <div dir='rtl' className="min-h-screen bg-[#0A1121] text-white font-arabicUI3">
                     <div className="fixed inset-0 pointer-events-none">
@@ -241,7 +241,7 @@ const CoursePage = () => {
     return (
         <>
             <Head>
-                <title>{courseInfo.nameofcourse ? `${courseInfo.nameofcourse} - منصة حسام ميرا  ` : 'منصة حسام ميرا   '}</title>
+                <title>{courseInfo.nameofcourse ? `${courseInfo.nameofcourse} - منصة حسام ميرة  ` : 'منصة حسام ميرة   '}</title>
                 {/* Add Plyr CSS */}
                 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
                 {/* Add custom styling for Plyr */}
@@ -285,7 +285,7 @@ const CoursePage = () => {
                                         <img src="/prof.jpg"
                                             className="w-10 h-10 rounded-full border-2 border-blue-500" />
                                         <div>
-                                            <p className="text-white">أ/ حسام ميرا </p>
+                                            <p className="text-white">أ/ حسام ميرة </p>
                                             <p className="text-sm text-gray-400">مدرس المادة</p>
                                         </div>
                                     </div>

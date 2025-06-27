@@ -566,7 +566,7 @@ const CourseManager = () => {
                             isCompleted={currentStep > 2}
                         />
                         <div className="w-12 h-0.5 bg-gray-700" />
-                        
+
                     </div>
 
                     {/* Mobile Step Indicators */}
@@ -623,13 +623,13 @@ const CourseManager = () => {
     );
 
     return (
-        <div className="p-6   font-arabicUI3   rounded-lg shadow-lg min-h-screen">
+        <div className="p-6 font-arabicUI3 rounded-lg shadow-lg min-h-screen bg-white text-gray-900 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 dark:text-white">
             {/* Header Section */}
-            <div className="flex justify-between items-center mb-6 bg-gradient-to-r from-gray-800/80 to-gray-900/90 p-4 rounded-xl border border-white/10">
-                <h2 className="text-2xl font-arabicUI3 text-white  ">إدارة الكورسات</h2>
+            <div className="flex justify-between items-center mb-6 bg-gradient-to-r from-blue-100/80 to-blue-200/90 p-4 rounded-xl border border-blue-200/40 dark:from-gray-800/80 dark:to-gray-900/90 dark:border-white/10">
+                <h2 className="text-2xl font-arabicUI3 text-blue-900 dark:text-white">إدارة الكورسات</h2>
                 <button
                     onClick={() => setShowForm(true)}
-                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300"
+                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 dark:text-blue-400"
                 >
                     <FaPlus /> إضافة كورس جديد
                 </button>
@@ -642,33 +642,33 @@ const CourseManager = () => {
                         label: 'إجمالي الكورسات',
                         value: courses.length,
                         icon: FaBook,
-                        color: 'from-blue-600/20 to-blue-400/20',
-                        iconColor: 'text-blue-400',
-                        borderColor: 'border-blue-500/20'
+                        color: 'from-blue-100/60 to-blue-300/40 dark:from-blue-600/20 dark:to-blue-400/20',
+                        iconColor: 'text-blue-500 dark:text-blue-400',
+                        borderColor: 'border-blue-200/40 dark:border-blue-500/20'
                     },
                     {
                         label: 'الكورسات المنشورة',
                         value: courses.filter(c => !c.isDraft).length,
                         icon: FaVideo,
-                        color: 'from-green-600/20 to-green-400/20',
-                        iconColor: 'text-green-400',
-                        borderColor: 'border-green-500/20'
+                        color: 'from-green-100/60 to-green-300/40 dark:from-green-600/20 dark:to-green-400/20',
+                        iconColor: 'text-green-500 dark:text-green-400',
+                        borderColor: 'border-green-200/40 dark:border-green-500/20'
                     },
                     {
                         label: 'المسودات',
                         value: courses.filter(c => c.isDraft).length,
                         icon: FaEdit,
-                        color: 'from-yellow-600/20 to-yellow-400/20',
-                        iconColor: 'text-yellow-400',
-                        borderColor: 'border-yellow-500/20'
+                        color: 'from-yellow-100/60 to-yellow-300/40 dark:from-yellow-600/20 dark:to-yellow-400/20',
+                        iconColor: 'text-yellow-500 dark:text-yellow-400',
+                        borderColor: 'border-yellow-200/40 dark:border-yellow-500/20'
                     },
                     {
                         label: 'الكورسات المجانية',
                         value: courses.filter(c => c.isFree).length,
                         icon: FaBookmark,
-                        color: 'from-purple-600/20 to-purple-400/20',
-                        iconColor: 'text-purple-400',
-                        borderColor: 'border-purple-500/20'
+                        color: 'from-purple-100/60 to-purple-300/40 dark:from-purple-600/20 dark:to-purple-400/20',
+                        iconColor: 'text-purple-500 dark:text-purple-400',
+                        borderColor: 'border-purple-200/40 dark:border-purple-500/20'
                     }
                 ].map((stat, index) => (
                     <motion.div
@@ -676,17 +676,15 @@ const CourseManager = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         key={index}
-                        className={`relative overflow-hidden bg-gradient-to-br ${stat.color} 
-                            backdrop-blur-xl rounded-xl p-6 border ${stat.borderColor}
-                            hover:shadow-lg hover:shadow-white/5 transition-all duration-300`}
+                        className={`relative overflow-hidden bg-gradient-to-br ${stat.color} backdrop-blur-xl rounded-xl p-6 border ${stat.borderColor} hover:shadow-lg hover:shadow-blue-200/20 dark:hover:shadow-white/5 transition-all duration-300`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className={`p-3 rounded-lg bg-white/5 ${stat.iconColor}`}>
+                            <div className={`p-3 rounded-lg bg-blue-50 dark:bg-white/5 ${stat.iconColor}`}> {/* icon bg for light mode */}
                                 <stat.icon className="text-2xl" />
                             </div>
                             <div>
-                                <p className="text-gray-400 text-sm font-arabicUI3">{stat.label}</p>
-                                <h3 className="text-3xl font-arabicUI3 text-white mt-1">
+                                <p className="text-gray-500 text-sm font-arabicUI3 dark:text-gray-400">{stat.label}</p>
+                                <h3 className="text-3xl font-arabicUI3 text-blue-900 mt-1 dark:text-white">
                                     {stat.value}
                                 </h3>
                             </div>
@@ -713,7 +711,7 @@ const CourseManager = () => {
                 <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all [&>option]:text-black"
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-black dark:text-white focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all [&>option]:text-black"
                 >
                     <option value="all">جميع الكورسات</option>
                     <option value="active">الكورسات النشطة</option>
@@ -905,18 +903,18 @@ const CourseManager = () => {
 
                                             {/* Course Level */}
                                             <div className="space-y-2">
-                                                <label className="text-sm font-arabicUI3 text-gray-400">المستوى الدراسي</label>
+                                                <label className="text-sm text-white font-arabicUI3 ">المستوى الدراسي</label>
                                                 <select
                                                     value={newCourse.level}
                                                     onChange={(e) => setNewCourse({ ...newCourse, level: e.target.value })}
-                                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white 
+                                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl  text-white 
                                                              focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                                     required
                                                 >
-                                                    <option value="">اختر المستوى</option>
-                                                    <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
-                                                    <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
-                                                    <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                                                    <option className='text-black' value="">اختر المستوى</option>
+                                                    <option className='text-black' value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+                                                    <option className='text-black' value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+                                                    <option className='text-black' value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
                                                 </select>
                                             </div>
 

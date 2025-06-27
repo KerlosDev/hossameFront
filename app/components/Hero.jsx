@@ -70,7 +70,7 @@ const Hero = () => {
                                                      bg-gradient-to-l from-blue-600 via-purple-600 to-blue-800 
                                                      bg-clip-text text-transparent font-bold 
                                                      drop-shadow-lg group-hover:scale-105 transition-transform duration-300">
-                                            حسام ميرا
+                                            حسام ميرة
                                         </h1>                                        <div className="hidden sm:flex w-12 h-12 bg-gradient-to-br from-yellow-500/30 to-red-500/30 
                                                       rounded-full items-center justify-center group-hover:scale-110 
                                                       transition-transform duration-300">
@@ -81,7 +81,7 @@ const Hero = () => {
 
                                 {/* Professional Titles */}
                                 <div className="space-y-3">
-                                  {/*   <div className="flex justify-center sm:justify-start items-center gap-3">
+                                    {/*   <div className="flex justify-center sm:justify-start items-center gap-3">
                                         <FaAward className="text-2xl text-yellow-500 animate-bounce" />
                                         <h2 className="text-xl sm:text-2xl lg:text-3xl font-arabicUI3 
                                                      bg-gradient-to-l from-purple-600 via-blue-600 to-cyan-600 
@@ -96,8 +96,7 @@ const Hero = () => {
                                         <FaTrophy className="text-yellow-500 text-lg animate-spin-slow" />
                                         <span className="text-base sm:text-lg font-arabicUI3 
                                                        text-slate-700 dark:text-slate-300">
-                                            هنحول الرياضيات لمادة ممتعة وسهلة
-                                        </span>
+                                            مدرس الرياضيات البحتة والتطبيقية بخبرة +5 سنوات                                        </span>
                                     </div>
                                 </div>
 

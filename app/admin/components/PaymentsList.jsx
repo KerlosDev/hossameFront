@@ -214,8 +214,8 @@ export default function PaymentsList() {
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className="flex-1 sm:flex-none bg-white/5 border border-white/10 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors text-sm sm:text-base"
                             >
-                                <option value="date">تاريخ الدفع</option>
-                                <option value="amount">المبلغ</option>
+                                <option  className='text-black' value="date">تاريخ الدفع</option>
+                                <option  className='text-black' value="amount">المبلغ</option>
                             </select>
                             <button
                                 onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}

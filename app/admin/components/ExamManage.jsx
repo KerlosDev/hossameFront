@@ -28,13 +28,13 @@ api.interceptors.request.use((config) => {
 
 const SearchBar = ({ value, onChange }) => (
     <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-400" size={20} />
         <input
             type="text"
             value={value}
             onChange={e => onChange(e.target.value)}
             placeholder="البحث عن امتحان..."
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:border-blue-500/50 transition-colors"
+            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 text-gray-700 placeholder-gray-400 focus:border-blue-400 transition-colors rounded-xl dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500/50"
         />
     </div>
 );
@@ -43,8 +43,8 @@ const FilterButton = ({ active, onClick, children }) => (
     <button
         onClick={onClick}
         className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${active
-            ? 'bg-blue-500/20 text-blue-400'
-            : 'bg-white/5 text-gray-400 hover:bg-white/10'
+            ? 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
+            : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10'
             }`}
     >
         {children}
@@ -58,17 +58,17 @@ const ExamStats = ({ exams }) => {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p className="text-gray-400 text-sm">إجمالي الأسئلة</p>
-                <p className="text-2xl font-bold text-white mt-1">{totalQuestions}</p>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/5 dark:border-white/10">
+                <p className="text-gray-500 text-sm dark:text-gray-400">إجمالي الأسئلة</p>
+                <p className="text-2xl font-bold text-gray-800 mt-1 dark:text-white">{totalQuestions}</p>
             </div>
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p className="text-gray-400 text-sm">إجمالي المدة</p>
-                <p className="text-2xl font-bold text-white mt-1">{totalDuration} دقيقة</p>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/5 dark:border-white/10">
+                <p className="text-gray-500 text-sm dark:text-gray-400">إجمالي المدة</p>
+                <p className="text-2xl font-bold text-gray-800 mt-1 dark:text-white">{totalDuration} دقيقة</p>
             </div>
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p className="text-gray-400 text-sm">متوسط الدرجات</p>
-                <p className="text-2xl font-bold text-white mt-1">{avgScore}</p>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-white/5 dark:border-white/10">
+                <p className="text-gray-500 text-sm dark:text-gray-400">متوسط الدرجات</p>
+                <p className="text-2xl font-bold text-gray-800 mt-1 dark:text-white">{avgScore}</p>
             </div>
         </div>
     );
@@ -76,7 +76,7 @@ const ExamStats = ({ exams }) => {
 
 const DraggableQuestion = ({ question, index, onEdit, onDelete, onDragEnd }) => {
     return (<motion.div
-        className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-white/20"
+        className="p-4 bg-white border border-gray-200 rounded-xl dark:bg-white/5 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20"
     >
         <div className="flex flex-col gap-2">
             <div className="flex justify-between items-start">                            <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ const DraggableQuestion = ({ question, index, onEdit, onDelete, onDragEnd }) => 
                                 onDragEnd(null, { point: { y: newIndex * 100 } });
                             }
                         }}
-                        className="p-1 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded transition-colors disabled:opacity-50"
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 dark:hover:text-blue-400 dark:hover:bg-blue-500/10"
                         disabled={index === 0}
                         title="تحريك لأعلى"
                     >
@@ -101,26 +101,26 @@ const DraggableQuestion = ({ question, index, onEdit, onDelete, onDragEnd }) => 
                             const newIndex = index + 1;
                             onDragEnd(null, { point: { y: newIndex * 100 } });
                         }}
-                        className="p-1 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded transition-colors"
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors dark:hover:text-blue-400 dark:hover:bg-blue-500/10"
                         title="تحريك لأسفل"
                     >
                         ▼
                     </button>
                 </div>
                 <span className="text-gray-400">#{index + 1}</span>
-                <h4 className="text-white">{question.title}</h4>
+                <h4 className="text-gray-800 dark:text-white">{question.title}</h4>
             </div>
                 <div className="flex gap-2">
                     <button
                         onClick={() => onEdit(index)}
-                        className="p-2 text-blue-400 hover:bg-blue-500/10 rounded transition-colors"
+                        className="p-2 text-blue-600 hover:bg-blue-100 rounded transition-colors dark:text-blue-400 dark:hover:bg-blue-500/10"
                         title="تعديل السؤال"
                     >
                         <Edit2 size={16} />
                     </button>
                     <button
                         onClick={() => onDelete(index)}
-                        className="p-2 text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                        className="p-2 text-red-500 hover:bg-red-100 rounded transition-colors dark:text-red-400 dark:hover:bg-red-500/10"
                         title="حذف السؤال"
                     >
                         <Trash2 size={16} />
@@ -141,8 +141,8 @@ const DraggableQuestion = ({ question, index, onEdit, onDelete, onDragEnd }) => 
                     <div
                         key={key}
                         className={`text-sm p-2 rounded ${question.correctAnswer === key
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-white/5 text-gray-400'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400'
+                            : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'
                             }`}
                     >
                         {key}: {value}
@@ -469,14 +469,15 @@ const ExamManage = () => {
     );
 
     return (
-        <div className="p-6   font-arabicUI3 rounded-lg min-h-screen">
+        <div className="p-6 font-arabicUI3 rounded-lg min-h-screen bg-gray-50 text-gray-800 dark:bg-transparent dark:text-white">
             {/* Header with Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">                <StatsCard
-                title="إجمالي الامتحانات"
-                value={pagination.totalExams}
-                icon={<Book className="text-blue-500" />}
-                change="+2 this week"
-            />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <StatsCard
+                    title="إجمالي الامتحانات"
+                    value={pagination.totalExams}
+                    icon={<Book className="text-blue-500" />}
+                    change="+2 this week"
+                />
                 <StatsCard
                     title="متوسط الدرجات"
                     value="85%"
@@ -507,11 +508,10 @@ const ExamManage = () => {
                     /* Manage Exams Tab */
                     <div className="space-y-4">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-white">قائمة الامتحانات</h2>
+                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">قائمة الامتحانات</h2>
                             <button
                                 onClick={() => setActiveTab('create')}
-                                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg 
-                                         flex items-center gap-2 transition-all duration-300"
+                                className="bg-blue-100 hover:bg-blue-200 text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 dark:text-blue-400"
                             >
                                 <Plus size={20} />
                                 إضافة امتحان جديد
@@ -545,8 +545,8 @@ const ExamManage = () => {
                     </div>
                 ) : (
                     /* Create Exam Tab */
-                    <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
-                        <h3 className="text-xl font-bold text-white mb-6">إنشاء امتحان جديد</h3>
+                    <div className="bg-white border border-gray-200 backdrop-blur-xl rounded-xl p-6 dark:bg-white/5 dark:border-white/10">
+                        <h3 className="text-xl font-bold text-gray-800 mb-6 dark:text-white">إنشاء امتحان جديد</h3>
                         {/* Move the exam creation form here */}
                         <div className="space-y-6">
                             {/* Basic Info */}
@@ -556,7 +556,7 @@ const ExamManage = () => {
                                     placeholder="عنوان الامتحان"
                                     value={newExam.title}
                                     onChange={(e) => setNewExam({ ...newExam, title: e.target.value })}
-                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                    className="w-full p-3 bg-white border border-gray-200 rounded-xl text-gray-800 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                 />
                                 <div className="flex items-center gap-4">
                                     <Clock className="text-gray-400" />
@@ -565,17 +565,17 @@ const ExamManage = () => {
                                         placeholder="مدة الامتحان (دقائق)"
                                         value={newExam.duration}
                                         onChange={(e) => setNewExam({ ...newExam, duration: e.target.value })}
-                                        className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                        className="w-full p-3 bg-white border border-gray-200 rounded-xl text-gray-800 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                     />
                                 </div>
                             </div>
 
                             {/* Questions */}
                             <div className="space-y-4">
-                                <h4 className="text-lg font-semibold text-white">الأسئلة</h4>
+                                <h4 className="text-lg font-semibold text-gray-800 dark:text-white">الأسئلة</h4>
 
                                 {/* Question Input */}
-                                <div className="space-y-4 bg-white/5 p-4 rounded-xl">
+                                <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200 dark:bg-white/5 dark:border-white/10">
                                     <input
                                         type="text"
                                         placeholder="السؤال"
@@ -584,7 +584,7 @@ const ExamManage = () => {
                                             ...currentQuestion,
                                             title: e.target.value
                                         })}
-                                        className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                        className="w-full p-3 bg-white border border-gray-200 rounded-xl text-gray-800 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                     />
 
                                     {/* Options */}
@@ -602,7 +602,7 @@ const ExamManage = () => {
                                                         [key]: e.target.value
                                                     }
                                                 })}
-                                                className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                                className="w-full p-3 bg-white border border-gray-200 rounded-xl text-gray-800 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                             />
                                         ))}
                                     </div>
@@ -615,15 +615,15 @@ const ExamManage = () => {
                                                 ...currentQuestion,
                                                 correctAnswer: e.target.value
                                             })}
-                                            className="flex-1 p-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                            className="flex-1 p-3 bg-white border border-gray-200 rounded-xl text-gray-800 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                         >
                                             <option value="">الإجابة الصحيحة</option>
                                             {Object.keys(currentQuestion.options).map((key) => (
-                                                <option key={key} value={key}>الإجابة {key}</option>
+                                                <option  className='  text-black' key={key} value={key}>الإجابة {key}</option>
                                             ))}
                                         </select>
 
-                                        <label className="flex items-center justify-center p-3 bg-white/5 border border-white/10 rounded-xl text-white cursor-pointer hover:bg-white/10 transition-colors">
+                                        <label className="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-xl text-gray-800 cursor-pointer hover:bg-gray-100 transition-colors dark:bg-white/5 dark:border-white/10 dark:text-white dark:hover:bg-white/10">
                                             <ImageIcon size={20} />
                                             <input
                                                 type="file"
@@ -656,7 +656,7 @@ const ExamManage = () => {
 
                                     <button
                                         onClick={addQuestion}
-                                        className="w-full p-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-xl transition-colors"
+                                        className="w-full p-3 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-xl transition-colors dark:bg-blue-500/20 dark:hover:bg-blue-500/30 dark:text-blue-400"
                                     >
                                         إضافة السؤال
                                     </button>
@@ -690,8 +690,7 @@ const ExamManage = () => {
                             <button
                                 onClick={handleSubmit}
                                 disabled={!newExam.title || newExam.questions.length === 0}
-                                className="w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-colors 
-                                         disabled:bg-gray-500 disabled:cursor-not-allowed"
+                                className="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors disabled:bg-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500 dark:disabled:text-white"
                             >
                                 {isEditing ? 'تحديث الامتحان' : 'إنشاء الامتحان'}
                             </button>
@@ -705,14 +704,14 @@ const ExamManage = () => {
 
 // Sub-components
 const StatsCard = ({ title, value, icon, change }) => (
-    <div className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10">
+    <div className="bg-white border border-gray-200 backdrop-blur-xl rounded-xl p-6 dark:bg-white/5 dark:border-white/10">
         <div className="flex justify-between items-start">
             <div>
-                <p className="text-gray-400 text-sm">{title}</p>
-                <h3 className="text-2xl font-bold text-white mt-1">{value}</h3>
+                <p className="text-gray-500 text-sm dark:text-gray-400">{title}</p>
+                <h3 className="text-2xl font-bold text-gray-800 mt-1 dark:text-white">{value}</h3>
                 <p className="text-sm text-gray-400 mt-2">{change}</p>
             </div>
-            <div className="p-3 bg-white/5 rounded-lg">
+            <div className="p-3 bg-gray-100 rounded-lg dark:bg-white/5">
                 {icon}
             </div>
         </div>
@@ -736,18 +735,18 @@ const ExamCard = ({ exam, onDelete, onEdit }) => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/5 backdrop-blur-xl rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all"
+            className="bg-white border border-gray-200 backdrop-blur-xl rounded-xl p-6 hover:border-gray-300 transition-all dark:bg-white/5 dark:border-white/10 dark:hover:border-white/20"
         >
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h3 className="text-xl font-semibold text-white">{exam.title}</h3>
+                        <h3 className="text-xl font-semibold text-gray-800 dark:text-white">{exam.title}</h3>
                         <div className="flex items-center gap-4 mt-2">
-                            <span className="text-gray-400 flex items-center gap-2">
+                            <span className="text-gray-500 flex items-center gap-2 dark:text-gray-400">
                                 <Clock size={16} />
                                 {exam.duration} دقيقة
                             </span>
-                            <span className="text-gray-400 flex items-center gap-2">
+                            <span className="text-gray-500 flex items-center gap-2 dark:text-gray-400">
                                 <HelpCircle size={16} />
                                 {exam.questions?.length || 0} أسئلة
                             </span>
@@ -756,14 +755,14 @@ const ExamCard = ({ exam, onDelete, onEdit }) => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => onEdit && onEdit(exam)}
-                            className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors dark:text-blue-400 dark:hover:bg-blue-500/10"
                             title="تعديل"
                         >
                             <Edit2 size={16} />
                         </button>
                         <button
                             onClick={() => onDelete && onDelete(exam._id)}
-                            className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors dark:text-red-400 dark:hover:bg-red-500/10"
                             title="حذف"
                         >
                             <Trash2 size={16} />
@@ -771,16 +770,16 @@ const ExamCard = ({ exam, onDelete, onEdit }) => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
+                <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200 dark:bg-white/5 dark:border-white/10">
                     <input
                         type="text"
                         value={examUrl}
                         readOnly
-                        className="flex-1 bg-transparent text-gray-400 text-sm outline-none"
+                        className="flex-1 bg-transparent text-gray-500 text-sm outline-none dark:text-gray-400"
                     />
                     <button
                         onClick={copyLink}
-                        className="px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded transition-colors text-sm"
+                        className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded transition-colors text-sm dark:bg-blue-500/20 dark:hover:bg-blue-500/30 dark:text-blue-400"
                     >
                         نسخ الرابط
                     </button>

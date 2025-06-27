@@ -38,12 +38,12 @@ const Footer = () => {
                                 <TbMathFunction size={20} className="text-white" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-white">حسام ميرا</h3>
+                                <h3 className="text-lg font-bold text-white">حسام ميرة</h3>
                                 <p className="text-blue-400 text-xs">منصة تعليم الرياضيات</p>
                             </div>
                         </div>
                         <p className="text-gray-400 text-sm leading-relaxed">
-                            تعلم الرياضيات بطريقة مبتكرة وممتعة مع أ / حسام ميرا  .
+                            تعلم الرياضيات بطريقة مبتكرة وممتعة مع أ / حسام ميرة  .
                         </p>
                     </div>
 
@@ -103,7 +103,7 @@ const Footer = () => {
                 {/* Compact Bottom Bar */}
                 <div className="pt-6 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-gray-500 text-xs">
-                        © {new Date().getFullYear()} منصة حسام ميرا للرياضيات - جميع الحقوق محفوظة
+                        © {new Date().getFullYear()} منصة حسام ميرة للرياضيات - جميع الحقوق محفوظة
                     </p>
 
                     <a href="https://kerlos.site/"

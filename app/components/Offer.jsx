@@ -62,32 +62,32 @@ const Offer = () => {
                 }
 
                 const responseData = await response.json();
- 
+
                 // Check if the response has the expected structure
                 if (responseData.status === 'success' && Array.isArray(responseData.offers)) {
                     const publishedOffers = responseData.offers;
                     // Handle array response
                     const offersBySection = {};
                     publishedOffers.forEach(offer => {
-                         // Check if the offer is published and has required fields
+                        // Check if the offer is published and has required fields
                         if (offer && offer.stage === 'PUBLISHED' && offer.section) {
                             offersBySection[offer.section] = offer;
                         }
                     });
 
- 
+
                     // Only set error if there are no valid offers
                     if (Object.keys(offersBySection).length === 0) {
-                         setError('No active offers available');
+                        setError('No active offers available');
                     } else {
-                         setError(null);
+                        setError(null);
                         setOffers(offersBySection);
                         // Set active section to the first available section
                         const availableSections = Object.keys(offersBySection);
                         setActiveSection(availableSections[0]);
                     }
                 } else {
-                     setError('Invalid data format received from server');
+                    setError('Invalid data format received from server');
                 }
             } catch (err) {
                 console.error('Error fetching offers:', err);
@@ -208,11 +208,11 @@ const Offer = () => {
                             <FiZap className="text-xl sm:text-3xl md:text-4xl text-red-500" />
                         </div>
                         <p className="text-sm sm:text-base md:text-xl text-slate-600 dark:text-slate-300 font-arabicUI3 px-2">
-                            احصل على أفضل العروض لتعلم الرياضيات مع حسام ميرا
+                            احصل على أفضل العروض لتعلم الرياضيات مع حسام ميرة
                         </p>
                     </div>
                     {/* Section Buttons */}
-                   
+
                     {/* Main Offer Card */}
                     <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-lg sm:rounded-xl md:rounded-2xl shadow-2xl overflow-hidden 
                                   border border-blue-500/20 relative">

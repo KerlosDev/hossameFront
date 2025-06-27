@@ -31,14 +31,14 @@ const abrilFatface = Abril_Fatface({
 });
 
 export const metadata = {
-  title: "حسام ميرا رياضيات | Hossam Mira Math",
+  title: "حسام ميرة رياضيات | Hossam Mira Math",
   description: " شرح وحل تمارين مادة الرياضيات لطلاب الصفوف الثانوية الثلاثة بكل بساطة ",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 antialiased`}>
+      <body className={`bg-gradient-to-br from-blue-100 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 antialiased`}>
         <SessionProvider>
           <Header />
           {children}

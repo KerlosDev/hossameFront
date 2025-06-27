@@ -293,28 +293,28 @@ export default function StudentsList() {
         window.URL.revokeObjectURL(url);
     };    // Analytics Section Component
     const AnalyticsSection = () => (
-        <div className="grid grid-cols-1  font-arabicUI3 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
-                <h3 className="text-lg text-white/70 mb-2">إجمالي الطلاب</h3>
-                <p className="text-3xl  font-arabicUI3 text-white">{analytics?.totalStudents || 0}</p>
+        <div className="grid grid-cols-1 font-arabicUI3 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 backdrop-blur-sm border border-gray-200 dark:border-white/10">
+                <h3 className="text-lg text-gray-700 dark:text-white/70 mb-2">إجمالي الطلاب</h3>
+                <p className="text-3xl font-arabicUI3 text-gray-900 dark:text-white">{analytics?.totalStudents || 0}</p>
                 {analytics?.totalStudents !== totalStudents &&
-                    <p className="text-sm text-white/50 mt-2">مجموع كل الطلاب في النظام</p>
+                    <p className="text-sm text-gray-500 dark:text-white/50 mt-2">مجموع كل الطلاب في النظام</p>
                 }
             </div>
-            <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
-                <h3 className="text-lg text-white/70 mb-2">الطلاب النشطين</h3>
-                <p className="text-3xl  font-arabicUI3 text-green-400">{analytics?.activeStudents || 0}</p>
-                <p className="text-sm text-white/50 mt-2">الطلاب الغير محظورين</p>
+            <div className="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 backdrop-blur-sm border border-gray-200 dark:border-white/10">
+                <h3 className="text-lg text-gray-700 dark:text-white/70 mb-2">الطلاب النشطين</h3>
+                <p className="text-3xl font-arabicUI3 text-green-600 dark:text-green-400">{analytics?.activeStudents || 0}</p>
+                <p className="text-sm text-gray-500 dark:text-white/50 mt-2">الطلاب الغير محظورين</p>
             </div>
-            <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
-                <h3 className="text-lg text-white/70 mb-2">الطلاب المحظورين</h3>
-                <p className="text-3xl  font-arabicUI3 text-red-400">{analytics?.bannedStudents || 0}</p>
-                <p className="text-sm text-white/50 mt-2">الطلاب المحظورين حالياً</p>
+            <div className="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 backdrop-blur-sm border border-gray-200 dark:border-white/10">
+                <h3 className="text-lg text-gray-700 dark:text-white/70 mb-2">الطلاب المحظورين</h3>
+                <p className="text-3xl font-arabicUI3 text-red-600 dark:text-red-400">{analytics?.bannedStudents || 0}</p>
+                <p className="text-sm text-gray-500 dark:text-white/50 mt-2">الطلاب المحظورين حالياً</p>
             </div>
-            <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
-                <h3 className="text-lg text-white/70 mb-2">نشطين آخر أسبوع</h3>
-                <p className="text-3xl  font-arabicUI3 text-blue-400">{analytics?.lastWeekActive || 0}</p>
-                <p className="text-sm text-white/50 mt-2">الطلاب النشطين في آخر 7 أيام</p>
+            <div className="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 backdrop-blur-sm border border-gray-200 dark:border-white/10">
+                <h3 className="text-lg text-gray-700 dark:text-white/70 mb-2">نشطين آخر أسبوع</h3>
+                <p className="text-3xl font-arabicUI3 text-blue-600 dark:text-blue-400">{analytics?.lastWeekActive || 0}</p>
+                <p className="text-sm text-gray-500 dark:text-white/50 mt-2">الطلاب النشطين في آخر 7 أيام</p>
             </div>
         </div>
     );
@@ -347,9 +347,9 @@ export default function StudentsList() {
         };
 
         return (
-            <div className="grid  font-arabicUI3 grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
-                    <h3 className="text-lg text-white/70 mb-4">توزيع المحافظات</h3>
+            <div className="grid font-arabicUI3 grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 backdrop-blur-sm border border-gray-200 dark:border-white/10">
+                    <h3 className="text-lg text-gray-700 dark:text-white/70 mb-4">توزيع المحافظات</h3>
                     <div className="relative h-[400px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -382,12 +382,12 @@ export default function StudentsList() {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{
-                                        backgroundColor: '#1f2937',
+                                        backgroundColor: '#f3f4f6', // gray-100
                                         border: 'none',
                                         borderRadius: '8px',
                                         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
                                     }}
-                                    labelStyle={{ color: 'white' }}
+                                    labelStyle={{ color: '#111827' }} // gray-900
                                     formatter={(value, name) => [
                                         `${value} طالب`,
                                         `${name}`
@@ -403,30 +403,30 @@ export default function StudentsList() {
                                             className="w-3 h-3 rounded-full"
                                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                                         />
-                                        <span className="text-sm text-white/70">{entry.id}</span>
+                                        <span className="text-sm text-gray-700 dark:text-white/70">{entry.id}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm h-[400px]">
-                    <h3 className="text-lg text-white/70 mb-4">توزيع المستويات</h3>
+                <div className="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 backdrop-blur-sm h-[400px] border border-gray-200 dark:border-white/10">
+                    <h3 className="text-lg text-gray-700 dark:text-white/70 mb-4">توزيع المستويات</h3>
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={analytics.levelDistribution}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="id"
-                                stroke="#ffffff70"
+                                stroke="#6b7280"
                             />
                             <YAxis
-                                stroke="#ffffff70"
+                                stroke="#6b7280"
                             />
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#1f2937', border: 'none' }}
-                                labelStyle={{ color: 'white' }}
+                                contentStyle={{ backgroundColor: '#f3f4f6', border: 'none' }}
+                                labelStyle={{ color: '#111827' }}
                             />
-                            <Bar dataKey="value" fill="#8884d8" />
+                            <Bar dataKey="value" fill="#6366f1" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
@@ -460,77 +460,78 @@ export default function StudentsList() {
 
     // Table View Component
     const TableView = () => (
-        <div className="overflow-x-auto font-arabicUI3 text-xs rounded-2xl bg-white/5 border border-white/10">
+        <div className="overflow-x-auto font-arabicUI3 text-xs rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
             <table className="w-full">
                 <thead>
-                    <tr className="border-b border-white/10">
+                    <tr className="border-b border-gray-200 dark:border-white/10">
                         <th
-                            className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
+                            className="p-4 text-right text-gray-700 dark:text-white/70 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('name')}
                         >
                             <div className="flex items-center gap-2">
                                 الاسم
                                 {sortConfig.key === 'name' && (
-                                    <span className="text-blue-400">
+                                    <span className="text-blue-600 dark:text-blue-400">
                                         {sortConfig.direction === 'ascending' ? '↑' : '↓'}
                                     </span>
                                 )}
                             </div>
                         </th>
                         <th
-                            className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
+                            className="p-4 text-right text-gray-700 dark:text-white/70 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('email')}
                         >
                             <div className="flex items-center gap-2">
                                 البريد الإلكتروني
                                 {sortConfig.key === 'email' && (
-                                    <span className="text-blue-400">
+                                    <span className="text-blue-600 dark:text-blue-400">
                                         {sortConfig.direction === 'ascending' ? '↑' : '↓'}
                                     </span>
                                 )}
                             </div>
                         </th>
                         <th
-                            className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
+                            className="p-4 text-right text-gray-700 dark:text-white/70 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('phoneNumber')}
                         >
                             <div className="flex items-center gap-2">
                                 رقم الهاتف
                                 {sortConfig.key === 'phoneNumber' && (
-                                    <span className="text-blue-400">
+                                    <span className="text-blue-600 dark:text-blue-400">
                                         {sortConfig.direction === 'ascending' ? '↑' : '↓'}
                                     </span>
                                 )}
                             </div>
                         </th>
                         <th
-                            className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
+                            className="p-4 text-right text-gray-700 dark:text-white/70 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('government')}
                         >
                             <div className="flex items-center gap-2">
                                 المحافظة
                                 {sortConfig.key === 'government' && (
-                                    <span className="text-blue-400">
+                                    <span className="text-blue-600 dark:text-blue-400">
                                         {sortConfig.direction === 'ascending' ? '↑' : '↓'
                                         }</span>
                                 )}
                             </div>
-                        </th>                        <th
-                            className="p-4 text-right text-white/70 hover:text-white cursor-pointer transition-colors"
+                        </th>
+                        <th
+                            className="p-4 text-right text-gray-700 dark:text-white/70 hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors"
                             onClick={() => sortData('lastActive')}
                         >
                             <div className="flex items-center gap-2">
                                 آخر نشاط
                                 {sortConfig.key === 'lastActive' && (
-                                    <span className="text-blue-400">
+                                    <span className="text-blue-600 dark:text-blue-400">
                                         {sortConfig.direction === 'ascending' ? '↑' : '↓'}
                                     </span>
                                 )}
                             </div>
                         </th>
-                        <th className="p-4 text-right text-white/70">الجهاز</th>
-                        <th className="p-4 text-right text-white/70">الحالة</th>
-                        <th className="p-4 text-right text-white/70">إجراءات</th>
+                        <th className="p-4 text-right text-gray-700 dark:text-white/70">الجهاز</th>
+                        <th className="p-4 text-right text-gray-700 dark:text-white/70">الحالة</th>
+                        <th className="p-4 text-right text-gray-700 dark:text-white/70">إجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -538,54 +539,55 @@ export default function StudentsList() {
                         <tr
                             key={student._id}
                             className={`
-                                border-b border-white/5 hover:bg-white/5 transition-colors
-                                ${index % 2 === 0 ? 'bg-white/[0.02]' : ''}
+                                border-b border-gray-100 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/5 transition-colors
+                                ${index % 2 === 0 ? 'bg-gray-50 dark:bg-white/[0.02]' : ''}
                             `}
                         >
-                            <td className="p-4 text-white">
+                            <td className="p-4 text-gray-900 dark:text-white">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-400 dark:from-blue-600 dark:to-indigo-600 flex items-center justify-center">
                                         <User className="text-white" size={14} />
                                     </div>
                                     <div>
-                                        <p className=" font-arabicUI3">{student.name}</p>
-                                        <p className="text-sm text-white/50">{student.level}</p>
+                                        <p className="font-arabicUI3">{student.name}</p>
+                                        <p className="text-sm text-gray-500 dark:text-white/50">{student.level}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td className="p-4 text-white">
+                            <td className="p-4 text-gray-900 dark:text-white">
                                 <div className="flex items-center gap-2">
-                                    <Mail size={14} className="text-white/50" />
+                                    <Mail size={14} className="text-gray-400 dark:text-white/50" />
                                     {student.email}
                                 </div>
                             </td>
-                            <td className="p-4 text-white">
+                            <td className="p-4 text-gray-900 dark:text-white">
                                 <div className="flex items-center gap-2">
-                                    <Phone size={14} className="text-white/50" />
+                                    <Phone size={14} className="text-gray-400 dark:text-white/50" />
                                     {student.phoneNumber}
                                     <a
                                         href={getWhatsAppLink(student.phoneNumber)}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
-                                        className="p-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors"
+                                        className="p-1.5 bg-green-100 dark:bg-green-500/20 hover:bg-green-200 dark:hover:bg-green-500/30 rounded-lg transition-colors"
                                     >
-                                        <FaWhatsapp className="text-green-400" size={12} />
+                                        <FaWhatsapp className="text-green-600 dark:text-green-400" size={12} />
                                     </a>
                                 </div>
                             </td>
-                            <td className="p-4 text-white">
+                            <td className="p-4 text-gray-900 dark:text-white">
                                 <div className="flex items-center gap-2">
-                                    <MapPin size={14} className="text-white/50" />
+                                    <MapPin size={14} className="text-gray-400 dark:text-white/50" />
                                     {student.government}
                                 </div>
-                            </td>                            <td className="p-4 text-white">
+                            </td>
+                            <td className="p-4 text-gray-900 dark:text-white">
                                 <div className="flex items-center gap-2">
-                                    <Clock size={14} className="text-white/50" />
+                                    <Clock size={14} className="text-gray-400 dark:text-white/50" />
                                     {formatDate(student.lastActive)}
                                 </div>
                             </td>
-                            <td className="p-4 text-white">
+                            <td className="p-4 text-gray-900 dark:text-white">
                                 {student.deviceInfo ? (
                                     <div className="flex items-center gap-2">
                                         {(() => {
@@ -593,26 +595,26 @@ export default function StudentsList() {
                                             const DeviceIcon = deviceInfo.icon;
                                             return (
                                                 <>
-                                                    <DeviceIcon size={14} className="text-white/50" />
+                                                    <DeviceIcon size={14} className="text-gray-400 dark:text-white/50" />
                                                     <div className="flex flex-col">
                                                         <span className="text-xs">{deviceInfo.browser}</span>
-                                                        <span className="text-xs text-white/50">{deviceInfo.os}</span>
+                                                        <span className="text-xs text-gray-500 dark:text-white/50">{deviceInfo.os}</span>
                                                     </div>
                                                     {student.hasActiveSession && (
-                                                        <div className="w-2 h-2 bg-green-400 rounded-full" title="جلسة نشطة" />
+                                                        <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full" title="جلسة نشطة" />
                                                     )}
                                                 </>
                                             );
                                         })()}
                                     </div>
                                 ) : (
-                                    <span className="text-white/30 text-xs">لا يوجد</span>
+                                    <span className="text-gray-300 dark:text-white/30 text-xs">لا يوجد</span>
                                 )}
                             </td>
                             <td className="p-4">
-                                <span className={`px-3 py-1.5 rounded-full text-xs  font-arabicUI3 ${student.isBanned
-                                    ? 'bg-red-500/20 text-red-400'
-                                    : 'bg-green-500/20 text-green-400'
+                                <span className={`px-3 py-1.5 rounded-full text-xs font-arabicUI3 ${student.isBanned
+                                    ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400'
+                                    : 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400'
                                     }`}>
                                     {student.isBanned ? 'محظور' : 'نشط'}
                                 </span>
@@ -621,7 +623,7 @@ export default function StudentsList() {
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setSelectedStudent(student)}
-                                        className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                                        className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-colors"
                                     >
                                         <Eye size={16} />
                                     </button>
@@ -632,8 +634,8 @@ export default function StudentsList() {
                                             setShowBanConfirm(true);
                                         }}
                                         className={`p-2 rounded-lg transition-colors ${student.isBanned
-                                            ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                                            : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                            ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30'
+                                            : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-white/70 hover:bg-gray-200 dark:hover:bg-white/10'
                                             }`}
                                     >
                                         <Ban size={16} />
@@ -672,7 +674,7 @@ export default function StudentsList() {
     // Pagination component
     const Pagination = () => (
         <div className="mt-6 flex font-arabicUI3 items-center justify-between">
-            <div className="text-sm text-white/60">
+            <div className="text-sm text-gray-600 dark:text-white/60">
                 عرض {((page - 1) * limit) + 1} إلى {Math.min(page * limit, totalStudents)} من {totalStudents} طالب
             </div>
             <div className="flex items-center gap-2">
@@ -680,8 +682,8 @@ export default function StudentsList() {
                     onClick={() => setPage(prev => Math.max(prev - 1, 1))}
                     disabled={page === 1}
                     className={`px-3 py-1 rounded-lg ${page === 1
-                        ? 'bg-white/5 text-white/30 cursor-not-allowed'
-                        : 'bg-white/10 text-white hover:bg-white/20'
+                        ? 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/30 cursor-not-allowed'
+                        : 'bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-white/20'
                         } transition-colors`}
                 >
                     السابق
@@ -691,8 +693,8 @@ export default function StudentsList() {
                         key={index + 1}
                         onClick={() => setPage(index + 1)}
                         className={`w-8 h-8 rounded-lg ${page === index + 1
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-white/10 text-white hover:bg-white/20'
+                            ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                            : 'bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-white/20'
                             } transition-colors`}
                     >
                         {index + 1}
@@ -702,8 +704,8 @@ export default function StudentsList() {
                     onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={page === totalPages}
                     className={`px-3 py-1 rounded-lg ${page === totalPages
-                        ? 'bg-white/5 text-white/30 cursor-not-allowed'
-                        : 'bg-white/10 text-white hover:bg-white/20'
+                        ? 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/30 cursor-not-allowed'
+                        : 'bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-white/20'
                         } transition-colors`}
                 >
                     التالي
@@ -716,10 +718,10 @@ export default function StudentsList() {
         <div className="container font-arabicUI3 mx-auto p-6">
             {/* Header Section */}
             <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl  font-arabicUI3 text-white">إدارة الطلاب</h1>
+                <h1 className="text-3xl font-arabicUI3 text-gray-900 dark:text-white">إدارة الطلاب</h1>
                 <button
                     onClick={exportToExcel}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 rounded-xl hover:bg-green-200 dark:hover:bg-green-500/30 transition-colors"
                 >
                     <Download size={18} />
                     تصدير إلى Excel
@@ -736,15 +738,13 @@ export default function StudentsList() {
             <div className="flex items-center gap-4 mb-6">
                 <button
                     onClick={() => setViewMode('grid')}
-                    className={`px-4 py-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-white/5 text-white/70'
-                        }`}
+                    className={`px-4 py-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-white/70'}`}
                 >
                     عرض البطاقات
                 </button>
                 <button
                     onClick={() => setViewMode('table')}
-                    className={`px-4 py-2 rounded-xl transition-colors ${viewMode === 'table' ? 'bg-blue-500 text-white' : 'bg-white/5 text-white/70'
-                        }`}
+                    className={`px-4 py-2 rounded-xl transition-colors ${viewMode === 'table' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-white/70'}`}
                 >
                     عرض الجدول
                 </button>
@@ -752,27 +752,27 @@ export default function StudentsList() {
 
             {/* Existing Search and Filter Section */}
             <div className="mb-8">
-                <h1 className="text-3xl  font-arabicUI3 text-white mb-6">إدارة الطلاب</h1>
+                <h1 className="text-3xl font-arabicUI3 text-gray-900 dark:text-white mb-6">إدارة الطلاب</h1>
                 <div className="flex flex-wrap gap-4 items-center justify-between">
                     {/* Search */}
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50" size={20} />
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white/50" size={20} />
                         <input
                             type="text"
                             placeholder="البحث عن طالب..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-2 text-white placeholder:text-white/50 focus:outline-none focus:border-white/30"
+                            className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-10 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50 focus:outline-none focus:border-gray-400 dark:focus:border-white/30"
                         />
                     </div>
 
                     {/* Filter */}
                     <div className="relative">
-                        <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50" size={16} />
+                        <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white/50" size={16} />
                         <select
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-xl px-10 py-2 text-white focus:outline-none focus:border-white/30 appearance-none"
+                            className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-white/30 appearance-none"
                         >
                             <option value="all">جميع الطلاب</option>
                             <option value="active">نشط</option>
@@ -791,22 +791,22 @@ export default function StudentsList() {
                             key={student._id}
                             dir='rtl'
                             onClick={() => setSelectedStudent(student)}
-                            className={`group bg-white/5 backdrop-blur-sm rounded-2xl p-6 border transition-all cursor-pointer
+                            className={`group bg-gray-100 dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border transition-all cursor-pointer
                                 ${student.isBanned
-                                    ? 'border-red-500/50 bg-red-500/5'
-                                    : 'border-white/10 hover:border-white/20 hover:bg-white/10'}`}
+                                    ? 'border-red-200 dark:border-red-500/50 bg-red-50 dark:bg-red-500/5'
+                                    : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-200 dark:hover:bg-white/10'}`}
                         >
                             {/* Student Header */}
                             <div className="flex items-start justify-between mb-6">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-400 dark:from-blue-600 dark:to-indigo-600 flex items-center justify-center">
                                         <User className="text-white" size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg  font-arabicUI3 text-white group-hover:text-blue-300 transition-colors">{student.name}</h3>
+                                        <h3 className="text-lg font-arabicUI3 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">{student.name}</h3>
                                         <div className="flex items-center gap-2 mt-1">
-                                            <FaGraduationCap className="text-white/60" size={14} />
-                                            <span className="text-sm text-white/60">{student.level}</span>
+                                            <FaGraduationCap className="text-gray-500 dark:text-white/60" size={14} />
+                                            <span className="text-sm text-gray-500 dark:text-white/60">{student.level}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -814,32 +814,32 @@ export default function StudentsList() {
                                 {/* Status Badge */}
                                 <span className={`px-3 py-1 rounded-full text-xs 
                                     ${student.isBanned
-                                        ? 'bg-red-500/20 text-red-400'
-                                        : 'bg-green-500/20 text-green-400'}`}>
+                                        ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400'
+                                        : 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400'}`}>
                                     {student.isBanned ? 'محظور' : 'نشط'}
                                 </span>
                             </div>
 
                             {/* Contact Info */}
                             <div className="space-y-3 mb-6">
-                                <div className="flex items-center gap-3 text-sm text-white/70">
-                                    <Mail size={14} className="text-white/50" />
+                                <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-white/70">
+                                    <Mail size={14} className="text-gray-400 dark:text-white/50" />
                                     <span>{student.email}</span>
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <Phone size={14} className="text-white/50" />
+                                    <Phone size={14} className="text-gray-400 dark:text-white/50" />
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm text-white/70"> الطالب:{student.phoneNumber}</span>
+                                        <span className="text-sm text-gray-700 dark:text-white/70"> الطالب:{student.phoneNumber}</span>
                                         {student.phoneNumber && (
                                             <a
                                                 href={getWhatsAppLink(student.phoneNumber)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="p-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors"
+                                                className="p-2 bg-green-100 dark:bg-green-500/20 hover:bg-green-200 dark:hover:bg-green-500/30 rounded-lg transition-colors"
                                             >
-                                                <FaWhatsapp className="text-green-400" size={14} />
+                                                <FaWhatsapp className="text-green-600 dark:text-green-400" size={14} />
                                             </a>
                                         )}
                                     </div>
@@ -847,32 +847,33 @@ export default function StudentsList() {
 
                                 {student.parentPhoneNumber && (
                                     <div className="flex items-center gap-3">
-                                        <Phone size={14} className="text-white/50" />
+                                        <Phone size={14} className="text-gray-400 dark:text-white/50" />
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-white/70">ولي الأمر: {student.parentPhoneNumber}</span>
+                                            <span className="text-sm text-gray-700 dark:text-white/70">ولي الأمر: {student.parentPhoneNumber}</span>
                                             <a
                                                 href={getWhatsAppLink(student.parentPhoneNumber)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="p-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors"
+                                                className="p-2 bg-green-100 dark:bg-green-500/20 hover:bg-green-200 dark:hover:bg-green-500/30 rounded-lg transition-colors"
                                             >
-                                                <FaWhatsapp className="text-green-400" size={14} />
+                                                <FaWhatsapp className="text-green-600 dark:text-green-400" size={14} />
                                             </a>
                                         </div>
                                     </div>
                                 )}
 
-                                <div className="flex items-center gap-3 text-sm text-white/70">
-                                    <MapPin size={14} className="text-white/50" />
+                                <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-white/70">
+                                    <MapPin size={14} className="text-gray-400 dark:text-white/50" />
                                     <span>{student.government}</span>
-                                </div>                                <div className="flex items-center gap-3 text-sm text-white/70">
-                                    <Clock size={14} className="text-white/50" />
+                                </div>
+                                <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-white/70">
+                                    <Clock size={14} className="text-gray-400 dark:text-white/50" />
                                     <span>آخر نشاط: {formatDate(student.lastActive)}</span>
                                 </div>
 
                                 {/* Device Information */}
-                                <div className="flex items-center gap-3 text-sm text-white/70">
+                                <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-white/70">
                                     {student.deviceInfo ? (
                                         <>
                                             {(() => {
@@ -880,13 +881,13 @@ export default function StudentsList() {
                                                 const DeviceIcon = deviceInfo.icon;
                                                 return (
                                                     <>
-                                                        <DeviceIcon size={14} className="text-white/50" />
+                                                        <DeviceIcon size={14} className="text-gray-400 dark:text-white/50" />
                                                         <div className="flex items-center gap-2">
                                                             <span>{deviceInfo.browser} - {deviceInfo.os}</span>
                                                             {student.hasActiveSession && (
-                                                                <div className="flex items-center gap-1">
-                                                                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                                                    <span className="text-xs text-green-400">متصل</span>
+                                                                <div className="flex items-center gap-2 ml-2">
+                                                                    <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full animate-pulse" />
+                                                                    <span className="text-xs text-green-400 bg-green-500/20 px-2 py-1 rounded-full">جلسة نشطة</span>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -896,8 +897,8 @@ export default function StudentsList() {
                                         </>
                                     ) : (
                                         <>
-                                            <Monitor size={14} className="text-white/50" />
-                                            <span className="text-white/50">لا يوجد معلومات جهاز</span>
+                                            <Monitor size={14} className="text-gray-400 dark:text-white/50" />
+                                            <span className="text-gray-400 dark:text-white/50">لا يوجد معلومات جهاز</span>
                                         </>
                                     )}
                                 </div>
@@ -912,8 +913,8 @@ export default function StudentsList() {
                                         setShowBanConfirm(true);
                                     }}
                                     className={`p-2 rounded-lg transition-all ${student.isBanned
-                                        ? 'bg-green-500 hover:bg-green-600 text-white'
-                                        : 'bg-red-500 hover:bg-red-600 text-white'
+                                        ? 'bg-green-100 dark:bg-green-500 hover:bg-green-200 dark:hover:bg-green-600 text-green-600 dark:text-white'
+                                        : 'bg-red-100 dark:bg-red-500 hover:bg-red-200 dark:hover:bg-red-600 text-red-600 dark:text-white'
                                         }`}
                                     title={student.isBanned ? 'إلغاء الحظر' : 'حظر الطالب'}
                                 >

@@ -143,7 +143,7 @@ const SignInPage = () => {
                          bg-white/5 backdrop-blur-lg border border-white/10 hover:border-white/20 
                          transform hover:scale-105 transition-all duration-500">
                         <IoMdCalculator className="text-3xl text-blue-300" />
-                        <span className="font-arabicUI2 text-xl text-blue-300">منصة حسام ميرا</span>
+                        <span className="font-arabicUI2 text-xl text-blue-300">منصة حسام ميرة</span>
                     </div>
 
                     <h1 className="text-3xl sm:text-4xl lg:text-5xl font-arabicUI2 font-bold text-white leading-tight">
