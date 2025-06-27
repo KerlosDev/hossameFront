@@ -23,10 +23,10 @@ const QuizData = ({ params }) => {
     const [userData, setUserData] = useState({ email: '', fullName: '' });
 
     // Load user data from cookies
-    useEffect(() => { 
+    useEffect(() => {
         const userFullName = Cookies.get('username');
-        if ( userFullName) {
-            setUserData({   fullName: userFullName });
+        if (userFullName) {
+            setUserData({ fullName: userFullName });
         }
     }, []);
 
@@ -54,56 +54,56 @@ const QuizData = ({ params }) => {
     }, [quizid]);
     const loadQuizData = async () => {
         try {
-          const token = Cookies.get('token');
-          if (!token) {
-            throw new Error('لم يتم العثور على رمز المصادقة');
-          }
-      
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/exam/${quizid}`, {
-            headers: {
-              Authorization: `Bearer ${token}`
+            const token = Cookies.get('token');
+            if (!token) {
+                throw new Error('لم يتم العثور على رمز المصادقة');
             }
-          });
-      
-          if (!response || !response.data) {
-            throw new Error('لا يمكن الوصول إلى هذا الاختبار');
-          }
-      
-          const examData = response.data;
-      
-          // 🔁 تحويل بيانات الأسئلة إلى الشكل المناسب
-          const parsedQuestions = examData.questions.map((q) => ({
-            qus: q.title,
-            opationA: q.options.a,
-            opationB: q.options.b,
-            opationC: q.options.c,
-            opationD: q.options.d,
-            trueChoisevip: q.correctAnswer?.toUpperCase(), // "a" => "A"
-            imageUrl: q.imageUrl
-          }));
-      
-          setQuiz({
-            title: examData.title,
-            questions: parsedQuestions
-          });
-      
-          setTimeLeft(parsedQuestions.length * 120);
-          setLoading(false);
-      
+
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/exam/${quizid}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (!response || !response.data) {
+                throw new Error('لا يمكن الوصول إلى هذا الاختبار');
+            }
+
+            const examData = response.data;
+
+            // 🔁 تحويل بيانات الأسئلة إلى الشكل المناسب
+            const parsedQuestions = examData.questions.map((q) => ({
+                qus: q.title,
+                opationA: q.options.a,
+                opationB: q.options.b,
+                opationC: q.options.c,
+                opationD: q.options.d,
+                trueChoisevip: q.correctAnswer?.toUpperCase(), // "a" => "A"
+                imageUrl: q.imageUrl
+            }));
+
+            setQuiz({
+                title: examData.title,
+                questions: parsedQuestions
+            });
+
+            setTimeLeft(parsedQuestions.length * 120);
+            setLoading(false);
+
         } catch (error) {
-          console.error('Error loading quiz:', error);
-          Swal.fire({
-            title: 'خطأ',
-            text: error.message || 'حدث خطأ أثناء تحميل الاختبار',
-            icon: 'error',
-            confirmButtonText: 'حسناً'
-          }).then(() => {
-            window.location.href = '/';
-          });
-          setLoading(false);
+            console.error('Error loading quiz:', error);
+            Swal.fire({
+                title: 'خطأ',
+                text: error.message || 'حدث خطأ أثناء تحميل الاختبار',
+                icon: 'error',
+                confirmButtonText: 'حسناً'
+            }).then(() => {
+                window.location.href = '/';
+            });
+            setLoading(false);
         }
-      };
-      
+    };
+
     useEffect(() => {
         if (timeLeft === null || quizComplete) return;
 
@@ -219,7 +219,7 @@ const QuizData = ({ params }) => {
             if (!result.isConfirmed) return;
 
             const results = calculateResults();
-            
+
             // Format data according to the requested format
             const examResult = {
                 examTitle: quiz.title,
@@ -403,7 +403,7 @@ const QuizData = ({ params }) => {
                             </h1>
                             <div className="flex items-center gap-2 mt-2">
                                 <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
-                                    كيمياء
+                                    رياضيات
                                 </span>
                                 <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm">
                                     {quiz.questions.length} أسئلة
@@ -492,32 +492,35 @@ const QuizData = ({ params }) => {
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {['A', 'B', 'C', 'D'].map((option) => (
-                                <button
-                                    key={option}
-                                    onClick={() => handleAnswerSelect(option)}
-                                    className={`
-                                        p-6 rounded-xl text-right transition-all duration-300
-                                        flex items-center gap-4 group
-                                        ${selectedAnswers[currentQuestion] === option
-                                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
-                                            : 'bg-slate-800/50 text-slate-300 hover:bg-slate-800'}
-                                    `}
-                                >
-                                    <div className={`
-                                        w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
-                                        transition-all duration-300
-                                        ${selectedAnswers[currentQuestion] === option
-                                            ? 'bg-blue-500/20 text-blue-400'
-                                            : 'bg-slate-700/50 text-slate-400 group-hover:bg-slate-700'}
-                                    `}>
-                                        {option}
-                                    </div>
-                                    <span className="flex-1">
-                                        {quiz?.questions[currentQuestion]?.[`opation${option}`]}
-                                    </span>
-                                </button>
-                            ))}
+                            {['A', 'B', 'C', 'D'].map((option, idx) => {
+                                const arabicOptions = ['ا', 'ب', 'ج', 'د'];
+                                return (
+                                    <button
+                                        key={option}
+                                        onClick={() => handleAnswerSelect(option)}
+                                        className={`
+                                            p-6 rounded-xl text-right transition-all duration-300
+                                            flex items-center gap-4 group
+                                            ${selectedAnswers[currentQuestion] === option
+                                                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
+                                                : 'bg-slate-800/50 text-slate-300 hover:bg-slate-800'}
+                                        `}
+                                    >
+                                        <div className={`
+                                            w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
+                                            transition-all duration-300
+                                            ${selectedAnswers[currentQuestion] === option
+                                                ? 'bg-blue-500/20 text-blue-400'
+                                                : 'bg-slate-700/50 text-slate-400 group-hover:bg-slate-700'}
+                                        `}>
+                                            {arabicOptions[idx]}
+                                        </div>
+                                        <span className="flex-1">
+                                            {quiz?.questions[currentQuestion]?.[`opation${option}`]}
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

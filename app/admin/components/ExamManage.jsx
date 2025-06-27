@@ -172,8 +172,8 @@ const ExamManage = () => {
     const [sortBy, setSortBy] = useState({ field: 'title', direction: 'asc' });
     const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
     const [currentQuestion, setCurrentQuestion] = useState({
-        title: '',
-        options: { a: '', b: '', c: '', d: '' },
+        title: 'الاختيار الصح ؟',
+        options: { a: 'أ', b: 'ب', c: 'ج', d: 'د' },
         correctAnswer: '',
         imageFile: null,
         imagePreview: null
@@ -309,8 +309,8 @@ const ExamManage = () => {
 
         // Reset form
         setCurrentQuestion({
-            title: '',
-            options: { a: '', b: '', c: '', d: '' },
+            title: 'الاختيار الصح ؟',
+            options: { a: 'أ', b: 'ب', c: 'ج', d: 'د' },
             correctAnswer: '',
             imageFile: null,
             imagePreview: null
@@ -618,9 +618,14 @@ const ExamManage = () => {
                                             className="flex-1 p-3 bg-white border border-gray-200 rounded-xl text-gray-800 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                         >
                                             <option value="">الإجابة الصحيحة</option>
-                                            {Object.keys(currentQuestion.options).map((key) => (
-                                                <option  className='  text-black' key={key} value={key}>الإجابة {key}</option>
-                                            ))}
+                                            {Object.keys(currentQuestion.options).map((key, idx) => {
+                                                const arabicOptions = ['ا', 'ب', 'ج', 'د'];
+                                                return (
+                                                    <option className='text-black' key={key} value={key}>
+                                                        الإجابة {arabicOptions[idx]}
+                                                    </option>
+                                                );
+                                            })}
                                         </select>
 
                                         <label className="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-xl text-gray-800 cursor-pointer hover:bg-gray-100 transition-colors dark:bg-white/5 dark:border-white/10 dark:text-white dark:hover:bg-white/10">
