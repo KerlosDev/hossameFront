@@ -3,7 +3,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { FaLock, FaUnlock, FaGraduationCap, FaPlay } from "react-icons/fa";
 import { BsLightningChargeFill } from "react-icons/bs";
- import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
@@ -14,6 +14,9 @@ const EnrollmentSection = ({ courseInfo }) => {
     const [userData, setUserData] = useState(null);
 
     useEffect(() => {
+        // Debug courseInfo to see what properties are available
+        console.log('courseInfo:', courseInfo);
+
         // Check if user is logged in by looking for token in cookies
         const token = Cookies.get('token');
         if (token) {
@@ -23,11 +26,17 @@ const EnrollmentSection = ({ courseInfo }) => {
             if (userDataStr) {
                 setUserData(JSON.parse(userDataStr));
             }
-            
-            // Check enrollment status
-            checkEnrollmentStatus(token, courseInfo.nicknameforcourse);
+
+            // Get the correct course ID - handle different possible formats
+            const courseId = courseInfo._id || courseInfo.id || courseInfo.nicknameforcourse;
+            console.log('Using courseId:', courseId);
+
+            if (courseId) {
+                // Check enrollment status
+                checkEnrollmentStatus(token, courseId);
+            }
         }
-    }, [courseInfo.nicknameforcourse]);
+    }, [courseInfo]);
 
     const checkEnrollmentStatus = async (token, courseId) => {
         try {
@@ -36,7 +45,7 @@ const EnrollmentSection = ({ courseInfo }) => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            
+
             if (response.data && response.data.isHeEnrolled) {
                 setEnrolled(true);
             }
@@ -56,24 +65,53 @@ const EnrollmentSection = ({ courseInfo }) => {
         setLoading(true);
         try {
             const token = Cookies.get('token');
-            // Generate a unique enrollment ID
-            const uniqueEnrollId = `enr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            
-            // Save activation with free course data
-            
 
-            setEnrolled(true);
-            toast.success('تم التسجيل في الكورس بنجاح');
-            window.location.reload();
+            // Get the correct course ID - handle different possible formats
+            const courseId = courseInfo._id || courseInfo.id || courseInfo.nicknameforcourse;
+
+            // Create enrollment for free course - same format as payment page
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/active`, {
+                courseId: courseId,
+                price: courseInfo.price || 0,
+                phoneNumber: '01000000000' // Replace with actual phone number if needed
+
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 200 || response.status === 201) {
+                // Update payment status to paid for free course
+                await axios.put(
+                    `${process.env.NEXT_PUBLIC_API_URL}/active/payment/${response.data.enrollment._id}`,
+                    { paymentStatus: 'paid' },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                setEnrolled(true);
+                toast.success('تم التسجيل في الكورس بنجاح');
+                // Optionally reload to update the UI
+                window.location.reload();
+            }
         } catch (error) {
             console.error('Error:', error);
-            toast.error('حدث خطأ في التسجيل');
+            if (error.response?.data?.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error('حدث خطأ في التسجيل');
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    if (courseInfo.isfree) {
+    if (courseInfo.isFree) {
         return (
             <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm">
                 <div className="space-y-6">
@@ -132,7 +170,7 @@ const EnrollmentSection = ({ courseInfo }) => {
                             </button>
                         </div>
                     ) : (
-                        <Link href={`/payment/${courseInfo.nicknameforcourse}`} className="block">
+                        <Link href={`/payment/${courseInfo._id || courseInfo.id || courseInfo.nicknameforcourse}`} className="block">
                             <div className="space-y-4">
                                 <div className="text-center">
                                     <h3 className="text-3xl font-bold text-white mb-1">{courseInfo.price} جنيه</h3>
