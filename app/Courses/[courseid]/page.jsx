@@ -10,6 +10,7 @@ import Head from 'next/head';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import VideoPlayer from '../../components/player';
+import { File } from 'lucide-react';
 
 // Dynamically import Plyr with no SSR to avoid hydration issues
 const Plyr = dynamic(() => import('plyr-react'), {
@@ -113,8 +114,11 @@ const CoursePage = () => {
                                 ? chapter.lessons.map(lesson => ({
                                     id: lesson._id,
                                     name: lesson.title,
-                                    // Only include link if enrolled, otherwise it will be null
+                                    // Always include fileName from API
+                                    fileName: lesson.fileName,
+                                    // Only include link and fileUrl if enrolled
                                     link: enrollmentStatus ? lesson.videoUrl : null,
+                                    fileUrl: enrollmentStatus ? lesson.fileUrl : null,
                                     // Lock lessons for non-enrolled users
                                     locked: !enrollmentStatus
                                 }))
@@ -218,7 +222,7 @@ const CoursePage = () => {
         return (
             <>
                 <Head>
-                    <title>جاري التحميل... - حسام ميرة</title>
+                    <title>جاري التحميل... -  حسام ميرة  </title>
                 </Head>
                 <div dir='rtl' className="min-h-screen bg-[#0A1121] text-white font-arabicUI3">
                     <div className="fixed inset-0 pointer-events-none">
@@ -241,7 +245,7 @@ const CoursePage = () => {
     return (
         <>
             <Head>
-                <title>{courseInfo.nameofcourse ? `${courseInfo.nameofcourse} - منصة حسام ميرة  ` : 'منصة حسام ميرة   '}</title>
+                <title>{courseInfo.nameofcourse ? `${courseInfo.nameofcourse} - منصة حسام ميرة   ` : 'منصة  حسام ميرة   '}</title>
                 {/* Add Plyr CSS */}
                 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
                 {/* Add custom styling for Plyr */}
@@ -279,13 +283,13 @@ const CoursePage = () => {
                                     <span className="text-blue-400">كورس {courseInfo.level || "تعليمي"}</span>
                                 </div>
                                 <h1 className="text-4xl font-bold text-white">{courseInfo.nameofcourse}</h1>
-                                <p className="text-gray-400 text-lg">{courseInfo.description}</p>
+                                <pre className="text-gray-400 text-lg whitespace-pre-line" style={{ fontFamily: 'inherit', background: 'none', border: 'none', padding: 0, margin: 0 }}>{courseInfo.description}</pre>
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2">
                                         <img src="/prof.jpg"
                                             className="w-10 h-10 rounded-full border-2 border-blue-500" />
                                         <div>
-                                            <p className="text-white">أ/ حسام ميرة </p>
+                                            <p className="text-white">أ/ حسام ميرة   </p>
                                             <p className="text-sm text-gray-400">مدرس المادة</p>
                                         </div>
                                     </div>
@@ -312,6 +316,8 @@ const CoursePage = () => {
                     {/* Main Content */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Video Section */}
+
+
                         <div className="lg:col-span-2 space-y-6">                            <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-900">
                             {currentVideoUrl && !isContentLocked && isReady ? (
                                 <VideoPlayer
@@ -331,6 +337,7 @@ const CoursePage = () => {
                                     </div>
                                 </div>
                             )}
+
                         </div>
 
                             {/* Chapter and Lesson Info */}
@@ -369,38 +376,63 @@ const CoursePage = () => {
                                                 </div>
                                             </div>                                            <div className="space-y-2 pr-4">
                                                 {chapter.lessons.map((lesson, lessonIndex) => (
-                                                    <button
-                                                        key={lesson.id}
-                                                        onClick={() => isEnrolled && handleLessonClick(chapterIndex, lessonIndex)}
-                                                        className={`w-full p-3 flex items-center gap-3 rounded-lg transition-all duration-200 
-                                                            ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                                ? 'bg-blue-500/20 shadow-lg shadow-blue-500/10'
-                                                                : 'hover:bg-gray-700/30'}`}
-                                                        disabled={!isEnrolled || lesson.locked}
-                                                    >
-                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors
-                                                            ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                                ? 'bg-blue-500'
-                                                                : 'bg-gray-700'}`}
+                                                    <div key={lesson.id} className="mb-1">
+                                                        <button
+                                                            onClick={() => isEnrolled && handleLessonClick(chapterIndex, lessonIndex)}
+                                                            className={`w-full p-3 flex items-center gap-3 rounded-lg transition-all duration-200 
+                                                                ${activeChapter === chapterIndex && activeLesson === lessonIndex
+                                                                    ? 'bg-blue-500/20 shadow-lg shadow-blue-500/10'
+                                                                    : 'hover:bg-gray-700/30'}`}
+                                                            disabled={!isEnrolled || lesson.locked}
                                                         >
-                                                            {!isEnrolled || lesson.locked ? (
-                                                                <FaLock className="text-gray-400 text-xs" />
-                                                            ) : (
-                                                                <FaPlay className={`${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                                    ? 'text-white'
-                                                                    : 'text-gray-400'
-                                                                    } text-xs`} />
-                                                            )}
-                                                        </div>
-                                                        <div className="text-right flex-1">
-                                                            <p className={`text-sm transition-colors ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                                ? 'text-blue-400 font-medium'
-                                                                : lesson.locked ? 'text-gray-500' : 'text-gray-300'
-                                                                }`}>
-                                                                {lesson.name}
-                                                            </p>
-                                                        </div>
-                                                    </button>
+                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors
+                                                                ${activeChapter === chapterIndex && activeLesson === lessonIndex
+                                                                    ? 'bg-blue-500'
+                                                                    : 'bg-gray-700'}`}
+                                                            >
+                                                                {!isEnrolled || lesson.locked ? (
+                                                                    <FaLock className="text-gray-400 text-xs" />
+                                                                ) : (
+                                                                    <FaPlay className={`${activeChapter === chapterIndex && activeLesson === lessonIndex
+                                                                        ? 'text-white'
+                                                                        : 'text-gray-400'
+                                                                        } text-xs`} />
+                                                                )}
+                                                            </div>
+                                                            <div className="text-right flex-1">
+                                                                <p className={`text-sm transition-colors ${activeChapter === chapterIndex && activeLesson === lessonIndex
+                                                                    ? 'text-blue-400 font-medium'
+                                                                    : lesson.locked ? 'text-gray-500' : 'text-gray-300'
+                                                                    }`}>
+                                                                    {lesson.name}
+                                                                </p>
+                                                            </div>
+                                                        </button>
+                                                        {/* File name or link below lesson button - always show fileName if present */}
+
+                                                        {lesson && (
+                                                            console.log(lesson.fileName),
+                                                            <div className="flex items-center mt-2 mr-12 group">
+                                                                {isEnrolled && lesson.fileUrl ? (
+                                                                    <a
+                                                                        href={lesson.fileUrl}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="px-5 py-2 rounded-lg w-full bg-green-500/10 text-green-400 text-lg font-semibold transition ease-in-out ml-1 flex items-center gap-1 group-hover:text-green-900 group-hover:bg-green-500"
+                                                                    >
+                                                                        <File className="w-6 h-6 text-green-500 group-hover:text-green-900" />
+                                                                        {lesson.fileName || "تحميل الملف"}
+                                                                    </a>
+                                                                ) : (
+                                                                    <div className="px-5 py-2 rounded-lg w-full bg-gray-700/30 text-gray-400 text-lg font-semibold flex items-center gap-1">
+                                                                        <FaLock className="w-5 h-5 text-gray-400" />
+                                                                        {lesson.fileName}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>

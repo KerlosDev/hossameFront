@@ -72,6 +72,7 @@ const EnrollmentSection = ({ courseInfo }) => {
             // Create enrollment for free course - same format as payment page
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/active`, {
                 courseId: courseId,
+                paymentStatus: 'paid', // For free courses, we set paymentStatus to 'paid'
                 price: courseInfo.price || 0,
                 phoneNumber: '01000000000' // Replace with actual phone number if needed
 
