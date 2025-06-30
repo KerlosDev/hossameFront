@@ -410,8 +410,7 @@ const CoursePage = () => {
                                                         </button>
                                                         {/* File name or link below lesson button - always show fileName if present */}
 
-                                                        {lesson && (
-                                                            console.log(lesson.fileName),
+                                                        {lesson && lesson.fileName && (  
                                                             <div className="flex items-center mt-2 mr-12 group">
                                                                 {isEnrolled && lesson.fileUrl ? (
                                                                     <a
