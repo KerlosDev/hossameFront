@@ -78,8 +78,8 @@ const Footer = () => {
                         </h4>
                         <div className="space-y-3">
                             <div className="text-gray-400 text-sm">
-                                <a href="tel:+201080506463" dir='rtl' className="text-blue-400 hover:text-blue-300 transition-colors">
-                                    01080506463
+                                <a href="https://t.me/Hossammirah" dir='rtl' className="text-blue-400 hover:text-blue-300 transition-colors">
+                                    تواصل تيليجرام
                                 </a>
                             </div>
 
