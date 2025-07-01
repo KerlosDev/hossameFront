@@ -183,17 +183,11 @@ export default function StudentsList() {
 
     // Filter students
     const filteredStudents = students.filter(student => {
-        const matchesSearch =
-            student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.phoneNumber.includes(searchQuery) ||
-            student.government.includes(searchQuery);
-
         const matchesStatus = filterStatus === 'all' ||
             (filterStatus === 'banned' && student.isBanned) ||
             (filterStatus === 'active' && !student.isBanned);
 
-        return matchesSearch && matchesStatus;
+        return matchesStatus;
     });
 
     // Format date
@@ -434,12 +428,23 @@ export default function StudentsList() {
         );
     };
 
+    // Add temporary search input state
+    const [tempSearchInput, setTempSearchInput] = useState("");
+    
+    // Add a function to handle search button click
+    const handleSearch = () => {
+        setSearchQuery(tempSearchInput); // This will trigger the API call through the useEffect dependency
+    };
+    
+    // Add a function to handle key press
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     // Add sorting function
     const sortData = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        }
         setSortConfig({ key, direction });
     };
 
@@ -755,15 +760,24 @@ export default function StudentsList() {
                 <h1 className="text-3xl font-arabicUI3 text-gray-900 dark:text-white mb-6">إدارة الطلاب</h1>
                 <div className="flex flex-wrap gap-4 items-center justify-between">
                     {/* Search */}
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white/50" size={20} />
-                        <input
-                            type="text"
-                            placeholder="البحث عن طالب..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-10 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50 focus:outline-none focus:border-gray-400 dark:focus:border-white/30"
-                        />
+                    <div className="flex items-center gap-2 flex-1 max-w-md">
+                        <div className="relative flex-1">
+                            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white/50" size={20} />
+                            <input
+                                type="text"
+                                placeholder="البحث عن طالب..."
+                                value={tempSearchInput}
+                                onChange={(e) => setTempSearchInput(e.target.value)}
+                                onKeyDown={handleKeyPress}
+                                className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-10 py-2 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50 focus:outline-none focus:border-gray-400 dark:focus:border-white/30"
+                            />
+                        </div>
+                        <button
+                            onClick={handleSearch}
+                            className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                        >
+                            بحث
+                        </button>
                     </div>
 
                     {/* Filter */}
