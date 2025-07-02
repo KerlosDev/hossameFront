@@ -1,23 +1,63 @@
 // Dynamic sitemap.xml for Next.js App Router
 export async function GET() {
-  const baseUrl = 'https://hossame-front.vercel.app'; // Change to your actual domain
+  const baseUrl = 'https://www.hossammirah.com'; // Change to your actual domain
+
+  // Static pages
   const pages = [
     '',
-    'admin',
     'book-order',
-    'Courses',
-    'payment',
     'profile',
-    'quiz',
     'sign-in',
-    'sign-up',
+    'sign-up', 
   ];
 
-  const urls = pages.map(
-    (page) => `  <url>\n    <loc>${baseUrl}/${page}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`
+  // Get course data from API
+  let coursesSitemap = '';
+  try {
+    // Using the same API endpoint as in Courses.jsx
+    const courseRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.hossammirah.com'}/course`);
+
+    if (courseRes.ok) {
+      const data = await courseRes.json();
+
+      // Filter out draft courses, same as in Courses.jsx
+      const courses = (data.courses || []).filter(course => !course.isDraft);
+
+      if (courses && Array.isArray(courses)) {
+        // Map each course to a sitemap entry
+        const coursesUrls = courses.map(course => {
+          const courseId = course._id; // Using _id as in Courses.jsx
+
+          return `  <url>
+    <loc>${baseUrl}/Courses/${courseId}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+        }).join('\n');
+
+        coursesSitemap = coursesUrls;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching courses for sitemap:', error);
+  }
+
+  // Generate main pages sitemap entries
+  const staticUrls = pages.map(
+    (page) => `  <url>
+    <loc>${baseUrl}/${page}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`
   ).join('\n');
 
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;
+  // Combine static and dynamic URLs
+  const allUrls = `${staticUrls}\n${coursesSitemap}`;
+
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${allUrls}
+</urlset>`;
 
   return new Response(sitemap, {
     headers: {
