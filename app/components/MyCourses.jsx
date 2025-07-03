@@ -106,7 +106,7 @@ export default function MyCourses({ onBack }) {
                 </div>
                 <h3 className="text-2xl font-arabicUI2 text-white/90">لم تشترك في أي كورسات بعد</h3>
                 <p className="text-white/70 max-w-md mx-auto">استكشف مجموعتنا الواسعة من الكورسات التعليمية واشترك فيما يناسب احتياجاتك التعليمية.</p>
-                <Link href="/courses">
+                <Link href="/">
                     <button className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-white hover:shadow-lg hover:shadow-blue-500/20 transition-all flex items-center gap-2">
                         <span>استكشف الكورسات المتاحة</span>
                         <ChevronRight size={18} />
