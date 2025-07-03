@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { CreditCard, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Phone, Mail, Plus } from 'lucide-react';
+import { CreditCard, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Phone, Mail, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Cookies from 'js-cookie';
@@ -10,20 +10,47 @@ export default function PaymentsList() {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [sortBy, setSortBy] = useState('date'); const [sortOrder, setSortOrder] = useState('desc');
+    const [sortBy, setSortBy] = useState('date');
+    const [sortOrder, setSortOrder] = useState('desc');
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
     const [showAddEnrollment, setShowAddEnrollment] = useState(false);
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+
     // Define fetchEnrollments as a component function
     const fetchEnrollments = async () => {
         try {
+            setLoading(true);
             const token = Cookies.get('token');
             if (!token) {
                 throw new Error('No authentication token found');
             }
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/active/admin/enrollments`, {
+            // Prepare query parameters
+            const queryParams = new URLSearchParams();
+            queryParams.append('page', currentPage);
+            queryParams.append('limit', itemsPerPage);
+
+            if (searchQuery) {
+                queryParams.append('search', searchQuery);
+            }
+
+            if (filterStatus !== 'all') {
+                queryParams.append('status', filterStatus);
+            }
+
+            // Add sorting parameters
+            if (sortBy) {
+                queryParams.append('sortBy', sortBy);
+                queryParams.append('sortOrder', sortOrder);
+            }
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/active/admin/enrollments?${queryParams}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -31,7 +58,10 @@ export default function PaymentsList() {
             });
             if (!response.ok) throw new Error('Failed to fetch enrollments');
             const data = await response.json();
+
             setPayments(data.enrollments);
+            setTotalPages(data.pagination.totalPages);
+            setTotalItems(data.pagination.totalItems);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching enrollments:', error);
@@ -43,34 +73,44 @@ export default function PaymentsList() {
     // Use the defined fetchEnrollments in useEffect
     useEffect(() => {
         fetchEnrollments();
-    }, []);
+    }, [currentPage, itemsPerPage, searchQuery, filterStatus, sortBy, sortOrder]);
 
-    // Filter payments based on search query and status
-    const filteredPayments = payments?.filter(payment => {
-        const matchesSearch = searchQuery
-            ? payment.userEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            payment.courseName?.toLowerCase().includes(searchQuery.toLowerCase())
-            : true;
-
-        const matchesStatus = filterStatus === 'all' ? true : payment.paymentStatus === filterStatus;
-
-        return matchesSearch && matchesStatus;
-    });
-
-    // Sort payments
-    const sortedPayments = [...(filteredPayments || [])].sort((a, b) => {
-        if (sortBy === 'date') {
-            return sortOrder === 'desc'
-                ? new Date(b.date) - new Date(a.date)
-                : new Date(a.date) - new Date(b.date);
+    // Server-side sorting is now in place
+    // We will handle sorting through API parameters when we update fetchEnrollments
+    const handleSortChange = (sortField) => {
+        // If clicking on the same field, toggle order, otherwise set the new field with desc order
+        if (sortField === sortBy) {
+            setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+        } else {
+            setSortBy(sortField);
+            setSortOrder('desc');
         }
-        if (sortBy === 'amount') {
-            return sortOrder === 'desc'
-                ? b.amount - a.amount
-                : a.amount - b.amount;
+        setCurrentPage(1); // Reset to first page when changing sort
+    };
+
+    // Pagination logic
+    // No longer calculating from client side as we get this from the API
+    const indexOfFirstItem = (currentPage - 1) * itemsPerPage + 1;
+    const indexOfLastItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+    // Handle pagination
+    const goToPage = (pageNumber) => {
+        if (pageNumber > 0 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
         }
-        return 0;
-    });
+    };
+
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
 
     // Format date
     const formatDate = (dateString) => {
@@ -130,6 +170,7 @@ export default function PaymentsList() {
 
             // Update local state and refresh data
             await fetchEnrollments();
+            setCurrentPage(1); // Reset to first page after status change
 
             toast.success(newStatus === 'paid' ? 'تم تفعيل الكورس بنجاح' : 'تم إلغاء تفعيل الكورس بنجاح');
         } catch (error) {
@@ -140,8 +181,11 @@ export default function PaymentsList() {
 
     const handleEnrollmentAdded = (newEnrollment) => {
         setPayments(prev => [newEnrollment, ...prev]);
+        setCurrentPage(1); // Go to first page when adding new enrollment
         setShowAddEnrollment(false);
-    };    return (
+    };
+
+    return (
         <div className="space-y-4 sm:space-y-6">
             {/* Stats Section */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -214,8 +258,8 @@ export default function PaymentsList() {
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className="flex-1 sm:flex-none bg-white/5 border border-white/10 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors text-sm sm:text-base"
                             >
-                                <option  className='text-black' value="date">تاريخ الدفع</option>
-                                <option  className='text-black' value="amount">المبلغ</option>
+                                <option value="date">تاريخ الدفع</option>
+                                <option value="amount">المبلغ</option>
                             </select>
                             <button
                                 onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
@@ -226,6 +270,42 @@ export default function PaymentsList() {
                                     className={`transform transition-transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`}
                                 />
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Search and Filter Bar */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center p-4 border-t border-white/10 gap-4">
+                    <div className="flex-1 relative">
+                        <input
+                            type="text"
+                            placeholder="بحث بالاسم أو الإيميل أو الكورس..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setCurrentPage(1); // Reset to first page on search
+                            }}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white placeholder:text-white/40 focus:border-blue-500 outline-none transition-colors"
+                        />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40" size={18} />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <div className="relative">
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => {
+                                    setFilterStatus(e.target.value);
+                                    setCurrentPage(1); // Reset to first page on filter change
+                                }}
+                                className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-blue-500 outline-none transition-colors"
+                            >
+                                <option value="all">جميع الحالات</option>
+                                <option value="paid">مفعل</option>
+                                <option value="pending">قيد المعالجة</option>
+                                <option value="failed">غير مفعل</option>
+                            </select>
+                            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40" size={18} />
                         </div>
                     </div>
                 </div>
@@ -243,7 +323,7 @@ export default function PaymentsList() {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedPayments?.map((payment) => (
+                            {payments.map((payment) => (
                                 <tr key={payment._id} className="border-b border-white/5 hover:bg-white/5">
                                     <td className="py-4 px-6">
                                         <div className="flex flex-col gap-2">
@@ -317,7 +397,59 @@ export default function PaymentsList() {
                                 </tr>
                             ))}
                         </tbody>
-                    </table>                </div>
+                    </table>
+
+                    {/* Empty State */}
+                    {payments.length === 0 && !loading && (
+                        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                            <div className="p-4 rounded-full bg-white/5 mb-4">
+                                <CreditCard className="text-white/40" size={32} />
+                            </div>
+                            <h3 className="text-lg font-medium text-white mb-1">لا توجد مدفوعات</h3>
+                            <p className="text-white/60 max-w-md mb-6">
+                                {searchQuery || filterStatus !== 'all'
+                                    ? 'لا توجد نتائج تطابق معايير البحث أو التصفية الحالية'
+                                    : 'لا توجد مدفوعات في النظام حتى الآن. يمكنك إضافة مدفوعات جديدة بالنقر على زر إضافة اشتراك.'}
+                            </p>
+                            {(searchQuery || filterStatus !== 'all') && (
+                                <button
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setFilterStatus('all');
+                                    }}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    مسح عوامل التصفية
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-t border-white/10">
+                    <div className="text-white/60 text-sm">
+                        {/* Display total items and current page info */}
+                        {`عرض ${indexOfFirstItem} - ${indexOfLastItem} من ${totalItems} عنصر`}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={goToPreviousPage}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                        <button
+                            onClick={goToNextPage}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Add Enrollment Modal */}
