@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react';
-import { User, Mail, Phone, Clock, Filter, Ban, Search, MapPin, Book, AlertCircle, Download, Eye, Monitor, Smartphone, Tablet } from 'lucide-react';
+import { User, Mail, Phone, Clock, Filter, Ban, Search, MapPin, Book, AlertCircle, Download, Eye, Monitor, Smartphone, Tablet, Key } from 'lucide-react';
 import { FaWhatsapp, FaGraduationCap } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
@@ -15,6 +15,10 @@ export default function StudentsList() {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showBanConfirm, setShowBanConfirm] = useState(false);
     const [banReason, setBanReason] = useState('');
+    const [showPasswordReset, setShowPasswordReset] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordResetLoading, setPasswordResetLoading] = useState(false);
 
     // New state for analytics
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
@@ -178,6 +182,55 @@ export default function StudentsList() {
         } catch (error) {
             console.error('Error updating ban status:', error);
             toast.error('حدث خطأ في تحديث حالة الحظر');
+        }
+    };
+
+    // Password reset function
+    const handlePasswordReset = async () => {
+        if (newPassword !== confirmPassword) {
+            return toast.error('كلمتا المرور غير متطابقتين');
+        }
+
+        if (newPassword.length < 6) {
+            return toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+        }
+
+        setPasswordResetLoading(true);
+        try {
+            const token = Cookies.get('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password/${selectedStudent._id}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ newPassword }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                toast.success('تم إعادة تعيين كلمة المرور بنجاح');
+                setShowPasswordReset(false);
+                setNewPassword('');
+                setConfirmPassword('');
+                // Optionally, you can refetch the student data to get the updated info
+                await fetchStudents();
+            } else {
+                throw new Error(data.message || 'فشل في إعادة تعيين كلمة المرور');
+            }
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            toast.error(error.message || 'حدث خطأ في إعادة تعيين كلمة المرور');
+        } finally {
+            setPasswordResetLoading(false);
         }
     };
 
@@ -430,12 +483,12 @@ export default function StudentsList() {
 
     // Add temporary search input state
     const [tempSearchInput, setTempSearchInput] = useState("");
-    
+
     // Add a function to handle search button click
     const handleSearch = () => {
         setSearchQuery(tempSearchInput); // This will trigger the API call through the useEffect dependency
     };
-    
+
     // Add a function to handle key press
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
@@ -645,6 +698,16 @@ export default function StudentsList() {
                                     >
                                         <Ban size={16} />
                                     </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedStudent(student);
+                                            setShowPasswordReset(true);
+                                        }}
+                                        className="p-2 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-500/30 transition-colors"
+                                    >
+                                        <Key size={16} />
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -788,9 +851,9 @@ export default function StudentsList() {
                             onChange={(e) => setFilterStatus(e.target.value)}
                             className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-10 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-white/30 appearance-none"
                         >
-                            <option value="all">جميع الطلاب</option>
-                            <option value="active">نشط</option>
-                            <option value="banned">محظور</option>
+                            <option className='text-black' value="all">جميع الطلاب</option>
+                            <option className='text-black' value="active">نشط</option>
+                            <option className='text-black' value="banned">محظور</option>
                         </select>
                     </div>
                 </div>
@@ -934,6 +997,17 @@ export default function StudentsList() {
                                 >
                                     <Ban size={18} />
                                 </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedStudent(student);
+                                        setShowPasswordReset(true);
+                                    }}
+                                    className="p-2 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-500/30 transition-colors"
+                                    title="إعادة تعيين كلمة المرور"
+                                >
+                                    <Key size={18} />
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -983,8 +1057,66 @@ export default function StudentsList() {
                 </div>
             )}
 
+            {/* Student Password Reset Modal */}
+            {showPasswordReset && selectedStudent && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 max-w-md w-full mx-4">
+                        <h3 className="text-xl  font-arabicUI3 text-white mb-4">
+                            إعادة تعيين كلمة مرور الطالب
+                        </h3>
+
+                        <div className="space-y-4 mb-4">
+                            <div>
+                                <label className="block text-white/60 mb-1 text-sm">
+                                    كلمة المرور الجديدة
+                                </label>
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder:text-white/50 focus:outline-none focus:border-white/30"
+                                    placeholder="أدخل كلمة المرور الجديدة"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-white/60 mb-1 text-sm">
+                                    تأكيد كلمة المرور
+                                </label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder:text-white/50 focus:outline-none focus:border-white/30"
+                                    placeholder="أعد إدخال كلمة المرور الجديدة"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={() => {
+                                    setShowPasswordReset(false);
+                                    setNewPassword('');
+                                    setConfirmPassword('');
+                                }}
+                                className="px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all"
+                            >
+                                إلغاء
+                            </button>
+                            <button
+                                onClick={handlePasswordReset}
+                                className="px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-all"
+                                disabled={passwordResetLoading}
+                            >
+                                {passwordResetLoading ? 'جاري إعادة التعيين...' : 'تأكيد إعادة التعيين'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Student Details Modal */}
-            {selectedStudent && !showBanConfirm && (
+            {selectedStudent && !showBanConfirm && !showPasswordReset && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
                     <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 max-w-4xl w-full mx-4">
                         {/* Modal Header */}
@@ -1144,6 +1276,13 @@ export default function StudentsList() {
                                 إغلاق
                             </button>
                             <button
+                                onClick={() => setShowPasswordReset(true)}
+                                className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white transition-all flex items-center gap-2"
+                            >
+                                <Key size={16} />
+                                تغيير كلمة المرور
+                            </button>
+                            <button
                                 onClick={() => {
                                     setShowBanConfirm(true);
                                 }}
@@ -1159,6 +1298,64 @@ export default function StudentsList() {
                 </div>
             )
             }
+
+            {/* Password Reset Modal */}
+            {showPasswordReset && selectedStudent && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 max-w-md w-full mx-4">
+                        <h3 className="text-xl font-arabicUI3 text-white mb-4">
+                            تغيير كلمة المرور للطالب: {selectedStudent.name}
+                        </h3>
+
+                        <div className="space-y-4 mb-6">
+                            <div>
+                                <label htmlFor="newPassword" className="block text-white/70 mb-2">كلمة المرور الجديدة</label>
+                                <input
+                                    type="password"
+                                    id="newPassword"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder:text-white/50 focus:outline-none focus:border-white/30"
+                                    placeholder="أدخل كلمة المرور الجديدة..."
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="confirmPassword" className="block text-white/70 mb-2">تأكيد كلمة المرور</label>
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder:text-white/50 focus:outline-none focus:border-white/30"
+                                    placeholder="أعد إدخال كلمة المرور..."
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={() => {
+                                    setShowPasswordReset(false);
+                                    setNewPassword('');
+                                    setConfirmPassword('');
+                                }}
+                                className="px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all"
+                                disabled={passwordResetLoading}
+                            >
+                                إلغاء
+                            </button>
+                            <button
+                                onClick={handlePasswordReset}
+                                className="px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-all flex items-center gap-2"
+                                disabled={passwordResetLoading}
+                            >
+                                {passwordResetLoading ? 'جاري التحديث...' : 'تأكيد تغيير كلمة المرور'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }
