@@ -178,6 +178,13 @@ const ExamManage = () => {
         imageFile: null,
         imagePreview: null
     });
+    // Add stats state
+    const [examStats, setExamStats] = useState({
+        totalStudents: 0,
+        averageGrade: 0
+    });
+    // Add loading state for stats
+    const [statsLoading, setStatsLoading] = useState(true);
 
     // Add pagination state
     const [pagination, setPagination] = useState({
@@ -209,7 +216,44 @@ const ExamManage = () => {
 
     useEffect(() => {
         fetchExams();
+        fetchExamStats(); // Fetch exam statistics
     }, [debouncedSearchTerm, pagination.currentPage, pageSize]);
+
+    const fetchExamStats = async () => {
+        try {
+            setStatsLoading(true); // Start loading
+            // Fetch student rankings to get number of students and avg grades
+            const response = await api.get('/rank/all');
+
+            if (response.data && response.data.success) {
+                const students = response.data.data || [];
+
+                // Calculate average percentage across all students
+                let totalPercentage = 0;
+                students.forEach(student => {
+                    totalPercentage += (student.percentage || 0);
+                });
+
+                const averageGrade = students.length > 0
+                    ? Math.round(totalPercentage / students.length)
+                    : 0;
+
+                setExamStats({
+                    totalStudents: students.length,
+                    averageGrade: `${averageGrade}%`
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching exam stats:', error);
+            // Set default values in case of error
+            setExamStats({
+                totalStudents: 0,
+                averageGrade: "0%"
+            });
+        } finally {
+            setStatsLoading(false); // End loading
+        }
+    };
 
     const fetchExams = async () => {
         try {
@@ -476,19 +520,22 @@ const ExamManage = () => {
                     title="إجمالي الامتحانات"
                     value={pagination.totalExams}
                     icon={<Book className="text-blue-500" />}
-                    change="+2 this week"
+                    change="إجمالي الامتحانات المتاحة"
+                    isLoading={loading}
                 />
                 <StatsCard
                     title="متوسط الدرجات"
-                    value="85%"
+                    value={examStats.averageGrade || "0%"}
                     icon={<Award className="text-green-500" />}
-                    change="↑ 5% increase"
+                    change="متوسط الدرجات لجميع الطلاب"
+                    isLoading={statsLoading}
                 />
                 <StatsCard
                     title="عدد الطلاب المشاركين"
-                    value="234"
+                    value={examStats.totalStudents || 0}
                     icon={<Users className="text-purple-500" />}
-                    change="↑ 12% increase"
+                    change="عدد الطلاب المشاركين في الامتحانات"
+                    isLoading={statsLoading}
                 />
             </div>
 
@@ -708,12 +755,16 @@ const ExamManage = () => {
 };
 
 // Sub-components
-const StatsCard = ({ title, value, icon, change }) => (
+const StatsCard = ({ title, value, icon, change, isLoading }) => (
     <div className="bg-white border border-gray-200 backdrop-blur-xl rounded-xl p-6 dark:bg-white/5 dark:border-white/10">
         <div className="flex justify-between items-start">
             <div>
                 <p className="text-gray-500 text-sm dark:text-gray-400">{title}</p>
-                <h3 className="text-2xl font-bold text-gray-800 mt-1 dark:text-white">{value}</h3>
+                {isLoading ? (
+                    <div className="h-7 w-24 mt-1 bg-gray-200 animate-pulse rounded-md dark:bg-white/10"></div>
+                ) : (
+                    <h3 className="text-2xl font-bold text-gray-800 mt-1 dark:text-white">{value}</h3>
+                )}
                 <p className="text-sm text-gray-400 mt-2">{change}</p>
             </div>
             <div className="p-3 bg-gray-100 rounded-lg dark:bg-white/5">
@@ -724,7 +775,7 @@ const StatsCard = ({ title, value, icon, change }) => (
 );
 
 const ExamCard = ({ exam, onDelete, onEdit }) => {
-    const examUrl = `http://localhost:3000/quiz/${exam._id}`;
+    const examUrl = `${window.location.origin}/quiz/${exam._id}`;
 
     const copyLink = async () => {
         try {
