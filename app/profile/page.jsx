@@ -44,7 +44,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
     const [stats, setStats] = useState({
         platformActivity: '0%',
         averageScore: '0%',
-        completedExams: { value: 0, subText: '0 من 0' },
+        completedExams: { value: 0, },
         enrolledCourses: { value: 0, subText: 'إجمالي الكورسات' }
     });
     const [lastActive, setLastActive] = useState("اليوم");
@@ -58,7 +58,18 @@ export default function ChemistryLMSProfile({ searchParams }) {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setStats(response.data.stats);
+
+            // Process the response data to ensure proper formatting
+            const statsData = response.data.stats;
+
+            // Handle the completedExams subText properly based on actual data
+            if (statsData.completedExams) {
+                const totalExams = statsData.completedExams.total || 0;
+                const completedValue = statsData.completedExams.value || 0;
+                statsData.completedExams.subText = `${completedValue} من ${totalExams}`;
+            }
+
+            setStats(statsData);
         } catch (error) {
             console.error('Error fetching stats:', error);
         }
@@ -170,7 +181,6 @@ export default function ChemistryLMSProfile({ searchParams }) {
             id: 3,
             value: stats.completedExams.value.toString(),
             label: "الاختبارات المكتملة",
-            subText: stats.completedExams.subText,
             color: "bg-purple-600",
             icon: <Beaker className="text-purple-600" />,
             gradient: "from-purple-600 to-indigo-600"
@@ -185,7 +195,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
             gradient: "from-blue-600 to-indigo-600"
         }
     ];
- 
+
 
     const menuItems = [
         {
@@ -399,7 +409,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
                                 <div className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3 transform group-hover:scale-110 transition-transform duration-500">
                                     {stat.icon}
                                 </div>
-                                <span className={`text-3xl font-bold text-${stat.color.replace('bg-', '')} group-hover:scale-110 transition-transform duration-500 drop-shadow-lg`}>
+                                <span className={`text-2xl font-bold text-${stat.color.replace('bg-', '')} group-hover:scale-110 transition-transform duration-500 drop-shadow-lg`}>
                                     {stat.value}
                                 </span>
                                 {stat.subText && <span className="text-sm text-white/60 mt-1">{stat.subText}</span>}
@@ -411,7 +421,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
             </div>
 
             {/* Achievements Section */}
-           
+
 
         </>
     );
