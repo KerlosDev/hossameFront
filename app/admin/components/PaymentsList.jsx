@@ -258,8 +258,8 @@ export default function PaymentsList() {
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className="flex-1 sm:flex-none bg-white/5 border border-white/10 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 text-white outline-none focus:border-blue-500 transition-colors text-sm sm:text-base"
                             >
-                                <option value="date">تاريخ الدفع</option>
-                                <option value="amount">المبلغ</option>
+                                <option className='text-black' value="date">تاريخ الدفع</option>
+                                <option className='text-black' value="amount">المبلغ</option>
                             </select>
                             <button
                                 onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
@@ -298,12 +298,12 @@ export default function PaymentsList() {
                                     setFilterStatus(e.target.value);
                                     setCurrentPage(1); // Reset to first page on filter change
                                 }}
-                                className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-blue-500 outline-none transition-colors"
+                                className="appearance-none font-arabicUI3 bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-blue-500 outline-none transition-colors"
                             >
-                                <option value="all">جميع الحالات</option>
-                                <option value="paid">مفعل</option>
-                                <option value="pending">قيد المعالجة</option>
-                                <option value="failed">غير مفعل</option>
+                                <option className='text-black' value="all">جميع الحالات</option>
+                                <option className='text-black' value="paid">مفعل</option>
+                                <option className='text-black' value="pending">قيد المعالجة</option>
+                                <option className='text-black' value="failed">غير مفعل</option>
                             </select>
                             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40" size={18} />
                         </div>

@@ -126,9 +126,9 @@ const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formDa
                                                 onChange={(e) => onFormChange('section', e.target.value)}
                                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
                                             >
-                                                <option  value="FIRST_SEC">الصف الأول الثانوي</option>
-                                                <option value="SECOND_SEC">الصف الثاني الثانوي</option>
-                                                <option value="THIRD_SEC">الصف الثالث الثانوي</option>
+                                                <option className='text-black' value="FIRST_SEC">الصف الأول الثانوي</option>
+                                                <option className='text-black' value="SECOND_SEC">الصف الثاني الثانوي</option>
+                                                <option className='text-black' value="THIRD_SEC">الصف الثالث الثانوي</option>
                                             </select>
                                         </div>
                                         <div className="space-y-4">
@@ -138,9 +138,9 @@ const OfferModal = memo(({ isEdit, onSubmit, onClose, currentStep, steps, formDa
                                                 onChange={(e) => onFormChange('stage', e.target.value)}
                                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
                                             >
-                                                <option value="DRAFT">مسودة</option>
-                                                <option value="PUBLISHED">نشر</option>
-                                                <option value="ARCHIVED">أرشيف</option>
+                                                <option className='text-black' value="DRAFT">مسودة</option>
+                                                <option className='text-black' value="PUBLISHED">نشر</option>
+                                                <option className='text-black' value="ARCHIVED">أرشيف</option>
                                             </select>
                                         </div>
                                     </div>

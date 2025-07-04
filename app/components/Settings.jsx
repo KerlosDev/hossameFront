@@ -181,9 +181,9 @@ export default function Settings({ userData, onClose, onUpdate }) {
                                 onChange={handleChange}
                                 className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-blue-500 outline-none transition-all duration-300"
                             >
-                                <option value="">اختر الجنس</option>
-                                <option value="ذكر">ذكر</option>
-                                <option value="أنثى">أنثى</option>
+                                <option className='text-black' value="">اختر الجنس</option>
+                                <option className='text-black' value="ذكر">ذكر</option>
+                                <option className='text-black' value="أنثى">أنثى</option>
                             </select>
                         </div>
 
@@ -264,10 +264,10 @@ export default function Settings({ userData, onClose, onUpdate }) {
                                 onChange={handleChange}
                                 className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-blue-500 outline-none transition-all duration-300"
                             >
-                                <option value="">اختر المستوى</option>
-                                <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
-                                <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
-                                <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                                <option className='text-black' value="">اختر المستوى</option>
+                                <option className='text-black' value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+                                <option className='text-black' value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+                                <option className='text-black' value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
                             </select>
                         </div>
                     </div>
