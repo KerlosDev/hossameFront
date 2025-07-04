@@ -11,7 +11,7 @@ import { PiMathOperationsBold } from "react-icons/pi";
 import { RiMenu4Fill } from "react-icons/ri";
 import { IoClose, IoNotifications, IoPersonCircle } from "react-icons/io5";
 import NotificationButton from './NotificationButton';
-import { LuUser, LuLogOut, LuUserCircle, LuChevronDown } from 'react-icons/lu';
+import { LuUser, LuLogOut, LuUserCircle, LuChevronDown, LuLogIn, LuUserPlus } from 'react-icons/lu';
 import sessionManager from '../utils/sessionManager';
 
 const Header = () => {
@@ -35,7 +35,7 @@ const Header = () => {
         checkUserLogin();
 
         // Set up session manager listener
-        const unsubscribe = sessionManager.addListener((event, data) => {
+        const unsubscribe = sessionManager.addListener((event, data) => {Z
             if (event === 'login') {
                 checkUserLogin();
             } else if (event === 'logout') {
@@ -327,11 +327,16 @@ const Header = () => {
                                 className="px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm 
                                              text-slate-600 dark:text-slate-300 font-arabicUI 
                                              hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg 
-                                             transition-all duration-300 relative group"
+                                             transition-all duration-300 relative group flex items-center gap-1.5
+                                             border border-blue-200 dark:border-blue-700 
+                                             hover:border-blue-400 dark:hover:border-blue-500"
                             >
+                                <LuLogIn className="text-blue-500 text-sm sm:text-base animate-pulse group-hover:animate-none" />
                                 <span className="relative z-10">تسجيل الدخول</span>
                                 <div className="absolute inset-0 bg-blue-500/5 rounded-lg scale-0 
                                                   group-hover:scale-100 transition-transform duration-300"></div>
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg opacity-0 
+                                                  group-hover:opacity-20 blur-md transition-opacity duration-500"></div>
                             </button>
                             <button
                                 onClick={handleSignUp}
@@ -339,12 +344,18 @@ const Header = () => {
                                              bg-gradient-to-r from-blue-500 to-blue-600 
                                              text-white text-xs sm:text-sm font-arabicUI rounded-lg
                                              transition-all duration-300 hover:shadow-lg
-                                             hover:shadow-blue-500/25"
+                                             hover:shadow-blue-500/40 flex items-center gap-1.5 hover:scale-105
+                                             border-2 border-blue-400 dark:border-blue-400 
+                                             hover:border-blue-300 dark:hover:border-blue-300
+                                             outline outline-1 outline-white/40 dark:outline-white/20"
                             >
+                                <LuUserPlus className="text-white text-sm sm:text-base animate-bounce animate-duration-2000" />
                                 <div className="absolute inset-0 bg-white/20 rounded-lg scale-0 
                                                   hover:scale-100 transition-transform duration-300"></div>
                                 <span className="hidden xs:inline relative z-10">انشاء حساب</span>
                                 <span className="xs:hidden relative z-10">حساب جديد</span>
+                                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/50 to-blue-700/50 rounded-lg blur-md 
+                                                  opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
                             </button>
                         </div>
                     )}
@@ -509,16 +520,34 @@ const Header = () => {
                                     onClick={() => { handleSignIn(); setIsMobileMenuOpen(false); }}
                                     className="w-full px-4 py-3 text-slate-600 dark:text-slate-300 
                                                  hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl 
-                                                 font-arabicUI text-right"
+                                                 font-arabicUI text-right flex items-center justify-between 
+                                                 transition-all duration-300 hover:shadow-sm group
+                                                 border border-blue-200 dark:border-blue-700/50
+                                                 hover:border-blue-400 dark:hover:border-blue-500"
                                 >
-                                    تسجيل الدخول
+                                    <span>تسجيل الدخول</span>
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center
+                                                     group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors
+                                                     ring-1 ring-blue-300 dark:ring-blue-500/30">
+                                        <LuLogIn className="text-blue-500 text-lg" />
+                                    </div>
                                 </button>
                                 <button
                                     onClick={() => { handleSignUp(); setIsMobileMenuOpen(false); }}
-                                    className="w-full px-4 py-3 bg-blue-600 text-white font-arabicUI
-                                                 hover:bg-blue-700 rounded-xl text-center"
+                                    className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white 
+                                                 font-arabicUI hover:from-blue-700 hover:to-blue-800 rounded-xl 
+                                                 flex items-center justify-between transition-all duration-300 
+                                                 hover:shadow-md hover:shadow-blue-500/30 relative overflow-hidden
+                                                 border-2 border-blue-400 dark:border-blue-500
+                                                 outline outline-1 outline-white/30 dark:outline-white/10"
                                 >
-                                    انشاء حساب
+                                    <span className="relative z-10">انشاء حساب</span>
+                                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center
+                                                     relative z-10 ring-2 ring-white/40">
+                                        <LuUserPlus className="text-white text-lg" />
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/0 to-blue-400/30 
+                                                     opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                                 </button>
                             </div>
                         )}
