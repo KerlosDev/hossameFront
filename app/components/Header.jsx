@@ -324,15 +324,15 @@ const Header = () => {
                         <div className="flex items-center gap-1.5 sm:gap-2">
                             <button
                                 onClick={handleSignIn}
-                                className="px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm 
-                                             text-slate-600 dark:text-slate-300 font-arabicUI 
+                                className="px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-xl 
+                                             text-slate-600 dark:text-slate-300 font-arabicUI2 
                                              hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg 
                                              transition-all duration-300 relative group flex items-center gap-1.5
-                                             border border-blue-200 dark:border-blue-700 
+                                             border-2  border-blue-200 dark:border-blue-700 
                                              hover:border-blue-400 dark:hover:border-blue-500"
                             >
-                                <LuLogIn className="text-blue-500 text-sm sm:text-base animate-pulse group-hover:animate-none" />
                                 <span className="relative z-10">تسجيل الدخول</span>
+                                <PiStudentBold className="text-blue-500 text-sm sm:text-xl animate-pulse group-hover:animate-none" />
                                 <div className="absolute inset-0 bg-blue-500/5 rounded-lg scale-0 
                                                   group-hover:scale-100 transition-transform duration-300"></div>
                                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg opacity-0 
@@ -342,18 +342,18 @@ const Header = () => {
                                 onClick={handleSignUp}
                                 className="relative overflow-hidden px-2 py-1.5 sm:px-3 sm:py-2 
                                              bg-gradient-to-r from-blue-500 to-blue-600 
-                                             text-white text-xs sm:text-sm font-arabicUI rounded-lg
+                                             text-white text-xs sm:text-xl font-arabicUI3 rounded-lg
                                              transition-all duration-300 hover:shadow-lg
                                              hover:shadow-blue-500/40 flex items-center gap-1.5 hover:scale-105
                                              border-2 border-blue-400 dark:border-blue-400 
                                              hover:border-blue-300 dark:hover:border-blue-300
                                              outline outline-1 outline-white/40 dark:outline-white/20"
                             >
-                                <LuUserPlus className="text-white text-sm sm:text-base animate-bounce animate-duration-2000" />
                                 <div className="absolute inset-0 bg-white/20 rounded-lg scale-0 
                                                   hover:scale-100 transition-transform duration-300"></div>
                                 <span className="hidden xs:inline relative z-10">انشاء حساب</span>
                                 <span className="xs:hidden relative z-10">حساب جديد</span>
+                                <PiMathOperationsBold className="text-white text-sm sm:text-xl animate-duration-2000" />
                                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/50 to-blue-700/50 rounded-lg blur-md 
                                                   opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
                             </button>
