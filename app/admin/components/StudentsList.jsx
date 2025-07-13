@@ -296,48 +296,86 @@ export default function StudentsList() {
 
         return { type, browser, os, icon };
     };    // Export to Excel
-    const exportToExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(students.map(student => {
-            const deviceInfo = getDeviceInfo(student.deviceInfo);
-            return {
-                'الاسم': student.name,
-                'البريد الإلكتروني': student.email,
-                'رقم الهاتف': student.phoneNumber,
-                'رقم ولي الأمر': student.parentPhoneNumber,
-                'المحافظة': student.government,
-                'المستوى': student.level,
-                'الحالة': student.isBanned ? 'محظور' : 'نشط',
-                'آخر نشاط': formatDate(student.lastActive),
-                'تاريخ التسجيل': formatDate(student.createdAt),
-                'نوع الجهاز': deviceInfo.type === 'mobile' ? 'هاتف' : deviceInfo.type === 'tablet' ? 'تابلت' : 'كمبيوتر',
-                'المتصفح': deviceInfo.browser,
-                'نظام التشغيل': deviceInfo.os,
-                'جلسة نشطة': student.hasActiveSession ? 'نعم' : 'لا'
-            };
-        }));
+    const exportToExcel = async () => {
+        try {
+            // Show loading toast
+            const loadingToast = toast.loading('جاري تحضير ملف Excel...');
+            
+            const token = Cookies.get('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
 
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+            // Fetch all students without pagination
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/students?limit=999999`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-        // Generate Excel file
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-        // Create Blob and download
-        const blob = new Blob([excelBuffer], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
+            const data = await response.json();
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Failed to fetch all students');
+            }
 
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `students-${new Date().toISOString().split('T')[0]}.xlsx`);
-        document.body.appendChild(link);
-        link.click();
+            const allStudents = data.data;
 
-        // Cleanup
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+            // Create Excel worksheet with all students
+            const worksheet = XLSX.utils.json_to_sheet(allStudents.map(student => {
+                const deviceInfo = getDeviceInfo(student.deviceInfo);
+                return {
+                    'الاسم': student.name,
+                    'البريد الإلكتروني': student.email,
+                    'رقم الهاتف': student.phoneNumber,
+                    'رقم ولي الأمر': student.parentPhoneNumber,
+                    'المحافظة': student.government,
+                    'المستوى': student.level,
+                    'الحالة': student.isBanned ? 'محظور' : 'نشط',
+                    'آخر نشاط': formatDate(student.lastActive),
+                    'تاريخ التسجيل': formatDate(student.createdAt),
+                    'نوع الجهاز': deviceInfo.type === 'mobile' ? 'هاتف' : deviceInfo.type === 'tablet' ? 'تابلت' : 'كمبيوتر',
+                    'المتصفح': deviceInfo.browser,
+                    'نظام التشغيل': deviceInfo.os,
+                    'جلسة نشطة': student.hasActiveSession ? 'نعم' : 'لا'
+                };
+            }));
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+
+            // Generate Excel file
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+            // Create Blob and download
+            const blob = new Blob([excelBuffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `all-students-${new Date().toISOString().split('T')[0]}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            // Dismiss loading toast and show success
+            toast.dismiss(loadingToast);
+            toast.success(`تم تصدير ${allStudents.length} طالب بنجاح`);
+
+        } catch (error) {
+            console.error('Error exporting to Excel:', error);
+            toast.error('حدث خطأ في تصدير البيانات');
+        }
     };    // Analytics Section Component
     const AnalyticsSection = () => (
         <div className="grid grid-cols-1 font-arabicUI3 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
