@@ -69,13 +69,11 @@ const EnrollmentSection = ({ courseInfo }) => {
             // Get the correct course ID - handle different possible formats
             const courseId = courseInfo._id || courseInfo.id || courseInfo.nicknameforcourse;
 
-            // Create enrollment for free course - same format as payment page
+            // Create enrollment for free course - backend will automatically set payment status to 'paid'
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/active`, {
                 courseId: courseId,
-                paymentStatus: 'paid', // For free courses, we set paymentStatus to 'paid'
                 price: courseInfo.price || 0,
                 phoneNumber: '01000000000' // Replace with actual phone number if needed
-
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -83,18 +81,6 @@ const EnrollmentSection = ({ courseInfo }) => {
             });
 
             if (response.status === 200 || response.status === 201) {
-                // Update payment status to paid for free course
-                await axios.put(
-                    `${process.env.NEXT_PUBLIC_API_URL}/active/payment/${response.data.enrollment._id}`,
-                    { paymentStatus: 'paid' },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-
                 setEnrolled(true);
                 toast.success('تم التسجيل في الكورس بنجاح');
                 // Optionally reload to update the UI
