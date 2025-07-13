@@ -60,20 +60,40 @@ const StudentFollowup = () => {
     const [inactivityThreshold] = useState(7); // Days to consider a student inactive
     const [watchHistory, setWatchHistory] = useState([]);
 
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [studentsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalStudents, setTotalStudents] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
     useEffect(() => {
         fetchLessonData();
         fetchAllCoursesAndChapters();
-    }, []);
+    }, [currentPage, sortBy, searchTerm]);
 
     const fetchLessonData = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/all-students-status`, {
+            setLoading(true);
+            const queryParams = new URLSearchParams({
+                page: currentPage.toString(),
+                limit: studentsPerPage.toString(),
+                sortBy: sortBy,
+                ...(searchTerm && { search: searchTerm })
+            });
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/all-students-status?${queryParams}`, {
                 headers: getAuthHeaders()
             });
 
             const studentsData = await response.json();
 
             if (studentsData.success) {
+                // Update pagination info
+                setTotalPages(studentsData.totalPages);
+                setTotalStudents(studentsData.totalStudents);
+
                 // Process student data
                 const whatsappObject = studentsData.data.reduce((acc, student) => {
                     acc[student.studentInfo.email] = {
@@ -114,7 +134,7 @@ const StudentFollowup = () => {
 
                 setStats({
                     totalViews,
-                    uniqueStudents: studentsData.count,
+                    uniqueStudents: studentsData.totalStudents, // Use total from server
                     mostViewedLesson: 'لم يتم تحديده', // This info is not available in the new API
                     mostActiveStudent: mostActiveStudent?.email || 'لا يوجد'
                 });
@@ -134,6 +154,8 @@ const StudentFollowup = () => {
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -195,7 +217,7 @@ const StudentFollowup = () => {
                 );                // Process exams
                 const processedExams = coursesData.flatMap(course => {
                     if (!course.exams || !Array.isArray(course.exams)) {
-                         return [];
+                        return [];
                     }
                     return course.exams.map(exam => ({
                         id: exam._id,
@@ -209,41 +231,11 @@ const StudentFollowup = () => {
 
                 setAllCourses(processedCourses);
                 setAllChapters(processedChapters);
-                 setAllExams(processedExams);
+                setAllExams(processedExams);
             }
         } catch (error) {
             console.error('Error fetching course data:', error);
         }
-    };
-
-    const sortStudents = (students) => {
-        return [...students].sort((a, b) => {
-            switch (sortBy) {
-                case 'views':
-                    return b.views - a.views;
-                case 'inactive':
-                    // First check if both students have a status
-                    if (!a.status || !b.status) return 0;
-
-                    // Sort by status priority (never_active > inactive > active)
-                    const statusPriority = { never_active: 2, inactive: 1, active: 0 };
-                    const priorityA = statusPriority[a.status.status] || 0;
-                    const priorityB = statusPriority[b.status.status] || 0;
-
-                    // If priorities are equal, sort by last activity date
-                    if (priorityA === priorityB) {
-                        const dateA = new Date(a.lastViewed || whatsappNumbers[a.email]?.lastActive || 0);
-                        const dateB = new Date(b.lastViewed || whatsappNumbers[b.email]?.lastActive || 0);
-                        return dateB - dateA;
-                    }
-
-                    return priorityB - priorityA;
-                default: // 'recent'
-                    const dateA = new Date(b.lastViewed || whatsappNumbers[b.email]?.lastActive || 0);
-                    const dateB = new Date(a.lastViewed || whatsappNumbers[a.email]?.lastActive || 0);
-                    return dateA - dateB;
-            }
-        });
     };
 
     const exportAsImage = async () => {
@@ -341,7 +333,8 @@ const StudentFollowup = () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             } const data = await response.json();
             // Remove console.log in production
-            // console.log(data);
+            // 
+            // (data);
 
             // The results array is directly in the data object, not in a nested 'results' property
             if (data && Array.isArray(data.results)) {
@@ -440,7 +433,7 @@ const StudentFollowup = () => {
         }, {});
 
         const completedExamIds = new Set(Object.keys(latestAttempts));
- 
+
         // If we have no exams data but have quiz results, create synthetic exam objects from quiz results
         if (allExams.length === 0 && quizResults.length > 0) {
             console.log("Creating synthetic exam objects from quiz results");
@@ -840,7 +833,10 @@ const StudentFollowup = () => {
                             <h3 className="text-white font-arabicUI3 text-xl">قائمة الطلاب</h3>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => setSortBy('views')}
+                                    onClick={() => {
+                                        setSortBy('views');
+                                        setCurrentPage(1);
+                                    }}
                                     className={`px-4 py-2 rounded-lg font-arabicUI3 transition-colors
                                         ${sortBy === 'views'
                                             ? 'bg-blue-500 text-white'
@@ -849,7 +845,10 @@ const StudentFollowup = () => {
                                     ترتيب حسب المشاهدات
                                 </button>
                                 <button
-                                    onClick={() => setSortBy('recent')}
+                                    onClick={() => {
+                                        setSortBy('recent');
+                                        setCurrentPage(1);
+                                    }}
                                     className={`px-4 py-2 rounded-lg font-arabicUI3 transition-colors
                                         ${sortBy === 'recent'
                                             ? 'bg-blue-500 text-white'
@@ -858,7 +857,10 @@ const StudentFollowup = () => {
                                     ترتيب حسب آخر نشاط
                                 </button>
                                 <button
-                                    onClick={() => setSortBy('inactive')}
+                                    onClick={() => {
+                                        setSortBy('inactive');
+                                        setCurrentPage(1);
+                                    }}
                                     className={`px-4 py-2 rounded-lg font-arabicUI3 transition-colors
                                         ${sortBy === 'inactive' ? 'bg-red-500 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
                                 >
@@ -870,95 +872,178 @@ const StudentFollowup = () => {
                             </div>
                         </div>
 
+                        {/* Search and Pagination Controls */}
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                            <div className="flex items-center gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="البحث عن طالب..."
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                    className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                {loading && (
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                                )}
+                            </div>
+
+                            <div className="text-white/70 text-sm">
+                                عرض {((currentPage - 1) * studentsPerPage) + 1} - {Math.min(currentPage * studentsPerPage, totalStudents)} من {totalStudents} طالب
+                            </div>
+                        </div>
+
                         <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="border-b border-white/10">
-                                    <tr className="text-white/70">
-                                        <th className="py-3 px-4 text-right">الطالب</th>
-                                        <th className="py-3 px-4 text-center">رقم الطالب</th>
-                                        <th className="py-3 px-4 text-center">رقم ولي الأمر</th>
-                                        <th className="py-3 px-4 text-center">الدروس المشاهدة</th>
-                                        <th className="py-3 px-4 text-center">آخر نشاط</th>
-                                        <th className="py-3 px-4 text-center">تفاصيل</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/10">
-                                    {sortStudents(studentList).map((student, index) => (
-                                        <tr key={student.email} className={`text-white/90 hover:bg-white/5 ${student.status.status !== 'active' ? 'bg-red-500/5' : ''
-                                            }`}>
-                                            {/* Email cell */}
-                                            <td className="py-4 px-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center`}>
-                                                        <FaUser className={student.status.color} />
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-medium">{whatsappNumbers[student.email]?.name || student.email}</div>
-                                                        <div className={`text-sm ${student.status.color}`}>
-                                                            {student.status.label}
+                            {loading ? (
+                                <div className="flex justify-center items-center py-12">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                                    <span className="ml-4 text-white/70">جاري تحميل البيانات...</span>
+                                </div>
+                            ) : studentList.length === 0 ? (
+                                <div className="text-center py-12 text-white/60">
+                                    {searchTerm ? 'لم يتم العثور على طلاب مطابقين للبحث' : 'لا توجد بيانات طلاب'}
+                                </div>
+                            ) : (
+                                <table className="w-full">
+                                    <thead className="border-b border-white/10">
+                                        <tr className="text-white/70">
+                                            <th className="py-3 px-4 text-right">الطالب</th>
+                                            <th className="py-3 px-4 text-center">رقم الطالب</th>
+                                            <th className="py-3 px-4 text-center">رقم ولي الأمر</th>
+                                            <th className="py-3 px-4 text-center">الدروس المشاهدة</th>
+                                            <th className="py-3 px-4 text-center">آخر نشاط</th>
+                                            <th className="py-3 px-4 text-center">تفاصيل</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/10">
+                                        {studentList.map((student, index) => (
+                                            <tr key={student.email} className={`text-white/90 hover:bg-white/5 ${student.status.status !== 'active' ? 'bg-red-500/5' : ''
+                                                }`}>
+                                                {/* Email cell */}
+                                                <td className="py-4 px-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center`}>
+                                                            <FaUser className={student.status.color} />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium">{whatsappNumbers[student.email]?.name || student.email}</div>
+                                                            <div className={`text-sm ${student.status.color}`}>
+                                                                {student.status.label}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </td>
+                                                </td>
 
-                                            {/* Student WhatsApp cell */}
-                                            <td className="py-4 px-4 text-center">
-                                                {whatsappNumbers[student.email]?.studentWhatsApp ? (
-                                                    <a
-                                                        href={getWhatsAppLink(whatsappNumbers[student.email].studentWhatsApp)}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-2 p-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors group"
+                                                {/* Student WhatsApp cell */}
+                                                <td className="py-4 px-4 text-center">
+                                                    {whatsappNumbers[student.email]?.studentWhatsApp ? (
+                                                        <a
+                                                            href={getWhatsAppLink(whatsappNumbers[student.email].studentWhatsApp)}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-2 p-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors group"
+                                                        >
+                                                            <FaWhatsapp className="text-green-400 text-xl group-hover:text-green-300" />
+                                                            <span className="text-sm text-white/70">{whatsappNumbers[student.email].studentWhatsApp}</span>
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-white/30">لا يوجد</span>
+                                                    )}
+                                                </td>
+
+                                                {/* Parent WhatsApp cell */}
+                                                <td className="py-4 px-4 text-center">
+                                                    {whatsappNumbers[student.email]?.parentWhatsApp ? (
+                                                        <a
+                                                            href={getWhatsAppLink(whatsappNumbers[student.email].parentWhatsApp)}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-2 p-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors group"
+                                                        >
+                                                            <FaWhatsapp className="text-green-400 text-xl group-hover:text-green-300" />
+                                                            <span className="text-sm text-white/70">{whatsappNumbers[student.email].parentWhatsApp}</span>
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-white/30">لا يوجد</span>
+                                                    )}
+                                                </td>
+
+                                                {/* ...rest of existing cells... */}
+
+                                                <td dir='rtl' className="py-4 px-4 text-center">
+                                                    {student.uniqueLessons}       درس
+                                                </td>
+                                                <td className="py-4 px-4 text-center">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <FaClock className="text-blue-400" />
+                                                        <span>{formatDate(student.lastViewed)}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-4 text-center">
+                                                    <button
+                                                        onClick={() => handleStudentSelect(student)}
+                                                        className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
                                                     >
-                                                        <FaWhatsapp className="text-green-400 text-xl group-hover:text-green-300" />
-                                                        <span className="text-sm text-white/70">{whatsappNumbers[student.email].studentWhatsApp}</span>
-                                                    </a>
-                                                ) : (
-                                                    <span className="text-white/30">لا يوجد</span>
-                                                )}
-                                            </td>
-
-                                            {/* Parent WhatsApp cell */}
-                                            <td className="py-4 px-4 text-center">
-                                                {whatsappNumbers[student.email]?.parentWhatsApp ? (
-                                                    <a
-                                                        href={getWhatsAppLink(whatsappNumbers[student.email].parentWhatsApp)}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-2 p-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors group"
-                                                    >
-                                                        <FaWhatsapp className="text-green-400 text-xl group-hover:text-green-300" />
-                                                        <span className="text-sm text-white/70">{whatsappNumbers[student.email].parentWhatsApp}</span>
-                                                    </a>
-                                                ) : (
-                                                    <span className="text-white/30">لا يوجد</span>
-                                                )}
-                                            </td>
-
-                                            {/* ...rest of existing cells... */}
-
-                                            <td dir='rtl' className="py-4 px-4 text-center">
-                                                {student.uniqueLessons}       درس
-                                            </td>
-                                            <td className="py-4 px-4 text-center">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <FaClock className="text-blue-400" />
-                                                    <span>{formatDate(student.lastViewed)}</span>
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-4 text-center">
-                                                <button
-                                                    onClick={() => handleStudentSelect(student)}
-                                                    className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
-                                                >
-                                                    <FaList className="text-blue-400" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                        <FaList className="text-blue-400" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-4 mt-6">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 disabled:bg-white/5 disabled:opacity-50 rounded-lg transition-colors text-white"
+                                >
+                                    السابق
+                                </button>
+
+                                <div className="flex gap-2">
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        let pageNumber;
+                                        if (totalPages <= 5) {
+                                            pageNumber = i + 1;
+                                        } else if (currentPage <= 3) {
+                                            pageNumber = i + 1;
+                                        } else if (currentPage >= totalPages - 2) {
+                                            pageNumber = totalPages - 4 + i;
+                                        } else {
+                                            pageNumber = currentPage - 2 + i;
+                                        }
+
+                                        return (
+                                            <button
+                                                key={pageNumber}
+                                                onClick={() => setCurrentPage(pageNumber)}
+                                                className={`px-3 py-2 rounded-lg transition-colors ${currentPage === pageNumber
+                                                        ? 'bg-blue-500 text-white'
+                                                        : 'bg-white/10 text-white/70 hover:bg-white/20'
+                                                    }`}
+                                            >
+                                                {pageNumber}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 disabled:bg-white/5 disabled:opacity-50 rounded-lg transition-colors text-white"
+                                >
+                                    التالي
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </>
             ) : (

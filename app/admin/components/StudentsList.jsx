@@ -300,7 +300,7 @@ export default function StudentsList() {
         try {
             // Show loading toast
             const loadingToast = toast.loading('جاري تحضير ملف Excel...');
-            
+
             const token = Cookies.get('token');
             if (!token) {
                 throw new Error('No authentication token found');
