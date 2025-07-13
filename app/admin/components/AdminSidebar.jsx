@@ -6,6 +6,8 @@ import {
     Bell
 } from 'lucide-react';
 import { MdOutlineAdminPanelSettings } from 'react-icons/md';
+import { IoAnalyticsOutline } from 'react-icons/io5';
+import { IoIosAnalytics } from 'react-icons/io';
 
 export default function AdminSidebar({ activeTab, setActiveTab, adminData, showLogoutConfirm, setShowLogoutConfirm }) {
     const menuItems = [
@@ -42,31 +44,37 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
         },
         {
             id: 6,
-            label: "احصائيات الامتحانات",
-            icon: <CreditCard size={20} />,
-            tab: 'exam'
+            label: "احصائيات الكورسات",
+            icon: <IoAnalyticsOutline size={20} />,
+            tab: 'analyses'
         },
         {
             id: 7,
+            label: "احصائيات الامتحانات",
+            icon: <IoIosAnalytics size={20} />,
+            tab: 'exam'
+        },
+        {
+            id: 8,
             label: " متابعة الطلاب",
             icon: <CreditCard size={20} />,
             tab: 'followup'
         },
         {
-            id: 8,
+            id: 9,
             label: "إدارة العروض",
             icon: <FileText size={20} />,
             tab: 'offers'
         },
         {
-            id: 9,
+            id: 10,
             label: "إدارة الكتب",
             icon: <FileText size={20} />,
             tab: 'books'
         },
 
         {
-            id: 10,
+            id: 11,
             label: "إدارة الإشعارات",
             icon: <Bell size={20} />,
             tab: 'notifications'

@@ -17,6 +17,7 @@ import OffersManagement from './components/OffersManagement';
 import NotFound from '../not-found';
 import AdminBooks from '../components/AdminBooks';
 import NotificationManagement from './components/NotificationManagement';
+import CoursesAnalyses from './components/CoursesAnalyses';
 
 
 export default function MathLMSAdmin() {
@@ -197,6 +198,9 @@ export default function MathLMSAdmin() {
                         )}
                         {activeTab === 'offers' && (
                             <OffersManagement />
+                        )}
+                        {activeTab === 'analyses' && (
+                            <CoursesAnalyses />
                         )}
                     </main>
                 </div>
