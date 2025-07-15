@@ -33,7 +33,7 @@ export default function MathLMSAdmin() {
 
     // Admin profile data
     const [adminData, setAdminData] = useState({
-        name: "احمد السيد",
+        name: " ادمن",
         email: "admin@math-lms.com",
         phoneNumber: "0123456789",
         role: "مسؤول النظام",
@@ -58,7 +58,7 @@ export default function MathLMSAdmin() {
                 });
                 const data = await response.json();
 
-                if (!data || data.role !== 'admin' || data.isBanned || data.status !== 'active') {
+                if (!data || (data.role !== 'admin' && data.role !== 'instructor') || data.isBanned || data.status !== 'active') {
                     setIsAdmin(false);
                     setIsLoading(false);
                     return;
@@ -69,7 +69,8 @@ export default function MathLMSAdmin() {
                     name: data.name,
                     email: data.email,
                     phoneNumber: data.phoneNumber,
-                    role: "مسؤول النظام",
+                    role: data.role === 'admin' ? "مسؤول النظام" : "مدرس",
+                    userRole: data.role, // Keep the actual role for permissions
                     joinedDate: data.createdAt,
                     lastLogin: data.lastActive
                 });
@@ -87,10 +88,24 @@ export default function MathLMSAdmin() {
     // Move localStorage logic to useEffect to run only on client-side
     useEffect(() => {
         const savedTab = localStorage.getItem('adminActiveTab');
-        if (savedTab) {
-            setActiveTab(savedTab);
+        if (savedTab && adminData.userRole) {
+            // Check if the saved tab is allowed for the user's role
+            const allowedTabs = {
+                admin: ['dashboard', 'students', 'courses', 'examMangae', 'payments', 'analyses', 'exam', 'followup', 'offers', 'books', 'notifications'],
+                instructor: ['examMangae']
+            };
+
+            if (allowedTabs[adminData.userRole]?.includes(savedTab)) {
+                setActiveTab(savedTab);
+            } else {
+                // Set default tab based on role
+                setActiveTab(adminData.userRole === 'instructor' ? 'examMangae' : 'dashboard');
+            }
+        } else if (adminData.userRole) {
+            // Set default tab based on role
+            setActiveTab(adminData.userRole === 'instructor' ? 'examMangae' : 'dashboard');
         }
-    }, []);
+    }, [adminData.userRole]);
 
     // Save tab changes to localStorage
     useEffect(() => {
@@ -146,7 +161,7 @@ export default function MathLMSAdmin() {
             <MathBackground />
 
             <div className="relative z-10">
-            
+
                 {/* Main Content */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Sidebar */}
@@ -160,46 +175,50 @@ export default function MathLMSAdmin() {
 
                     {/* Main Content Area */}
                     <main className="lg:col-span-9 space-y-6">
-                        {activeTab === 'dashboard' && (
+                        {activeTab === 'dashboard' && adminData.userRole === 'admin' && (
                             <>
                                 <DashboardStats />
                                 <StudentsList />
                             </>
                         )}
 
-                        {activeTab === 'students' && (
+                        {activeTab === 'students' && adminData.userRole === 'admin' && (
                             <StudentsList />
                         )}
 
-                        {activeTab === 'courses' && (
+                        {activeTab === 'courses' && adminData.userRole === 'admin' && (
                             <CourseManager />
                         )}
-                        {activeTab === 'followup' && (
+
+                        {activeTab === 'followup' && adminData.userRole === 'admin' && (
                             <StudentFollowup />
                         )}
 
-                        {activeTab === 'payments' && (
+                        {activeTab === 'payments' && adminData.userRole === 'admin' && (
                             <PaymentsList />
                         )}
 
-                        
-                        {activeTab === 'notifications' && (
+                        {activeTab === 'notifications' && adminData.userRole === 'admin' && (
                             <NotificationManagement />
                         )}
 
-                        {activeTab === 'exam' && (
+                        {activeTab === 'exam' && adminData.userRole === 'admin' && (
                             <ExamAnalysis />
                         )}
-                        {activeTab === 'examMangae' && (
+
+                        {activeTab === 'examMangae' && (adminData.userRole === 'admin' || adminData.userRole === 'instructor') && (
                             <ExamManage />
                         )}
-                        {activeTab === 'books' && (
+
+                        {activeTab === 'books' && adminData.userRole === 'admin' && (
                             <AdminBooks />
                         )}
-                        {activeTab === 'offers' && (
+
+                        {activeTab === 'offers' && adminData.userRole === 'admin' && (
                             <OffersManagement />
                         )}
-                        {activeTab === 'analyses' && (
+
+                        {activeTab === 'analyses' && adminData.userRole === 'admin' && (
                             <CoursesAnalyses />
                         )}
                     </main>

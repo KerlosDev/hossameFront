@@ -10,76 +10,90 @@ import { IoAnalyticsOutline } from 'react-icons/io5';
 import { IoIosAnalytics } from 'react-icons/io';
 
 export default function AdminSidebar({ activeTab, setActiveTab, adminData, showLogoutConfirm, setShowLogoutConfirm }) {
-    const menuItems = [
+    const allMenuItems = [
         {
             id: 1,
             label: "لوحة التحكم",
             icon: <BarChart2 size={20} />,
-            tab: 'dashboard'
+            tab: 'dashboard',
+            roles: ['admin'] // Only admin can see dashboard
         },
         {
             id: 2,
             label: "إدارة الطلاب",
             icon: <Users size={20} />,
-            tab: 'students'
+            tab: 'students',
+            roles: ['admin'] // Only admin can manage students
         },
         {
             id: 3,
             label: "إدارة الكورسات",
             icon: <Book size={20} />,
-            tab: 'courses'
+            tab: 'courses',
+            roles: ['admin'] // Only admin can manage courses
         },
         {
             id: 4,
             label: "ادارة الامتحانات",
             icon: <FileText size={20} />,
-            tab: 'examMangae'
+            tab: 'examMangae',
+            roles: ['admin', 'instructor'] // Both admin and instructor can manage exams
         },
-
         {
             id: 5,
             label: "المدفوعات",
             icon: <CreditCard size={20} />,
-            tab: 'payments'
+            tab: 'payments',
+            roles: ['admin'] // Only admin can see payments
         },
         {
             id: 6,
             label: "احصائيات الكورسات",
             icon: <IoAnalyticsOutline size={20} />,
-            tab: 'analyses'
+            tab: 'analyses',
+            roles: ['admin'] // Only admin can see course analytics
         },
         {
             id: 7,
             label: "احصائيات الامتحانات",
             icon: <IoIosAnalytics size={20} />,
-            tab: 'exam'
+            tab: 'exam',
+            roles: ['admin'] // Only admin can see exam analytics
         },
         {
             id: 8,
             label: " متابعة الطلاب",
             icon: <CreditCard size={20} />,
-            tab: 'followup'
+            tab: 'followup',
+            roles: ['admin'] // Only admin can follow up students
         },
         {
             id: 9,
             label: "إدارة العروض",
             icon: <FileText size={20} />,
-            tab: 'offers'
+            tab: 'offers',
+            roles: ['admin'] // Only admin can manage offers
         },
         {
             id: 10,
             label: "إدارة الكتب",
             icon: <FileText size={20} />,
-            tab: 'books'
+            tab: 'books',
+            roles: ['admin'] // Only admin can manage books
         },
-
         {
             id: 11,
             label: "إدارة الإشعارات",
             icon: <Bell size={20} />,
-            tab: 'notifications'
+            tab: 'notifications',
+            roles: ['admin'] // Only admin can manage notifications
         }
     ];
+
+    // Filter menu items based on user role
+    const menuItems = allMenuItems.filter(item =>
+        item.roles.includes(adminData.userRole)
+    );
 
     // Format date
     const formatDate = (dateString) => {
