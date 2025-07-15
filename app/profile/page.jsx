@@ -3,10 +3,8 @@ import { useState, useEffect, use } from 'react';
 import {
     User, Book, BarChart2, Award, Eye, FileText, Settings as SettingsIcon,
     LogOut, CreditCard, ChevronDown, Mail, Phone, BookOpen,
-    Clock, Target, Brain, Beaker, Edit2, Camera
-} from 'lucide-react';
-import { IoMdFlask } from "react-icons/io";
-import { GiMolecule, GiChemicalDrop } from "react-icons/gi";
+    Clock, Target, Brain, Beaker, Edit2, Camera, Sun, Moon
+} from 'lucide-react'; 
 import { FaAtom, FaCalculator, FaFlask, FaInfinity, FaMicroscope, FaPlay, FaSquareRootAlt } from "react-icons/fa";
 import { HiOutlineAcademicCap } from "react-icons/hi";
 import Cookies from 'js-cookie';
@@ -29,6 +27,63 @@ export default function ChemistryLMSProfile({ searchParams }) {
     const [showLessonView, setShowLessonView] = useState(false);
     const [showExamAnalysis, setShowExamAnalysis] = useState(false);
     const [showChat, setShowChat] = useState(false);
+    
+    // Theme state - synced with header theme toggle
+    const [isDarkMode, setIsDarkMode] = useState(true);
+
+    // Load theme preference and sync with document class
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        const isDark = savedTheme ? savedTheme === 'dark' : true;
+        setIsDarkMode(isDark);
+        
+        // Sync with document class
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, []);
+
+    // Listen for theme changes from other components (like header)
+    useEffect(() => {
+        const handleThemeChange = () => {
+            const savedTheme = localStorage.getItem('theme');
+            const isDark = savedTheme === 'dark';
+            setIsDarkMode(isDark);
+        };
+
+        // Listen for storage changes (when theme is changed in other tabs/components)
+        window.addEventListener('storage', handleThemeChange);
+        
+        // Also check periodically in case theme is changed by other components in same tab
+        const interval = setInterval(() => {
+            const savedTheme = localStorage.getItem('theme');
+            const isDark = savedTheme === 'dark';
+            if (isDark !== isDarkMode) {
+                setIsDarkMode(isDark);
+            }
+        }, 100);
+
+        return () => {
+            window.removeEventListener('storage', handleThemeChange);
+            clearInterval(interval);
+        };
+    }, [isDarkMode]);
+
+    // Save theme preference and sync with document class
+    const toggleTheme = () => {
+        const newTheme = !isDarkMode;
+        setIsDarkMode(newTheme);
+        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+        
+        // Update document class to sync with header toggle
+        if (newTheme) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    };
 
     // User profile data
     const [userData, setUserData] = useState({
@@ -257,24 +312,26 @@ export default function ChemistryLMSProfile({ searchParams }) {
     // Chemistry background component
     const ChemBackground = () => (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute inset-0   opacity-5 mix-blend-overlay"></div>
-            <div className="absolute top-20 left-20 text-white/10 text-7xl">
+            <div className={`absolute inset-0 opacity-5 mix-blend-overlay ${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}></div>
+            <div className={`absolute top-20 left-20 text-7xl ${isDarkMode ? 'text-white/10' : 'text-gray-300/30'}`}>
                 <FaSquareRootAlt className="animate-float" />
             </div>
-            <div className="absolute bottom-40 right-20 text-white/10 text-8xl">
+            <div className={`absolute bottom-40 right-20 text-8xl ${isDarkMode ? 'text-white/10' : 'text-gray-300/30'}`}>
                 <FaInfinity className="animate-spin-slow" />
             </div>
-            <div className="absolute top-1/2 left-1/3 text-white/10 text-6xl">
+            <div className={`absolute top-1/2 left-1/3 text-6xl ${isDarkMode ? 'text-white/10' : 'text-gray-300/30'}`}>
                 <FaCalculator className="animate-bounce-slow" />
             </div>
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full filter blur-3xl animate-pulse-delayed"></div>
+            <div className={`absolute top-1/4 left-1/4 w-96 h-96 ${isDarkMode ? 'bg-blue-500/20' : 'bg-blue-200/40'} rounded-full filter blur-3xl animate-pulse`}></div>
+            <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 ${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-200/40'} rounded-full filter blur-3xl animate-pulse-delayed`}></div>
         </div>
     );
 
     // Sidebar component for reuse
     const Sidebar = () => (
-        <aside className="lg:col-span-3 bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-500 h-fit">
+        <aside className={`lg:col-span-3 ${isDarkMode ? 'bg-white/10 border-white/20 hover:border-white/30' : 'bg-white/80 border-gray-200 hover:border-gray-300'} backdrop-blur-xl rounded-2xl p-6 border transition-all duration-500 h-fit`}>
+            {/* Theme Toggle Button */}
+            
             <div className="flex flex-col items-center mb-8">
                 <div className="group relative">
                     <div className="flex  justify-center">
@@ -285,10 +342,10 @@ export default function ChemistryLMSProfile({ searchParams }) {
                     </div>
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                            <h2 className="text-2xl font-arabicUI3 text-white group-hover:text-blue-300 transition-colors duration-300">{userData.name}</h2>
+                            <h2 className={`text-2xl font-arabicUI3 ${isDarkMode ? 'text-white group-hover:text-blue-300' : 'text-gray-900 group-hover:text-blue-600'} transition-colors duration-300`}>{userData.name}</h2>
                         </div>
-                        <p className="text-blue-200 text-sm mb-2">{userData.level}</p>
-                        <div className="flex items-center justify-center gap-2 text-xs text-white/60">
+                        <p className={`text-sm mb-2 ${isDarkMode ? 'text-blue-200' : 'text-blue-600'}`}>{userData.level}</p>
+                        <div className={`flex items-center justify-center gap-2 text-xs ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>
                             <span>انضم في {formatJoinDate(userData.createdAt)}</span>
                             <span>•</span>
                             <span>آخر نشاط: {lastActive}</span>
@@ -310,7 +367,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
                                 (item.label === "تفاصيل المشاهدات" && activeTab === 'lesson') ||
                                 (item.label === "كورساتي" && activeTab === 'courses') ?
                                 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20' :
-                                'hover:bg-white/10 text-white/80 hover:text-white'}`}
+                                `${isDarkMode ? 'hover:bg-white/10 text-white/80 hover:text-white' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'}`}`}
                     >
                         <span>{item.label}</span>
                         {item.icon}
@@ -332,40 +389,40 @@ export default function ChemistryLMSProfile({ searchParams }) {
     const ProfileContent = () => (
         <>
             {/* Welcome Card */}
-            <div className="h-fit font-arabicUI3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-6 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-16 -translate-x-16" />
+            <div className={`h-fit font-arabicUI3 ${isDarkMode ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white' : 'bg-gradient-to-br from-white to-blue-50 text-gray-900 border border-gray-200'} rounded-2xl p-6 relative overflow-hidden shadow-lg`}>
+                <div className={`absolute top-0 right-0 w-64 h-64 ${isDarkMode ? 'bg-white/10' : 'bg-blue-100/50'} rounded-full -translate-y-32 translate-x-32`} />
+                <div className={`absolute bottom-0 left-0 w-32 h-32 ${isDarkMode ? 'bg-white/10' : 'bg-blue-100/50'} rounded-full translate-y-16 -translate-x-16`} />
 
                 <div className="relative">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-xl flex items-center justify-center">
-                            <HiOutlineAcademicCap className="text-3xl text-white" />
+                        <div className={`h-16 w-16 rounded-full ${isDarkMode ? 'bg-white/20' : 'bg-blue-100'} backdrop-blur-xl flex items-center justify-center`}>
+                            <HiOutlineAcademicCap className={`text-3xl ${isDarkMode ? 'text-white' : 'text-blue-600'}`} />
                         </div>
                         <div>
                             <h1 className="text-3xl font-arabicUI3">
                                 مرحباً, {userData.name}
                             </h1>
-                            <p className="text-blue-100 mt-1">إليك نظرة على ملفك الشخصي</p>
+                            <p className={`mt-1 ${isDarkMode ? 'text-blue-100' : 'text-gray-600'}`}>إليك نظرة على ملفك الشخصي</p>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap gap-6 mt-8">
-                        <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-                            <p className="text-blue-100 text-sm mb-1">البريد الإلكتروني</p>
+                        <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white/70 border border-gray-200'} backdrop-blur rounded-xl p-4`}>
+                            <p className={`text-sm mb-1 ${isDarkMode ? 'text-blue-100' : 'text-gray-600'}`}>البريد الإلكتروني</p>
                             <div className="flex items-center gap-2">
-                                <Mail size={16} className="text-white/70" />
+                                <Mail size={16} className={`${isDarkMode ? 'text-white/70' : 'text-gray-500'}`} />
                                 <h3 className="text-lg font-arabicUI3">{userData.email}</h3>
                             </div>
                         </div>
-                        <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-                            <p className="text-blue-100 text-sm mb-1">رقم الهاتف</p>
+                        <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white/70 border border-gray-200'} backdrop-blur rounded-xl p-4`}>
+                            <p className={`text-sm mb-1 ${isDarkMode ? 'text-blue-100' : 'text-gray-600'}`}>رقم الهاتف</p>
                             <div className="flex items-center gap-2">
-                                <Phone size={16} className="text-white/70" />
+                                <Phone size={16} className={`${isDarkMode ? 'text-white/70' : 'text-gray-500'}`} />
                                 <h3 className="text-lg font-arabicUI3">{userData.phoneNumber}</h3>
                             </div>
                         </div>
-                        <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-                            <p className="text-blue-100 text-sm mb-1">المحافظة</p>
+                        <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white/70 border border-gray-200'} backdrop-blur rounded-xl p-4`}>
+                            <p className={`text-sm mb-1 ${isDarkMode ? 'text-blue-100' : 'text-gray-600'}`}>المحافظة</p>
                             <h3 className="text-lg font-arabicUI3">{userData.government}</h3>
                         </div>
                     </div>
@@ -375,7 +432,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
             {/* Statistics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statsDisplay.map(stat => (
-                    <div key={stat.id} className="group bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/40 transition-all duration-500 hover:transform hover:scale-105">
+                    <div key={stat.id} className={`group ${isDarkMode ? 'bg-white/10 border-white/20 hover:border-white/40' : 'bg-white/80 border-gray-200 hover:border-gray-300'} backdrop-blur-xl rounded-2xl p-6 border transition-all duration-500 hover:transform hover:scale-105 shadow-lg`}>
                         <div className="relative w-full aspect-square flex items-center justify-center">
                             {/* Glowing background */}
                             <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${stat.gradient} opacity-20 group-hover:opacity-30 transition-opacity duration-500 animate-pulse-slow`}></div>
@@ -383,7 +440,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
                             {/* Circular Progress Bar */}
                             <svg className="absolute inset-0 w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
                                 <circle
-                                    className="text-white/5"
+                                    className={`${isDarkMode ? 'text-white/5' : 'text-gray-200'}`}
                                     strokeWidth="8"
                                     stroke="currentColor"
                                     fill="transparent"
@@ -406,16 +463,16 @@ export default function ChemistryLMSProfile({ searchParams }) {
 
                             {/* Content */}
                             <div className="absolute inset-0 flex items-center justify-center flex-col z-10">
-                                <div className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3 transform group-hover:scale-110 transition-transform duration-500">
+                                <div className={`h-12 w-12 rounded-full ${isDarkMode ? 'bg-white/10' : 'bg-white/50'} backdrop-blur-sm flex items-center justify-center mb-3 transform group-hover:scale-110 transition-transform duration-500`}>
                                     {stat.icon}
                                 </div>
                                 <span className={`text-2xl font-bold text-${stat.color.replace('bg-', '')} group-hover:scale-110 transition-transform duration-500 drop-shadow-lg`}>
                                     {stat.value}
                                 </span>
-                                {stat.subText && <span className="text-sm text-white/60 mt-1">{stat.subText}</span>}
+                                {stat.subText && <span className={`text-sm mt-1 ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>{stat.subText}</span>}
                             </div>
                         </div>
-                        <p className="mt-4 text-center text-white/80 font-arabicUI3 group-hover:text-white transition-colors duration-500">{stat.label}</p>
+                        <p className={`mt-4 text-center font-arabicUI3 transition-colors duration-500 ${isDarkMode ? 'text-white/80 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'}`}>{stat.label}</p>
                     </div>
                 ))}
             </div>
@@ -451,7 +508,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
     };
 
     return (
-        <div className="min-h-screen font-arabicUI3 relative" dir="rtl">
+        <div className={`min-h-screen font-arabicUI3 relative transition-colors duration-300 ${isDarkMode ? ' ' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`} dir="rtl">
             {/* Chemistry Background */}
             <ChemBackground />
 
@@ -462,7 +519,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
                         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
                     </div>
                 ) : error ? (
-                    <div className="bg-red-500/20 backdrop-blur-xl rounded-xl p-4 text-white text-center">
+                    <div className={`${isDarkMode ? 'bg-red-500/20 text-white' : 'bg-red-100 text-red-800 border border-red-200'} backdrop-blur-xl rounded-xl p-4 text-center`}>
                         {error}
                     </div>
                 ) : (
@@ -481,13 +538,13 @@ export default function ChemistryLMSProfile({ searchParams }) {
             {/* Logout Confirmation Modal */}
             {showLogoutConfirm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-white/10 backdrop-blur-xl p-6 rounded-2xl border border-white/20 max-w-md w-full mx-4">
-                        <h3 className="text-xl font-bold text-white mb-4">تأكيد تسجيل الخروج</h3>
-                        <p className="text-white/80 mb-6">هل أنت متأكد من رغبتك في تسجيل الخروج من المنصة؟</p>
+                    <div className={`${isDarkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white border-gray-200 text-gray-900'} backdrop-blur-xl p-6 rounded-2xl border max-w-md w-full mx-4`}>
+                        <h3 className="text-xl font-bold mb-4">تأكيد تسجيل الخروج</h3>
+                        <p className={`mb-6 ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>هل أنت متأكد من رغبتك في تسجيل الخروج من المنصة؟</p>
                         <div className="flex gap-4 justify-end">
                             <button
                                 onClick={() => setShowLogoutConfirm(false)}
-                                className="px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all"
+                                className={`px-4 py-2 rounded-xl transition-all ${isDarkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             >
                                 إلغاء
                             </button>

@@ -1,14 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { Book, Play, Calendar, Clock, ChevronRight, FileText } from 'lucide-react';
-import { FaAtom, FaFlask, FaMicroscope } from "react-icons/fa";
+import { FaAtom, FaFlask, FaMicroscope, FaSquareRootAlt, FaInfinity, FaCalculator } from "react-icons/fa";
 import { GiMolecule } from "react-icons/gi";
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import Link from 'next/link';
-
-// Chemistry background component reused from main profile
- 
 
 export default function MyCourses({ onBack }) {
     const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -16,6 +13,52 @@ export default function MyCourses({ onBack }) {
     const [error, setError] = useState(null);
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [activeTab, setActiveTab] = useState('chapters');
+
+    // Theme state - synced with header theme toggle
+    const [isDarkMode, setIsDarkMode] = useState(true);
+
+    // Load theme preference and sync with document class
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        const isDark = savedTheme ? savedTheme === 'dark' : true;
+        setIsDarkMode(isDark);
+
+        // Sync with document class
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, []);
+
+    // Listen for theme changes from other components (like header)
+    useEffect(() => {
+        const handleThemeChange = () => {
+            const savedTheme = localStorage.getItem('theme');
+            const isDark = savedTheme === 'dark';
+            setIsDarkMode(isDark);
+        };
+
+        // Listen for storage changes (when theme is changed in other tabs/components)
+        window.addEventListener('storage', handleThemeChange);
+
+        // Also check periodically in case theme is changed by other components in same tab
+        const interval = setInterval(() => {
+            const savedTheme = localStorage.getItem('theme');
+            const isDark = savedTheme === 'dark';
+            if (isDark !== isDarkMode) {
+                setIsDarkMode(isDark);
+            }
+        }, 100);
+
+        return () => {
+            window.removeEventListener('storage', handleThemeChange);
+            clearInterval(interval);
+        };
+    }, [isDarkMode]);
+
+    // Chemistry background component
+     
 
     useEffect(() => {
         fetchEnrolledCourses();
@@ -99,13 +142,13 @@ export default function MyCourses({ onBack }) {
 
     // Empty state component
     const EmptyCoursesState = () => (
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 text-center">
+        <div className="bg-white/80 border-gray-200 dark:bg-white/10 dark:border-white/20 backdrop-blur-xl rounded-2xl p-8 border text-center">
             <div className="flex flex-col items-center justify-center gap-4">
                 <div className="h-24 w-24 rounded-full bg-gradient-to-br from-indigo-500/30 to-blue-600/30 flex items-center justify-center">
-                    <Book size={36} className="text-blue-300" />
+                    <Book size={36} className="text-blue-600 dark:text-blue-300" />
                 </div>
-                <h3 className="text-2xl font-arabicUI2 text-white/90">لم تشترك في أي كورسات بعد</h3>
-                <p className="text-white/70 max-w-md mx-auto">استكشف مجموعتنا الواسعة من الكورسات التعليمية واشترك فيما يناسب احتياجاتك التعليمية.</p>
+                <h3 className="text-2xl font-arabicUI2 text-gray-900 dark:text-white/90">لم تشترك في أي كورسات بعد</h3>
+                <p className="text-gray-600 dark:text-white/70 max-w-md mx-auto">استكشف مجموعتنا الواسعة من الكورسات التعليمية واشترك فيما يناسب احتياجاتك التعليمية.</p>
                 <Link href="/">
                     <button className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-white hover:shadow-lg hover:shadow-blue-500/20 transition-all flex items-center gap-2">
                         <span>استكشف الكورسات المتاحة</span>
@@ -113,7 +156,7 @@ export default function MyCourses({ onBack }) {
                     </button>
                 </Link>
 
-                 
+
             </div>
         </div>
     );
@@ -122,7 +165,7 @@ export default function MyCourses({ onBack }) {
     const renderCourseList = () => (
         <>
             {/* Header Section */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-6 text-white relative overflow-hidden mb-6">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-6 text-white relative overflow-hidden mb-6 shadow-lg">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32" />
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-16 -translate-x-16" />
 
@@ -151,7 +194,7 @@ export default function MyCourses({ onBack }) {
                     {enrolledCourses.map((course) => (
                         <div
                             key={course._id}
-                            className="group bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 hover:border-white/40 transition-all duration-500 overflow-hidden cursor-pointer hover:transform hover:scale-105"
+                            className="group bg-white/80 border-gray-200 hover:border-gray-300 dark:bg-white/10 dark:border-white/20 dark:hover:border-white/40 backdrop-blur-xl rounded-2xl border transition-all duration-500 overflow-hidden cursor-pointer hover:transform hover:scale-105 shadow-lg"
                         >
                             <div className="relative h-40 bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
@@ -171,15 +214,15 @@ export default function MyCourses({ onBack }) {
                             </div>
 
                             <div className="p-6">
-                                <p className="text-white/80 mb-4 line-clamp-2">{course.courseId.description}</p>
+                                <p className="text-gray-700 dark:text-white/80 mb-4 line-clamp-2">{course.courseId.description}</p>
 
                                 <div className="flex flex-wrap gap-3 mb-4">
-                                    <div className="bg-white/5 px-3 py-1 rounded-full text-xs flex items-center gap-1 text-white/70">
+                                    <div className="bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full text-xs flex items-center gap-1 text-gray-600 dark:text-white/70">
                                         <Calendar size={12} />
                                         <span>تاريخ الاشتراك: {formatDate(course.enrolledAt)}</span>
                                     </div>
 
-                                    <div className="bg-white/5 px-3 py-1 rounded-full text-xs flex items-center gap-1 text-white/70">
+                                    <div className="bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full text-xs flex items-center gap-1 text-gray-600 dark:text-white/70">
                                         <Clock size={12} />
                                         <span>حالة الدفع: {course.paymentStatus === 'paid' ? 'مدفوع' : 'قيد الانتظار'}</span>
                                     </div>
@@ -187,8 +230,8 @@ export default function MyCourses({ onBack }) {
 
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-1">
-                                        <FileText size={14} className="text-blue-400" />
-                                        <span className="text-white/70 text-sm">{course.courseId.chapters?.length || 0} فصول</span>
+                                        <FileText size={14} className="text-blue-600 dark:text-blue-400" />
+                                        <span className="text-gray-600 dark:text-white/70 text-sm">{course.courseId.chapters?.length || 0} فصول</span>
                                     </div>
 
                                     <Link href={`/Courses/${course.courseId._id}`}>
@@ -208,9 +251,26 @@ export default function MyCourses({ onBack }) {
         </>
     );
 
+    // Render course details (placeholder for future enhancement)
+    const renderCourseDetails = () => (
+        <div className="bg-white/80 border-gray-200 dark:bg-white/10 dark:border-white/20 backdrop-blur-xl rounded-2xl p-8 border">
+            <div className="flex items-center gap-4 mb-6">
+                <button
+                    onClick={handleBackToCourses}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 rounded-lg transition-all text-gray-700 dark:text-white"
+                >
+                    <ChevronRight size={20} />
+                    <span>العودة للكورسات</span>
+                </button>
+                <h2 className="text-2xl font-arabicUI3 text-gray-900 dark:text-white">{selectedCourse?.courseId.name}</h2>
+            </div>
+            <p className="text-gray-600 dark:text-white/70">تفاصيل الكورس ستكون متاحة قريباً...</p>
+        </div>
+    );
+
     return (
         <div className="min-h-screen font-arabicUI3 relative" dir="rtl">
- 
+
             <div className="relative z-20 container mx-auto px-4 py-8">
                 {/* Back to profile button */}
                 {!selectedCourse && (

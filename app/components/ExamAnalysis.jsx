@@ -3,6 +3,7 @@ import { FileText, AlertCircle, Clock, Download, Play, PieChart, BarChart, Award
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartPieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend } from "recharts";
 import { LightbulbIcon } from "lucide-react";
 import { Lightbulb, BookmarkPlus, BookmarkCheck, RefreshCw } from 'lucide-react';
+import { FaSquareRootAlt, FaInfinity, FaCalculator } from "react-icons/fa";
 import MemoryGame from "./Game";
 
 // Colors for charts
@@ -52,6 +53,51 @@ export default function EnhancedCourseOverview() {
   const [error, setError] = useState(null);
   const [studentData, setStudentData] = useState(null);
   const [todayAdvice, setTodayAdvice] = useState(null);
+
+  // Theme state - synced with header theme toggle
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Load theme preference and sync with document class
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const isDark = savedTheme ? savedTheme === 'dark' : true;
+    setIsDarkMode(isDark);
+
+    // Sync with document class
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  // Listen for theme changes from other components (like header)
+  useEffect(() => {
+    const handleThemeChange = () => {
+      const savedTheme = localStorage.getItem('theme');
+      const isDark = savedTheme === 'dark';
+      setIsDarkMode(isDark);
+    };
+
+    // Listen for storage changes (when theme is changed in other tabs/components)
+    window.addEventListener('storage', handleThemeChange);
+
+    // Also check periodically in case theme is changed by other components in same tab
+    const interval = setInterval(() => {
+      const savedTheme = localStorage.getItem('theme');
+      const isDark = savedTheme === 'dark';
+      if (isDark !== isDarkMode) {
+        setIsDarkMode(isDark);
+      }
+    }, 100);
+
+    return () => {
+      window.removeEventListener('storage', handleThemeChange);
+      clearInterval(interval);
+    };
+  }, [isDarkMode]);
+
+ 
 
   // Fetch student data from API
   useEffect(() => {
@@ -251,10 +297,12 @@ export default function EnhancedCourseOverview() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white" dir="rtl">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-purple-500 rounded-full border-t-transparent mx-auto mb-4"></div>
-          <p>جاري تحميل البيانات...</p>
+      <div className="min-h-screen relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 transition-colors duration-300" dir="rtl">
+         <div className="relative z-20 flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin h-12 w-12 border-4 border-purple-500 rounded-full border-t-transparent mx-auto mb-4"></div>
+            <p className="text-gray-800 dark:text-white">جاري تحميل البيانات...</p>
+          </div>
         </div>
       </div>
     );
@@ -262,66 +310,72 @@ export default function EnhancedCourseOverview() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white" dir="rtl">
-        <div className="bg-red-900/20 backdrop-blur-sm rounded-xl p-6 border border-red-500/30 max-w-md text-center">
-          <AlertCircle size={40} className="text-red-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold mb-2">حدث خطأ أثناء تحميل البيانات</h3>
-          <p className="text-white/70">{error}</p>
-          <button
-            className="mt-4 px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-colors"
-            onClick={() => window.location.reload()}
-          >
-            إعادة المحاولة
-          </button>
+      <div className="min-h-screen relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 transition-colors duration-300" dir="rtl">
+         <div className="relative z-20 flex items-center justify-center h-screen">
+          <div className="bg-red-100 dark:bg-red-900/20 backdrop-blur-sm rounded-xl p-6 border border-red-300 dark:border-red-500/30 max-w-md text-center">
+            <AlertCircle size={40} className="text-red-600 dark:text-red-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-2 text-red-800 dark:text-white">حدث خطأ أثناء تحميل البيانات</h3>
+            <p className="text-red-600 dark:text-white/70">{error}</p>
+            <button
+              className="mt-4 px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-colors text-white"
+              onClick={() => window.location.reload()}
+            >
+              إعادة المحاولة
+            </button>
+          </div>
         </div>
       </div>
     );
   }
   if (!studentData || (!course && studentData?.results?.length === 0)) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white" dir="rtl">
-        <div className="bg-purple-900/20 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30 max-w-md text-center">
-          <FileText size={40} className="text-purple-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold mb-2">لم تقم بإجراء أي امتحانات بعد</h3>
-          <p className="text-white/70 mb-4">ابدأ رحلتك التعليمية وقم بحل بعض الامتحانات لتتمكن من رؤية تقدمك وتحليل أدائك</p>
-          <button
-            onClick={() => window.location.href = '/Courses'}
-            className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-colors"
-          >
-            استكشف الدورات والامتحانات
-          </button>
+      <div className="min-h-screen relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 transition-colors duration-300" dir="rtl">
+         <div className="relative z-20 flex items-center justify-center h-screen">
+          <div className="bg-white/80 border-gray-200 dark:bg-purple-900/20 dark:border-purple-500/30 backdrop-blur-sm rounded-xl p-6 border max-w-md text-center shadow-lg">
+            <FileText size={40} className="text-purple-600 dark:text-purple-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">لم تقم بإجراء أي امتحانات بعد</h3>
+            <p className="text-gray-600 dark:text-white/70 mb-4">ابدأ رحلتك التعليمية وقم بحل بعض الامتحانات لتتمكن من رؤية تقدمك وتحليل أدائك</p>
+            <button
+              onClick={() => window.location.href = '/Courses'}
+              className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-colors text-white"
+            >
+              استكشف الدورات والامتحانات
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-6 text-white" dir="rtl">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white">{course.title}</h1>
-            <p className="text-white/60">{course.studentName} • {course.studentEmail}</p>
-          </div>
-          <div className="bg-purple-900/30 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-            <div className="flex items-center gap-2">
-              <span className="text-white/60 text-sm">المستوى الحالي:</span>
-              <span className={`font-bold ${getLevelColor()}`}>{course.level}</span>
+    <div className="min-h-screen relative    transition-colors duration-300" dir="rtl">
+       <div className="relative z-20 p-6 text-gray-900 dark:text-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{course.title}</h1>
+              <p className="text-gray-600 dark:text-white/60">{course.studentName} • {course.studentEmail}</p>
+            </div>
+            <div className="bg-white/80 border-gray-200 dark:bg-purple-900/30 dark:border-white/10 backdrop-blur-sm rounded-lg p-3 border shadow-lg">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 dark:text-white/60 text-sm">المستوى الحالي:</span>
+                <span className={`font-bold ${getLevelColor()}`}>{course.level}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-4 mb-6 border-b border-white/10 pb-2">
+        <div className="flex space-x-4 mb-6 border-b border-gray-200 dark:border-white/10 pb-2">
           <button
-            className={`px-4 py-2 ${activeTab === 'overview' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-white/70'}`}
+            className={`px-4 py-2 ${activeTab === 'overview' ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400' : 'text-gray-600 dark:text-white/70'}`}
             onClick={() => setActiveTab('overview')}
           >
             نظرة عامة
           </button>
 
           <button
-            className={`px-4 py-2 ${activeTab === 'exams' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-white/70'}`}
+            className={`px-4 py-2 ${activeTab === 'exams' ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400' : 'text-gray-600 dark:text-white/70'}`}
             onClick={() => setActiveTab('exams')}
           >
             الامتحانات
@@ -333,12 +387,12 @@ export default function EnhancedCourseOverview() {
             {/* Overview sections */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Progress summary card */}
-              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-purple-500/30 transition-all">
+              <div className="  border-gray-200 hover:border-purple-400 dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-indigo-900/20 dark:border-white/10 dark:hover:border-purple-500/30 backdrop-blur-sm rounded-xl p-6 border transition-all shadow-lg">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 rounded-lg bg-purple-500/20">
-                    <PieChart size={20} className="text-purple-300" />
+                    <PieChart size={20} className="text-purple-600 dark:text-purple-300" />
                   </div>
-                  <h3 className="font-bold text-lg">تقدمك الإجمالي</h3>
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-white">تقدمك الإجمالي</h3>
                 </div>
 
                 <div className="flex justify-center py-4">
@@ -350,7 +404,7 @@ export default function EnhancedCourseOverview() {
                         cy="50"
                         r="45"
                         fill="none"
-                        stroke="#1f2937"
+                        stroke={isDarkMode ? "#1f2937" : "#e5e7eb"}
                         strokeWidth="10"
                       />
                       {/* Progress circle */}
@@ -367,33 +421,33 @@ export default function EnhancedCourseOverview() {
                       />
                     </svg>
                     <div className="absolute flex flex-col items-center">
-                      <span className="text-3xl font-bold text-white">{course.progress}%</span>
-                      <span className="text-xs text-white/60">مكتمل</span>
+                      <span className="text-3xl font-bold text-gray-900 dark:text-white">{course.progress}%</span>
+                      <span className="text-xs text-gray-600 dark:text-white/60">مكتمل</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 text-center">
-                  <p className="text-white/70 text-sm">متبقي {100 - course.progress}% لإكمال المستوى</p>
+                  <p className="text-gray-600 dark:text-white/70 text-sm">متبقي {100 - course.progress}% لإكمال المستوى</p>
                 </div>
               </div>
 
               {/* advice card */}
               <div className="max-w-md h-full mx-auto">
-                <div className="bg-gradient-to-br  h-full from-emerald-900/20 to-teal-900/20 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-emerald-500/30 transition-all">
+                <div className="  border-gray-200 hover:border-emerald-400  dark:bg-gradient-to-br dark:from-emerald-900/20 dark:to-teal-900/20 dark:border-white/10 dark:hover:border-emerald-500/30 backdrop-blur-sm rounded-xl p-6 border transition-all shadow-lg h-full">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-lg bg-emerald-500/20">
-                      <Lightbulb size={20} className="text-emerald-300" />
+                      <Lightbulb size={20} className="text-emerald-600 dark:text-emerald-300" />
                     </div>
-                    <h3 className="font-bold text-lg">{todayAdvice.title}</h3>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">{todayAdvice.title}</h3>
                   </div>
 
                   <div className="py-4">
-                    <p className="text-white/80 leading-relaxed text-right mb-6">{todayAdvice.content}</p>
+                    <p className="text-gray-700 dark:text-white/80 leading-relaxed text-right mb-6">{todayAdvice.content}</p>
 
                     <div className="flex flex-wrap gap-2 justify-end mt-4">
                       {todayAdvice.tags.map((tag, index) => (
-                        <span key={index} className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 text-xs border border-emerald-500/20">
+                        <span key={index} className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs border border-emerald-200 dark:border-emerald-500/20">
                           {tag}
                         </span>
                       ))}

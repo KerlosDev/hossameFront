@@ -14,35 +14,113 @@ const VideoPlayer = ({ videoUrl }) => {
     return match?.[1] || null;
   };
 
-  const videoId = getYouTubeId(videoUrl);
+  const getBunnyVideoId = (url) => {
+    const match = url?.match(/iframe\.mediadelivery\.net\/embed\/\d+\/([a-f0-9\-]+)/);
+    return match?.[1] || null;
+  };
+
+  const getVideoType = (url) => {
+    if (getYouTubeId(url)) return 'youtube';
+    if (getBunnyVideoId(url)) return 'bunny';
+    return null;
+  };
+
+  const videoType = getVideoType(videoUrl);
+  const videoId = videoType === 'youtube' ? getYouTubeId(videoUrl) : getBunnyVideoId(videoUrl);
+
+  // Set aspect ratio based on video type
+  const aspectClass = videoId ? 'aspect-w-16 aspect-h-9' : 'aspect-w-16 aspect-h-9';
 
   useEffect(() => {
     if (typeof window !== 'undefined' && videoId && containerRef.current) {
       // Clear any previous player content
-      containerRef.current.innerHTML = `
-        <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="${videoId}"></div>
-      `;
+      containerRef.current.innerHTML = '';
 
-      playerRef.current = new Plyr('#player', {
-        controls: [
-          'play-large',
-          'play',
-          'progress',
-          'current-time',
-          'mute',
-          'volume',
-          'settings',
-          'fullscreen'
-        ],
-        settings: ['quality', 'speed'],
-        youtube: {
-          noCookie: false,
-          rel: 0,
-          showinfo: 0,
-          iv_load_policy: 3,
-          modestbranding: 1
-        }
-      });
+      if (videoType === 'youtube') {
+        // YouTube video setup
+        containerRef.current.innerHTML = `
+          <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="${videoId}"></div>
+        `;
+
+        playerRef.current = new Plyr('#player', {
+          controls: [
+            'play-large',
+            'play',
+            'progress',
+            'current-time',
+            'mute',
+            'volume',
+            'settings',
+            'fullscreen'
+          ],
+          settings: ['quality', 'speed'],
+          fullscreen: {
+            enabled: true,
+            fallback: true,
+            iosNative: true,
+            container: null
+          },
+          youtube: {
+            noCookie: false,
+            rel: 0,
+            showinfo: 0,
+            iv_load_policy: 3,
+            modestbranding: 1,
+            playsinline: 1
+          }
+        });
+      } else if (videoType === 'bunny') {
+        // Bunny.net video setup
+        containerRef.current.innerHTML = `
+          <iframe 
+            id="bunny-player"
+            src="${videoUrl}"
+            loading="lazy"
+            style="border: none; position: absolute; top: 0; height: 100%; width: 100%;"
+            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+            allowfullscreen="true">
+          </iframe>
+        `;
+
+        // Apply Plyr to the iframe for consistent controls
+        playerRef.current = new Plyr('#bunny-player', {
+          controls: [
+            'play-large',
+            'progress',
+            'current-time',
+            'mute',
+            'volume',
+            'fullscreen'
+          ],
+          fullscreen: {
+            enabled: true,
+            fallback: true,
+            iosNative: true,
+            container: null
+          }
+        });
+      }
+
+      // Add mobile-specific event listeners for better performance
+      if (playerRef.current && window.innerWidth <= 768) {
+        playerRef.current.on('enterfullscreen', () => {
+          // Force hardware acceleration
+          const playerElement = containerRef.current.querySelector('.plyr, #bunny-player');
+          if (playerElement) {
+            playerElement.style.transform = 'translateZ(0)';
+            playerElement.style.backfaceVisibility = 'hidden';
+          }
+        });
+
+        playerRef.current.on('exitfullscreen', () => {
+          // Reset transforms
+          const playerElement = containerRef.current.querySelector('.plyr, #bunny-player');
+          if (playerElement) {
+            playerElement.style.transform = '';
+            playerElement.style.backfaceVisibility = '';
+          }
+        });
+      }
     }
 
     // Cleanup player instance
@@ -51,9 +129,9 @@ const VideoPlayer = ({ videoUrl }) => {
         playerRef.current.destroy();
       }
     };
-  }, [videoId]);
+  }, [videoId, videoType, videoUrl]);
 
-  if (!videoId) {
+  if (!videoId || !videoType) {
     return (
       <div className="w-full h-full flex items-center justify-center text-white bg-black">
         رابط الفيديو غير صالح أو غير مدعوم
@@ -62,7 +140,17 @@ const VideoPlayer = ({ videoUrl }) => {
   }
 
   return (
-    <div ref={containerRef} className="aspect-w-16 aspect-h-9" />
+    <div
+      ref={containerRef}
+      className={`${aspectClass} w-full h-full relative`}
+      style={{
+        willChange: 'transform',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)'
+      }}
+    />
   );
 };
 
