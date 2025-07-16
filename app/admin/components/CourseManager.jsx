@@ -570,6 +570,12 @@ const CourseManager = () => {
                             isCompleted={currentStep > 2}
                         />
                         <div className="w-12 h-0.5 bg-gray-700" />
+                        <StepIndicator
+                            step={3}
+                            label="الامتحانات والاعدادات'"
+                            isActive={currentStep === 3}
+                            isCompleted={currentStep > 3}
+                        />
 
                     </div>
 
@@ -841,12 +847,12 @@ const CourseManager = () => {
             {/* Add/Edit Course Modal */}
 
             {showForm && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 m-6 z-50 overflow-y-auto">
+                <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center  m-6 z-50  pt-24">
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl w-full max-w-5xl 
-                     border border-white/10 shadow-2xl my-4 relative overflow-hidden"
+                     border border-white/10 shadow-2xl my-8 relative overflow-hidden"
                     >
                         {/* Progress Bar */}
                         <div className="absolute top-0 left-0 right-0 h-1 bg-gray-700/50">
