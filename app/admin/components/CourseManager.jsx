@@ -923,10 +923,10 @@ const CourseManager = () => {
                                                              focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                                     required
                                                 >
-                                                    <option value="">اختر المستوى</option>
-                                                    <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
-                                                    <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
-                                                    <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                                                    <option className='text-black' value="">اختر المستوى</option>
+                                                    <option className='text-black' value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+                                                    <option className='text-black' value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+                                                    <option className='text-black' value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
                                                 </select>
                                             </div>
 
