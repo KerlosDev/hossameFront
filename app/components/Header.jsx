@@ -13,6 +13,7 @@ import { IoClose, IoNotifications, IoPersonCircle } from "react-icons/io5";
 import NotificationButton from './NotificationButton';
 import { LuUser, LuLogOut, LuUserCircle, LuChevronDown, LuLogIn, LuUserPlus } from 'react-icons/lu';
 import sessionManager from '../utils/sessionManager';
+import styles from './Header.module.css';
 
 const Header = () => {
 
@@ -35,7 +36,8 @@ const Header = () => {
         checkUserLogin();
 
         // Set up session manager listener
-        const unsubscribe = sessionManager.addListener((event, data) => {Z
+        const unsubscribe = sessionManager.addListener((event, data) => {
+            Z
             if (event === 'login') {
                 checkUserLogin();
             } else if (event === 'logout') {
@@ -90,7 +92,7 @@ const Header = () => {
             if (userData) {
                 setUsername(userData.username);
                 setIsLoggedIn(true);
-                setIsAdmin(userData.role === 'admin'|| userData.role === 'instructor');
+                setIsAdmin(userData.role === 'admin' || userData.role === 'instructor');
                 return;
             }
 
@@ -239,10 +241,7 @@ const Header = () => {
                                               opacity-0 group-hover:opacity-30 transition-all duration-500"></div>
                         </div>
                         <div className="flex flex-col">
-                            <h2 className="font-arabicUI2 text-lg sm:text-2xl font-bold 
-                                             bg-clip-text text-transparent bg-gradient-to-r 
-                                             from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-600
-                                             transition-all duration-300">
+                            <h2 className={styles.teacherName}>
                                 حسام ميرة
                             </h2>
                             <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-arabicUI2">

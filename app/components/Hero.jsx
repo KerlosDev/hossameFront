@@ -7,6 +7,7 @@ import { MdFunctions, MdVideoLibrary, MdSchool } from "react-icons/md";
 import { TbMathSymbols, TbMathIntegral, TbCertificate } from "react-icons/tb";
 import { BsCheckCircleFill } from "react-icons/bs";
 import Link from 'next/link';
+import styles from './Hero.module.css';
 
 const Hero = () => {
     return (
