@@ -86,7 +86,7 @@ const CourseManager = () => {
     }, []); const fetchCourses = async () => {
         try {
             const token = Cookies.get('token');
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/course`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/course/allCourses`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
