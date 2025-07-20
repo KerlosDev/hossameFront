@@ -163,7 +163,7 @@ const CoursePage = () => {
     useEffect(() => {
         // Update the document title when courseInfo changes
         if (courseInfo.nameofcourse) {
-            document.title = `${courseInfo.nameofcourse} - منصة احمد السيد  `;
+            document.title = `${courseInfo.nameofcourse} - منصة حسام ميرة   `;
         }
     }, [courseInfo]);
 
