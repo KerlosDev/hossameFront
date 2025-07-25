@@ -29,36 +29,62 @@ export default function MyCourses({ onBack }) {
         } else {
             document.documentElement.classList.remove('dark');
         }
-    }, []);
 
-    // Listen for theme changes from other components (like header)
-    useEffect(() => {
-        const handleThemeChange = () => {
-            const savedTheme = localStorage.getItem('theme');
-            const isDark = savedTheme === 'dark';
-            setIsDarkMode(isDark);
+        // Listen for theme changes from other components (like header)
+        const handleThemeChange = (e) => {
+            if (e && e.key === 'theme') {
+                const isDark = e.newValue === 'dark';
+                setIsDarkMode(isDark);
+            }
         };
 
         // Listen for storage changes (when theme is changed in other tabs/components)
         window.addEventListener('storage', handleThemeChange);
 
-        // Also check periodically in case theme is changed by other components in same tab
-        const interval = setInterval(() => {
-            const savedTheme = localStorage.getItem('theme');
-            const isDark = savedTheme === 'dark';
-            if (isDark !== isDarkMode) {
-                setIsDarkMode(isDark);
+        // Use MutationObserver instead of interval for better performance
+        const observer = new MutationObserver(() => {
+            const currentIsDark = document.documentElement.classList.contains('dark');
+            if (currentIsDark !== isDarkMode) {
+                setIsDarkMode(currentIsDark);
             }
-        }, 100);
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
 
         return () => {
             window.removeEventListener('storage', handleThemeChange);
-            clearInterval(interval);
+            observer.disconnect();
         };
-    }, [isDarkMode]);
+    }, []);
 
-    // Chemistry background component
-     
+    // Course Skeleton for loading state
+    const CourseSkeleton = () => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map((item) => (
+                <div key={item} className="bg-white/80 dark:bg-white/10 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/20 overflow-hidden">
+                    <div className="h-40 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse"></div>
+                    <div className="p-6">
+                        <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse mb-4"></div>
+                        <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse mb-2"></div>
+                        <div className="h-3 w-5/6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse mb-4"></div>
+
+                        <div className="flex flex-wrap gap-3 mb-4">
+                            <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                            <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                            <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+                            <div className="h-8 w-28 bg-blue-200 dark:bg-blue-700 rounded-lg animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 
     useEffect(() => {
         fetchEnrolledCourses();
@@ -67,17 +93,42 @@ export default function MyCourses({ onBack }) {
     const fetchEnrolledCourses = async () => {
         setIsLoading(true);
 
-        // 1. Check cache first
-        const cached = localStorage.getItem('enrolledCourses');
-        if (cached) {
+        // Set up cache expiration time (24 hours)
+        const CACHE_EXPIRATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+        // Check if we have valid cache
+        const cachedData = localStorage.getItem('enrolledCourses');
+        const cacheTimestamp = localStorage.getItem('enrolledCoursesTimestamp');
+        const now = Date.now();
+        const isCacheValid = cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp) < CACHE_EXPIRATION);
+
+        // Use cache if it's valid and not expired
+        if (isCacheValid) {
             try {
-                const parsedCache = JSON.parse(cached);
+                const parsedCache = JSON.parse(cachedData);
                 // Filter out courses with null courseId from cache
                 const validCourses = parsedCache.filter(course => course.courseId !== null);
                 setEnrolledCourses(validCourses);
-            } catch {
+                setIsLoading(false);
+
+                // Refresh data in background after using cache
+                fetchFromAPI(false);
+                return;
+            } catch (error) {
+                // If cache parsing fails, clear it
                 localStorage.removeItem('enrolledCourses');
+                localStorage.removeItem('enrolledCoursesTimestamp');
             }
+        }
+
+        // If no valid cache, fetch from API with loading indicator
+        await fetchFromAPI(true);
+    };
+
+    // Separate function to fetch from API
+    const fetchFromAPI = async (showLoading = true) => {
+        if (showLoading) {
+            setIsLoading(true);
         }
 
         try {
@@ -91,19 +142,31 @@ export default function MyCourses({ onBack }) {
             if (response.data.isHeEnrolled && response.data.coursesAreEnrolled?.length > 0) {
                 // Filter out courses with null courseId
                 const validCourses = response.data.coursesAreEnrolled.filter(course => course.courseId !== null);
-                setEnrolledCourses(validCourses);
 
-                // 2. Store filtered courses in localStorage
+                // Update state only if we're showing loading or if data has changed
+                if (showLoading || JSON.stringify(validCourses) !== JSON.stringify(enrolledCourses)) {
+                    setEnrolledCourses(validCourses);
+                }
+
+                // Store filtered courses in localStorage with timestamp
                 localStorage.setItem('enrolledCourses', JSON.stringify(validCourses));
+                localStorage.setItem('enrolledCoursesTimestamp', Date.now().toString());
             } else {
-                setEnrolledCourses([]);
+                if (showLoading || enrolledCourses.length > 0) {
+                    setEnrolledCourses([]);
+                }
                 localStorage.removeItem('enrolledCourses');
+                localStorage.removeItem('enrolledCoursesTimestamp');
             }
         } catch (err) {
             console.error('Error fetching enrolled courses:', err);
-            setError('فشل في تحميل الكورسات المشترك بها. يرجى المحاولة مرة أخرى.');
+            if (showLoading) {
+                setError('فشل في تحميل الكورسات المشترك بها. يرجى المحاولة مرة أخرى.');
+            }
         } finally {
-            setIsLoading(false);
+            if (showLoading) {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -286,9 +349,26 @@ export default function MyCourses({ onBack }) {
                 )}
 
                 {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-                    </div>
+                    <>
+                        {/* Header Section Skeleton */}
+                        <div className="bg-gradient-to-br from-blue-500/70 to-indigo-500/70 rounded-2xl p-6 text-white relative overflow-hidden mb-6 shadow-lg animate-pulse">
+                            <div className="relative">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-xl"></div>
+                                    <div>
+                                        <div className="h-8 w-40 bg-white/30 rounded-md"></div>
+                                        <div className="h-4 w-64 bg-white/30 rounded-md mt-2"></div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-4 mt-6">
+                                    <div className="h-10 w-40 bg-white/20 rounded-xl"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Course cards skeleton */}
+                        <CourseSkeleton />
+                    </>
                 ) : error ? (
                     <div className="bg-red-500/20 backdrop-blur-xl rounded-xl p-4 text-white text-center">
                         {error}
