@@ -386,7 +386,7 @@ const CoursePage = () => {
                                     {/* Enhanced Video Player Skeleton */}
                                     <div className="relative group">
                                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-75 animate-pulse"></div>
-                                        <div className="relative bg-black/90 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/10">
+                                        <div className="relative w-full h-auto rounded-xl overflow-hidden bg-gray-900">
                                             <div className="aspect-video bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
                                                 <div className="text-center space-y-4">
                                                     <div className="w-24 h-24 mx-auto bg-white/5 rounded-2xl flex items-center justify-center animate-pulse">
