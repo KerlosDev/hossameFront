@@ -4,7 +4,7 @@ import {
     User, Book, BarChart2, Award, Eye, FileText, Settings as SettingsIcon,
     LogOut, CreditCard, ChevronDown, Mail, Phone, BookOpen,
     Clock, Target, Brain, Beaker, Edit2, Camera, Sun, Moon
-} from 'lucide-react'; 
+} from 'lucide-react';
 import { FaAtom, FaCalculator, FaFlask, FaInfinity, FaMicroscope, FaPlay, FaSquareRootAlt } from "react-icons/fa";
 import { HiOutlineAcademicCap } from "react-icons/hi";
 import Cookies from 'js-cookie';
@@ -27,7 +27,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
     const [showLessonView, setShowLessonView] = useState(false);
     const [showExamAnalysis, setShowExamAnalysis] = useState(false);
     const [showChat, setShowChat] = useState(false);
-    
+
     // Theme state - synced with header theme toggle
     const [isDarkMode, setIsDarkMode] = useState(true);
 
@@ -36,7 +36,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
         const savedTheme = localStorage.getItem('theme');
         const isDark = savedTheme ? savedTheme === 'dark' : true;
         setIsDarkMode(isDark);
-        
+
         // Sync with document class
         if (isDark) {
             document.documentElement.classList.add('dark');
@@ -55,7 +55,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
 
         // Listen for storage changes (when theme is changed in other tabs/components)
         window.addEventListener('storage', handleThemeChange);
-        
+
         // Also check periodically in case theme is changed by other components in same tab
         const interval = setInterval(() => {
             const savedTheme = localStorage.getItem('theme');
@@ -76,7 +76,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
         const newTheme = !isDarkMode;
         setIsDarkMode(newTheme);
         localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-        
+
         // Update document class to sync with header toggle
         if (newTheme) {
             document.documentElement.classList.add('dark');
@@ -155,8 +155,11 @@ export default function ChemistryLMSProfile({ searchParams }) {
     const calculateTimeSinceJoining = (dateString) => {
         const joinDate = new Date(dateString);
         const now = new Date();
-        const diffTime = Math.abs(now - joinDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // Zero out the time part for both dates
+        const joinDateOnly = new Date(joinDate.getFullYear(), joinDate.getMonth(), joinDate.getDate());
+        const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const diffTime = nowDateOnly - joinDateOnly;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays === 0) return "اليوم";
         if (diffDays === 1) return "الأمس";
@@ -331,7 +334,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
     const Sidebar = () => (
         <aside className={`lg:col-span-3 ${isDarkMode ? 'bg-white/10 border-white/20 hover:border-white/30' : 'bg-white/80 border-gray-200 hover:border-gray-300'} backdrop-blur-xl rounded-2xl p-6 border transition-all duration-500 h-fit`}>
             {/* Theme Toggle Button */}
-            
+
             <div className="flex flex-col items-center mb-8">
                 <div className="group relative">
                     <div className="flex  justify-center">
