@@ -52,6 +52,7 @@ const DashboardStats = () => {
         datasets: []
     });
 
+
     useEffect(() => {
         fetchDashboardStats();
     }, []);
@@ -68,37 +69,20 @@ const DashboardStats = () => {
                 'Content-Type': 'application/json'
             };
 
-            // Fetch all required data in parallel
+            // Fetch all dashboard stats in a single request
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/dashboard`, { headers });
+            const data = await response.json();
 
-            const [studentsResponse, revenueResponse, pendingResponse, progressResponse, signupsResponse, analyticsResponse] = await Promise.all([
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/new-students`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/revenue`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/pending-enrollments`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/all`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/student-signups`, { headers }),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/students`, { headers })
-            ]);
-
-
-
-            // Parse all responses in parallel
-            const [studentsData, revenueData, pendingData, progressData, signupsData, analyticsData] = await Promise.all([
-                studentsResponse.json(),
-                revenueResponse.json(),
-                pendingResponse.json(),
-                progressResponse.json(),
-                signupsResponse.json(),
-                analyticsResponse.json()
-            ]);
-
+            if (!data.success) throw new Error('Failed to load dashboard stats');
+            const d = data.data;
 
             // Process signup data for the chart
-            if (signupsData.success && signupsData.data) {
-                const labels = signupsData.data.map(item => {
+            if (d.signups && Array.isArray(d.signups)) {
+                const labels = d.signups.map(item => {
                     const date = new Date(item._id);
                     return date.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' });
                 });
-                const values = signupsData.data.map(item => item.count);
+                const values = d.signups.map(item => item.count);
 
                 setSignupData({
                     labels,
@@ -114,26 +98,18 @@ const DashboardStats = () => {
                 });
             }
 
-            // Calculate completion rate from progress data
-            const completionRate = progressData.data ?
-                Math.round(progressData.data.reduce((acc, curr) => acc + (curr.progress || 0), 0) / progressData.data.length) :
-                0;
-            const analyticsInfo = analyticsData.success ? analyticsData.data : {};
-
-
             setStats({
-                totalStudents: analyticsInfo.totalStudents || 0,
-                newStudents: studentsData.data || 0,
-                totalRevenue: revenueData.data || 0,
-                pendingEnrollments: pendingData.data || 0,
-                completionRate: completionRate || 0,
-                monthlyActiveUsers: analyticsInfo.monthlyActiveUsers || 0,
-                highEngagement: analyticsInfo.highEngagement || 0,
-                averageExamScore: analyticsInfo.averageExamScore || 0,
-                governmentDistribution: analyticsInfo.governmentDistribution || [],
-                levelDistribution: analyticsInfo.levelDistribution || []
+                totalStudents: d.totalStudents || 0,
+                newStudents: d.newStudents || 0,
+                totalRevenue: d.totalRevenue || 0,
+                pendingEnrollments: d.pendingEnrollments || 0,
+                completionRate: d.completionRate || 0,
+                monthlyActiveUsers: d.monthlyActiveUsers || 0,
+                highEngagement: d.highEngagement || 0,
+                averageExamScore: d.averageExamScore || 0,
+                governmentDistribution: d.governmentDistribution || [],
+                levelDistribution: d.levelDistribution || []
             });
-
 
             setLoading(false);
         } catch (error) {
@@ -385,7 +361,7 @@ const DashboardStats = () => {
                                     legend: {
                                         position: 'bottom',
                                         labels: {
-                                            font: { 
+                                            font: {
                                                 family: 'arabicUI3',
                                                 size: 12
                                             },
