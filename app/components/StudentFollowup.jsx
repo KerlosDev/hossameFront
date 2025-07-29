@@ -11,7 +11,7 @@ import {
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
-import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRegCircle } from "react-icons/fa";
 import Cookies from 'js-cookie';
 
 const getAuthHeaders = () => ({
@@ -94,7 +94,7 @@ const StudentFollowup = () => {
                 setTotalPages(studentsData.totalPages);
                 setTotalStudents(studentsData.totalStudents);
 
-                // Process student data
+                // Process student data with detailed enrollment information
                 const whatsappObject = studentsData.data.reduce((acc, student) => {
                     acc[student.studentInfo.email] = {
                         studentId: student.studentInfo.id,
@@ -105,25 +105,51 @@ const StudentFollowup = () => {
                         status: student.activityStatus.status,
                         totalWatchedLessons: student.activityStatus.totalWatchedLessons,
                         isEnrolled: student.enrollmentStatus.isEnrolled,
-                        enrolledCourses: student.enrollmentStatus.enrolledCourses,
+                        enrolledCourses: student.enrollmentStatus.enrolledCourses.map(course => ({
+                            courseName: course.courseName,
+                            enrollmentDate: course.enrollmentDate,
+                            paymentStatus: course.paymentStatus,
+                            chapters: course.chapters.map(chapter => ({
+                                chapterTitle: chapter.chapterTitle,
+                                lessons: chapter.lessons.map(lesson => ({
+                                    lessonTitle: lesson.lessonTitle,
+                                    isWatched: lesson.isWatched,
+                                    watchCount: lesson.watchCount
+                                }))
+                            }))
+                        })),
                         totalEnrollments: student.enrollmentStatus.totalEnrollments
                     };
                     return acc;
                 }, {});
                 setWhatsappNumbers(whatsappObject);
 
-                // Process activity data for the student list
-                const processedStudents = studentsData.data.map(student => ({
-                    email: student.studentInfo.email,
-                    userName: student.studentInfo.name,
-                    totalViews: student.activityStatus.totalWatchedLessons || 0,
-                    lastViewed: student.studentInfo.lastActivity,
-                    status: getStudentStatus(student.activityStatus),
-                    uniqueLessons: student.activityStatus.totalWatchedLessons || 0,
-                    lessons: [], // Since we don't have specific lesson data in this response
-                    lessonViews: {},
-                    hasWatchHistory: student.activityStatus.totalWatchedLessons > 0
-                }));
+                // Process activity data for the student list with enrollment details
+                const processedStudents = studentsData.data.map(student => {
+                    const totalWatchedLessons = student.activityStatus.totalWatchedLessons || 0;
+                    const enrolledCoursesCount = student.enrollmentStatus.enrolledCourses.length;
+                    const totalLessonsAvailable = student.enrollmentStatus.enrolledCourses.reduce((total, course) => {
+                        return total + course.chapters.reduce((chapterTotal, chapter) => {
+                            return chapterTotal + chapter.lessons.length;
+                        }, 0);
+                    }, 0);
+
+                    return {
+                        email: student.studentInfo.email,
+                        userName: student.studentInfo.name,
+                        totalViews: totalWatchedLessons,
+                        lastViewed: student.studentInfo.lastActivity,
+                        status: getStudentStatus(student.activityStatus),
+                        uniqueLessons: totalWatchedLessons,
+                        enrolledCourses: enrolledCoursesCount,
+                        totalLessonsAvailable,
+                        isEnrolled: student.enrollmentStatus.isEnrolled,
+                        enrollmentDetails: student.enrollmentStatus.enrolledCourses,
+                        lessons: [], // Will be populated by watch history if available
+                        lessonViews: {},
+                        hasWatchHistory: totalWatchedLessons > 0
+                    };
+                });
 
                 setStudentList(processedStudents);
 
@@ -277,26 +303,38 @@ const StudentFollowup = () => {
             cleanNumber;
         return `https://wa.me/${fullNumber}`;
     }; const prepareStudentChartData = () => {
-        if (!watchHistory || watchHistory.length === 0) {
-            return {
-                labels: [],
-                datasets: []
-            };
+        // Initialize with all enrolled courses
+        const courseStats = {};
+        
+        // First, add all enrolled courses with zero stats
+        if (selectedStudent && selectedStudent.enrollmentDetails) {
+            selectedStudent.enrollmentDetails.forEach(course => {
+                courseStats[course.courseName] = {
+                    totalViews: 0,
+                    uniqueLessons: new Set(),
+                    enrollmentDate: course.enrollmentDate,
+                    totalLessons: course.chapters.reduce((total, chapter) => 
+                        total + chapter.lessons.length, 0)
+                };
+            });
         }
 
-        // Group by course and calculate total views
-        const courseStats = watchHistory.reduce((acc, entry) => {
-            const courseName = entry.courseId.name;
-            if (!acc[courseName]) {
-                acc[courseName] = {
-                    totalViews: 0,
-                    uniqueLessons: new Set()
-                };
-            }
-            acc[courseName].totalViews += entry.watchedCount;
-            acc[courseName].uniqueLessons.add(entry.lessonId);
-            return acc;
-        }, {});
+        // Then add watch history data if available
+        if (watchHistory && watchHistory.length > 0) {
+            watchHistory.forEach(entry => {
+                const courseName = entry.courseId.name;
+                if (!courseStats[courseName]) {
+                    courseStats[courseName] = {
+                        totalViews: 0,
+                        uniqueLessons: new Set(),
+                        enrollmentDate: null,
+                        totalLessons: 0
+                    };
+                }
+                courseStats[courseName].totalViews += entry.watchedCount;
+                courseStats[courseName].uniqueLessons.add(entry.lessonId);
+            });
+        }
 
         // Prepare chart data
         return {
@@ -313,6 +351,13 @@ const StudentFollowup = () => {
                 backgroundColor: 'rgba(147, 51, 234, 0.5)',
                 borderColor: 'rgb(147, 51, 234)',
                 borderWidth: 1
+            }, {
+                label: 'إجمالي الدروس المتاحة',
+                data: Object.values(courseStats).map(stats => stats.totalLessons),
+                backgroundColor: 'rgba(234, 179, 8, 0.5)',
+                borderColor: 'rgb(234, 179, 8)',
+                borderWidth: 1,
+                borderDash: [5, 5]
             }]
         };
     };
@@ -367,18 +412,29 @@ const StudentFollowup = () => {
     };
 
     const calculateStudentProgress = (student) => {
-        const progress = allCourses.map(course => {
-            const courseChapters = allChapters.filter(ch =>
-                ch.courseNickname === course.nicknameforcourse
-            );
+        // Get the enrolled courses from the student's data
+        const enrolledCourses = student.enrollmentDetails || [];
+        
+        // Create a map of enrolled course names for quick lookup
+        const enrolledCoursesMap = new Map(
+            enrolledCourses.map(course => [course.courseName, course])
+        );
 
-            const courseLessons = courseChapters.flatMap(ch => ch.lessons || []);
-            const totalLessons = courseLessons.length;
+        const progress = allCourses
+            // First filter to only include enrolled courses
+            .filter(course => enrolledCoursesMap.has(course.nameofcourse))
+            .map(course => {
+                const courseChapters = allChapters.filter(ch =>
+                    ch.courseNickname === course.nicknameforcourse
+                );
 
-            // Filter watch history for this course
-            const courseWatchHistory = watchHistory.filter(entry =>
-                entry.courseId._id === course.id
-            );
+                const courseLessons = courseChapters.flatMap(ch => ch.lessons || []);
+                const totalLessons = courseLessons.length;
+
+                // Filter watch history for this course
+                const courseWatchHistory = watchHistory.filter(entry =>
+                    entry.courseId._id === course.id
+                );
 
             // Get unique watched lessons
             const watchedLessonsSet = new Set(courseWatchHistory.map(entry => entry.lessonId));
@@ -419,9 +475,21 @@ const StudentFollowup = () => {
                 unwatchedLessons,
                 courseChapters
             };
-        }).filter(course => course.totalLessons > 0);
+        });
 
-        setStudentProgress(progress);
+        // Get enrollment dates and other details from enrolledCoursesMap
+        const progressWithEnrollmentDetails = progress.map(course => {
+            const enrollmentDetails = enrolledCoursesMap.get(course.courseName);
+            return {
+                ...course,
+                enrollmentDate: enrollmentDetails?.enrollmentDate,
+                paymentStatus: enrollmentDetails?.paymentStatus,
+                // Include chapters from enrollment details to show what's available to the student
+                enrolledChapters: enrollmentDetails?.chapters || []
+            };
+        });
+
+        setStudentProgress(progressWithEnrollmentDetails);
     }; const filterExams = (allExams, quizResults) => {
         // Group quiz results by exam title to get the latest attempt
         const latestAttempts = (quizResults || []).reduce((acc, result) => {
@@ -583,7 +651,7 @@ const StudentFollowup = () => {
         });
 
         return (
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+            <div className="bg-white/10   backdrop-blur-lg rounded-2xl p-6 border border-white/20">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold text-white">الاختبارات</h3>
                     <div className="flex gap-2">
@@ -690,9 +758,22 @@ const StudentFollowup = () => {
         );
     };
 
-    const WatchHistorySection = () => (
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-            <h3 className="text-xl font-bold text-white mb-6">سجل المشاهدة</h3>            {watchHistory.length > 0 ? (
+    const WatchHistorySection = () => {
+        // Get all enrolled courses from the selected student
+        const enrolledCourses = selectedStudent?.enrollmentDetails || [];
+        
+        // Create a map of watched lessons by courseId for quick lookup
+        const watchedLessonsMap = new Map();
+        watchHistory.forEach(entry => {
+            if (!watchedLessonsMap.has(entry.courseId.name)) {
+                watchedLessonsMap.set(entry.courseId.name, new Set());
+            }
+            watchedLessonsMap.get(entry.courseId.name).add(entry.lessonId);
+        });
+
+        return (
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <h3 className="text-xl font-bold text-white mb-6">سجل المشاهدة</h3>
                 <div className="space-y-6">
                     {/* Summary statistics */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -710,55 +791,91 @@ const StudentFollowup = () => {
                         </div>
                         <div className="bg-white/5 rounded-lg p-4">
                             <div className="text-2xl font-bold text-green-400">
-                                {new Set(watchHistory.map(entry => entry.courseId._id)).size}
+                                {enrolledCourses.length}
                             </div>
-                            <div className="text-sm text-white/60">الكورسات النشطة</div>
+                            <div className="text-sm text-white/60">الكورسات المسجل فيها</div>
                         </div>
                     </div>
 
-                    {/* Watch history list */}
+                    {/* Course List with Watch Status */}
                     <div className="space-y-4">
-                        {watchHistory.map((entry, index) => (
-                            <div key={index} className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors">
-                                <div className="flex justify-between items-start">
-                                    <div className="space-y-1">
-                                        <h4 className="text-white font-medium">{entry.lessonTitle}</h4>
-                                        <p className="text-sm text-white/60">
-                                            {entry.courseId?.name} - {entry.chapterId?.title}
-                                        </p>
-                                        <div className="flex items-center gap-4 mt-2">
-                                            <div className="flex items-center gap-2">
-                                                <FaEye className="text-blue-400" />
-                                                <span className="text-sm text-white/60">
-                                                    {entry.watchedCount} مشاهدة
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <FaClock className="text-purple-400" />
-                                                <span className="text-sm text-white/60">
-                                                    آخر مشاهدة: {new Date(entry.lastWatchedAt).toLocaleDateString('ar-EG', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </span>
-                                            </div>
+                        {enrolledCourses.map((course, courseIndex) => {
+                            const totalLessons = course.chapters.reduce((total, chapter) => 
+                                total + chapter.lessons.length, 0);
+                            const watchedLessons = watchedLessonsMap.get(course.courseName)?.size || 0;
+                            const progress = totalLessons > 0 ? (watchedLessons / totalLessons) * 100 : 0;
+
+                            return (
+                                <div key={courseIndex} className="bg-white/5 rounded-lg p-6">
+                                    <div className="mb-4">
+                                        <h4 className="text-lg font-bold text-white mb-2">{course.courseName}</h4>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm text-white/60">
+                                                تاريخ التسجيل: {new Date(course.enrollmentDate).toLocaleDateString('ar-EG')}
+                                            </span>
+                                            <span className={`text-sm ${progress > 0 ? 'text-green-400' : 'text-yellow-400'}`}>
+                                                {watchedLessons} / {totalLessons} درس مشاهد
+                                            </span>
+                                        </div>
+                                        {/* Progress bar */}
+                                        <div className="w-full bg-white/10 rounded-full h-2">
+                                            <div 
+                                                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                                                style={{ width: `${progress}%` }}
+                                            />
                                         </div>
                                     </div>
+
+                                    {/* Chapter List */}
+                                    <div className="space-y-4">
+                                        {course.chapters.map((chapter, chapterIndex) => (
+                                            <div key={chapterIndex} className="border border-white/10 rounded-lg p-4">
+                                                <h5 className="text-white font-medium mb-3">{chapter.chapterTitle}</h5>
+                                                <div className="space-y-2">
+                                                    {chapter.lessons.map((lesson, lessonIndex) => {
+                                                        const watchEntry = watchHistory.find(entry => 
+                                                            entry.lessonTitle === lesson.lessonTitle
+                                                        );
+
+                                                        return (
+                                                            <div 
+                                                                key={lessonIndex}
+                                                                className="flex items-center justify-between py-2 px-3 rounded bg-white/5"
+                                                            >
+                                                                <div className="flex items-center gap-2">
+                                                                    {lesson.isWatched || watchEntry ? (
+                                                                        <FaCheckCircle className="text-green-400" />
+                                                                    ) : (
+                                                                        <FaRegCircle className="text-white/40" />
+                                                                    )}
+                                                                    <span className="text-white/80">{lesson.lessonTitle}</span>
+                                                                </div>
+                                                                {watchEntry && (
+                                                                    <span className="text-sm text-white/60">
+                                                                        {watchEntry.watchedCount} مشاهدة
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
-            ) : (
-                <div className="text-center py-8 text-white/60">
-                    لا يوجد سجل مشاهدة
-                </div>
-            )}
-        </div>
-    );
+
+                {enrolledCourses.length === 0 && (
+                    <div className="text-center py-8 text-white/60">
+                        الطالب غير مسجل في أي كورس
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div ref={reportRef} className="p-6 space-y-6">
@@ -788,13 +905,14 @@ const StudentFollowup = () => {
                     )}
                 </div>
 
-                <button
-                    onClick={exportAsImage}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors text-white"
-                >
-                    <FaImage />
-                    <span>تصدير كصورة</span>
-                </button>
+                 <button
+                        onClick={exportAsImage}
+                        className="flex  font-arabicUI3 items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 rounded-xl hover:bg-green-200 dark:hover:bg-green-500/30 transition-colors"
+                    >
+                        <FaImage />
+                        تصدير كصورة
+                    </button>
+               
             </div>
 
             {activeTab === 'overview' ? (
@@ -1025,8 +1143,8 @@ const StudentFollowup = () => {
                                                 key={pageNumber}
                                                 onClick={() => setCurrentPage(pageNumber)}
                                                 className={`px-3 py-2 rounded-lg transition-colors ${currentPage === pageNumber
-                                                        ? 'bg-blue-500 text-white'
-                                                        : 'bg-white/10 text-white/70 hover:bg-white/20'
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-white/10 text-white/70 hover:bg-white/20'
                                                     }`}
                                             >
                                                 {pageNumber}
