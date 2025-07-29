@@ -54,7 +54,7 @@ export default function CountdownTimer() {
             <div className="w-2 h-10 rounded-full bg-blue-500"></div>
             <div>
               <h4 className="font-medium">امتحانات ثانوية عامة</h4>
-              <p className="text-sm text-white/60">٨ يونيو ٢٠٢٥</p>
+              <p className="text-sm text-white/60">٨ يونيو 2026</p>
             </div>
           </div>
           <div className="px-3 py-1 rounded-full text-xs bg-blue-500/20 text-blue-300">
