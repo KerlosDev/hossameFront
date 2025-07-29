@@ -101,7 +101,7 @@ const StudentFollowup = () => {
                         studentWhatsApp: student.studentInfo.phoneNumber,
                         parentWhatsApp: student.studentInfo.parentPhoneNumber,
                         name: student.studentInfo.name,
-                        lastActive: student.activityStatus.lastActivity,
+                        lastActive: student.studentInfo.lastActivity,
                         status: student.activityStatus.status,
                         totalWatchedLessons: student.activityStatus.totalWatchedLessons,
                         isEnrolled: student.enrollmentStatus.isEnrolled,
@@ -117,7 +117,7 @@ const StudentFollowup = () => {
                     email: student.studentInfo.email,
                     userName: student.studentInfo.name,
                     totalViews: student.activityStatus.totalWatchedLessons || 0,
-                    lastViewed: student.activityStatus.lastActivity,
+                    lastViewed: student.studentInfo.lastActivity,
                     status: getStudentStatus(student.activityStatus),
                     uniqueLessons: student.activityStatus.totalWatchedLessons || 0,
                     lessons: [], // Since we don't have specific lesson data in this response

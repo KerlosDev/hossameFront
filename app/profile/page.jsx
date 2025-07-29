@@ -185,7 +185,7 @@ export default function ChemistryLMSProfile({ searchParams }) {
             setUserData(response.data);
 
             // Calculate last active time based on current date
-            setLastActive(calculateTimeSinceJoining(response.data.createdAt));
+            setLastActive(calculateTimeSinceJoining(response.data.lastActive));
 
         } catch (err) {
             console.error('Error fetching user data:', err);
