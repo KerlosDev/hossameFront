@@ -68,6 +68,24 @@ const StudentFollowup = () => {
     const [totalStudents, setTotalStudents] = useState(0);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [studentRatings, setStudentRatings] = useState([]);
+    const [ratingStars, setRatingStars] = useState(3);
+    const [ratingStatus, setRatingStatus] = useState('good');
+    const [ratingComment, setRatingComment] = useState('');
+    const [ratingLoading, setRatingLoading] = useState(false);
+    const [editingRatingId, setEditingRatingId] = useState(null); // null = not editing
+
+    // ✅ Define first
+    const getCurrentWeek = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const week = Math.ceil((((now - new Date(year, 0, 1)) / 86400000) + new Date(year, 0, 1).getDay() + 1) / 7);
+        return `${year}-W${week.toString().padStart(2, '0')}`;
+    };
+
+    // ✅ Then use it here
+    const [ratingWeek, setRatingWeek] = useState(getCurrentWeek());
+
 
     useEffect(() => {
         fetchLessonData();
@@ -594,8 +612,76 @@ const StudentFollowup = () => {
         if (studentData && studentData.studentId) {
             fetchQuizResults(studentData.studentId);
             fetchWatchHistory(studentData.studentId);
+            fetchStudentRatings(studentData.studentId); // 👈 Add this line
+
         }
         calculateStudentProgress(student);
+    };
+
+    const fetchStudentRatings = async (studentId) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-ratings/student/${studentId}`, {
+                headers: getAuthHeaders()
+            });
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+                setStudentRatings(data); // ✅ Correct handling for raw array
+            } else {
+                console.warn("Unexpected response format", data);
+            }
+        } catch (error) {
+            console.error("Error fetching student ratings", error);
+        }
+    };
+
+
+    const submitRating = async () => {
+        setRatingLoading(true);
+        try {
+            const method = editingRatingId ? 'PUT' : 'POST';
+            const url = editingRatingId
+                ? `${process.env.NEXT_PUBLIC_API_URL}/student-ratings/rate/${editingRatingId}`
+                : `${process.env.NEXT_PUBLIC_API_URL}/student-ratings/rate`;
+
+            const response = await fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    studentId: whatsappNumbers[selectedStudent.email]?.studentId,
+                    week: ratingWeek,
+                    stars: ratingStars,
+                    status: ratingStatus,
+                    comment: ratingComment
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                await fetchStudentRatings(whatsappNumbers[selectedStudent.email]?.studentId);
+                alert("تم حفظ التقييم بنجاح ✅");
+                resetRatingForm(); // Clear edit mode after saving
+            } else {
+                alert("حدث خطأ أثناء الحفظ ❌");
+            }
+        } catch (error) {
+            console.error("Error submitting rating", error);
+            alert("فشل في إرسال التقييم");
+        } finally {
+            setRatingLoading(false);
+        }
+    };
+
+   
+
+
+    const resetRatingForm = () => {
+        setRatingStars(1);
+        setRatingStatus("good");
+        setRatingComment('');
+        setRatingWeek(getCurrentWeek());
+        setEditingRatingId(null);
     };
 
     const fetchWatchHistory = async (studentId) => {
@@ -802,6 +888,15 @@ const StudentFollowup = () => {
         );
     };
 
+    const loadRatingForEdit = (rating) => {
+        setRatingStars(rating.stars);
+        setRatingStatus(rating.status);
+        setRatingComment(rating.comment || '');
+        setRatingWeek(rating.week);
+        setEditingRatingId(rating._id); // We'll use this to know it's an edit
+    };
+
+
     const WatchHistorySection = () => {
         // Get all enrolled courses from the selected student
         const enrolledCourses = selectedStudent?.enrollmentDetails || [];
@@ -897,10 +992,10 @@ const StudentFollowup = () => {
                                         <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all duration-300 ${progress >= 80
-                                                        ? 'bg-gradient-to-r from-green-500 to-green-400'
-                                                        : progress >= 50
-                                                            ? 'bg-gradient-to-r from-blue-500 to-blue-400'
-                                                            : 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+                                                    ? 'bg-gradient-to-r from-green-500 to-green-400'
+                                                    : progress >= 50
+                                                        ? 'bg-gradient-to-r from-blue-500 to-blue-400'
+                                                        : 'bg-gradient-to-r from-yellow-500 to-yellow-400'
                                                     }`}
                                                 style={{ width: `${progress}%` }}
                                             />
@@ -976,8 +1071,8 @@ const StudentFollowup = () => {
                     <button
                         onClick={() => setActiveTab('overview')}
                         className={`px-6 py-3 rounded-xl font-arabicUI3 transition-all duration-200 transform hover:scale-105 ${activeTab === 'overview'
-                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
-                                : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                            : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
                             }`}
                     >
                         <div className="flex items-center gap-2">
@@ -990,8 +1085,8 @@ const StudentFollowup = () => {
                         <button
                             onClick={() => setActiveTab('details')}
                             className={`px-6 py-3 rounded-xl font-arabicUI3 transition-all duration-200 transform hover:scale-105 ${activeTab === 'details'
-                                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/25'
-                                    : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/25'
+                                : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
@@ -1017,7 +1112,7 @@ const StudentFollowup = () => {
                         <FaImage />
                         تصدير كصورة
                     </button>
-                    
+
                 </div>
             </div>
 
@@ -1414,7 +1509,12 @@ const StudentFollowup = () => {
                                             {selectedStudent.enrollmentStatus.enrolledCourses.map((course, idx) => (
                                                 <div key={idx} className="bg-gradient-to-r from-slate-800/30 to-slate-900/30 rounded-xl p-6 border border-white/5 hover:border-white/10 transition-all duration-300 group">
                                                     <div className="flex justify-between items-center mb-3">
-                                                        <h4 className="text-lg font-medium text-white">{course.courseName}</h4>
+                                                        <div>
+                                                            <h4 className="text-lg font-medium text-white">{course.courseName}</h4>
+                                                            {course.fromPackage && course.packageName && (
+                                                                <div className="text-xs text-blue-400 mt-1">من باقة: {course.packageName}</div>
+                                                            )}
+                                                        </div>
                                                         <span className={`px-4 py-1.5 rounded-xl text-sm font-medium ${course.paymentStatus === 'paid'
                                                             ? 'bg-gradient-to-r from-green-500/20 to-green-600/20 text-green-400 border border-green-500/20'
                                                             : 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-400 border border-yellow-500/20'
@@ -1483,7 +1583,108 @@ const StudentFollowup = () => {
                                 </div>
 
                                 {/* Watch History Section */}
+
+                                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-8 border border-white/10 shadow-xl">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h3 className="text-2xl font-bold text-white mb-2">تقييم الطالب الأسبوعي</h3>
+                                            <p className="text-white/60 text-sm">قم بتقييم أداء الطالب هذا الأسبوع</p>
+                                        </div>
+                                        <div className="p-2 bg-yellow-500/20 rounded-xl">
+                                            <FaStar className="text-yellow-400 text-xl" />
+                                        </div>
+                                    </div>
+
+                                    {/* Rating Form */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                        <div>
+                                            <label className="text-white/70 block mb-1">التقييم (نجوم)</label>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                max={5}
+                                                value={ratingStars}
+                                                onChange={(e) => setRatingStars(Number(e.target.value))}
+                                                className="w-full p-3 rounded-xl bg-white/5 text-white focus:outline-none border border-white/10"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-white/70 block mb-1">الحالة</label>
+                                            <select
+                                                value={ratingStatus}
+                                                onChange={(e) => setRatingStatus(e.target.value)}
+                                                className="w-full font-arabicUI3 p-3 rounded-xl bg-white/5 text-white focus:outline-none border border-white/10"
+                                            >
+                                                <option className='text-black' value="good">جيد</option>
+                                                <option className='text-black' value="bad">ضعيف</option>
+                                                <option className='text-black' value="average">متوسط</option>
+                                                <option className='text-black' value="excellent">ممتاز</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-white/70 block mb-1">ملاحظة</label>
+                                            <input
+                                                type="text"
+                                                value={ratingComment}
+                                                onChange={(e) => setRatingComment(e.target.value)}
+                                                className="w-full p-3 rounded-xl bg-white/5 text-white focus:outline-none border border-white/10"
+                                            />
+                                        </div>
+
+                                    </div>
+                                    <button
+                                        onClick={submitRating}
+                                        disabled={ratingLoading}
+                                        className="px-6 py-3 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 font-bold transition"
+                                    >
+                                        {ratingLoading ? 'جارٍ الإرسال...' : 'حفظ التقييم'}
+                                    </button>
+
+                                    {editingRatingId && (
+                                        <button
+                                            onClick={resetRatingForm}
+                                            className="ml-4 px-6 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold transition"
+                                        >
+                                            إلغاء التعديل
+                                        </button>
+                                    )}
+
+
+                                    {/* Past Ratings */}
+                                    <div className="mt-8">
+                                        <h4 className="text-white text-lg font-semibold mb-4">التقييمات السابقة</h4>
+                                        {studentRatings.map((rating, idx) => (
+                                            <div key={idx} className="p-4 rounded-xl border border-white/10 bg-white/5 text-white">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="font-bold text-yellow-400">
+                                                        {rating.stars} ⭐ - {
+                                                            rating.status === 'good' ? 'جيد' :
+                                                                rating.status === 'bad' ? 'ضعيف' :
+                                                                    rating.status === 'average' ? 'متوسط' :
+                                                                        rating.status === 'excellent' ? 'ممتاز' : rating.status
+                                                        }
+                                                    </div>
+                                                    <span className="text-sm text-white/60">{rating.week}</span>
+                                                </div>
+                                                {rating.comment && (
+                                                    <div className="mt-1 text-sm text-white/80">{rating.comment}</div>
+                                                )}
+                                                <button
+                                                    onClick={() => loadRatingForEdit(rating)}
+                                                    className="mt-2 text-sm text-blue-400 underline hover:text-blue-300"
+                                                >
+                                                    تعديل
+                                                </button>
+                                            </div>
+                                        ))}
+
+                                    </div>
+                                </div>
+
+
                                 <WatchHistorySection />
+
+
                             </div>
                         )}                        {/* Course Progress Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
