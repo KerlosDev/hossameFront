@@ -1,6 +1,6 @@
 'use client'
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { User, Mail, Phone, Clock, Filter, Ban, Search, MapPin, Book, AlertCircle, Download, Eye, Monitor, Smartphone, Tablet, Key, Trash2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { User, Mail, Phone, Clock, Filter, Ban, Search, MapPin, Book, AlertCircle, Download, Eye, Monitor, Smartphone, Tablet, Key } from 'lucide-react';
 import { FaWhatsapp, FaGraduationCap } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
@@ -19,13 +19,6 @@ export default function StudentsList() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordResetLoading, setPasswordResetLoading] = useState(false);
-
-    // Delete student states
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [deleteLoading, setDeleteLoading] = useState(false);
-    const [canDelete, setCanDelete] = useState(true);
-    const [deleteCountdown, setDeleteCountdown] = useState(0);
-    const deleteTimer = useRef(null);
 
     // New state for analytics
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
@@ -122,7 +115,7 @@ export default function StudentsList() {
             if (!token) {
                 throw new Error('No authentication token found');
             }
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/students?page=${page}&limit=${limit}&search=${searchQuery}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/students?page=${page}&limit=${limit}&search=${searchQuery}&filterStatus=${filterStatus}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -152,7 +145,14 @@ export default function StudentsList() {
     // Effect to fetch students
     useEffect(() => {
         fetchStudents();
-    }, [page, limit, searchQuery]);
+    }, [page, limit, searchQuery, filterStatus]);
+
+    // Reset to page 1 when filter changes
+    useEffect(() => {
+        if (page !== 1) {
+            setPage(1);
+        }
+    }, [filterStatus]);
 
     const toggleBanStatus = async (studentId, reason = '') => {
         try {
@@ -241,58 +241,8 @@ export default function StudentsList() {
         }
     };
 
-    // Delete student function with rate limiting
-    const handleDeleteStudent = async () => {
-        if (!canDelete) {
-            toast.error(`يجب الانتظار ${deleteCountdown} ثانية قبل حذف طالب آخر`);
-            return;
-        }
-
-        setDeleteLoading(true);
-        try {
-            const token = Cookies.get('token');
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/students/${selectedStudent._id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data.status === 'success') {
-                toast.success('تم حذف الطالب بنجاح');
-                setShowDeleteConfirm(false);
-                await fetchStudents();
-                await fetchAnalytics();
-            } else {
-                throw new Error(data.message || 'Failed to delete student');
-            }
-        } catch (error) {
-            console.error('Error deleting student:', error);
-            toast.error(error.message || 'حدث خطأ في حذف الطالب');
-        } finally {
-            setDeleteLoading(false);
-        }
-    };
- 
-
-    // Filter students
-    const filteredStudents = students.filter(student => {
-        const matchesStatus = filterStatus === 'all' ||
-            (filterStatus === 'banned' && student.isBanned) ||
-            (filterStatus === 'active' && !student.isBanned);
-
-        return matchesStatus;
-    });
+    // Filter students - now handled by backend, so we just use the students directly
+    const filteredStudents = students;
 
     // Format date
     const formatDate = (dateString) => {
@@ -1451,18 +1401,6 @@ export default function StudentsList() {
                             >
                                 {selectedStudent.isBanned ? 'إلغاء الحظر' : 'حظر الطالب'}
                             </button>
-                            <button
-                                onClick={() => {
-                                    setShowDeleteConfirm(true);
-                                }}
-                                className="px-4 py-2 rounded-xl bg-primary2 hover:bg-primary/45 text-white transition-all flex items-center gap-2"
-                                disabled={!canDelete}
-                                title={!canDelete ? `يجب الانتظار ${deleteCountdown} ثانية قبل حذف طالب آخر` : "حذف الطالب نهائياً"}
-                            >
-                                <Trash2 size={16} />
-                                حذف الطالب
-                                {!canDelete && deleteCountdown > 0 && ` (${deleteCountdown})`}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -1521,54 +1459,6 @@ export default function StudentsList() {
                                 disabled={passwordResetLoading}
                             >
                                 {passwordResetLoading ? 'جاري التحديث...' : 'تأكيد تغيير كلمة المرور'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Delete Student Confirmation Modal */}
-            {showDeleteConfirm && selectedStudent && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 max-w-md w-full mx-4">
-                        <h3 className="text-xl font-arabicUI3 text-white mb-4">
-                            تأكيد حذف الطالب
-                        </h3>
-
-                        <div className="mb-6">
-                            <p className="text-white mb-4">
-                                هل أنت متأكد من حذف الطالب <span className="font-bold">{selectedStudent.name}</span> بشكل نهائي؟
-                            </p>
-                            <p className="text-red-400 text-sm">
-                                هذا الإجراء لا يمكن التراجع عنه وسيتم حذف جميع بيانات الطالب بما في ذلك الاشتراكات وسجل المشاهدة.
-                            </p>
-
-                            {!canDelete && (
-                                <div className="mt-4 p-3 bg-yellow-500/20 rounded-xl border border-yellow-500/30">
-                                    <p className="text-yellow-400 text-sm">
-                                        لا يمكن حذف أكثر من طالب واحد كل 30 ثانية. يرجى الانتظار {deleteCountdown} ثانية.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex justify-end gap-4">
-                            <button
-                                onClick={() => {
-                                    setShowDeleteConfirm(false);
-                                }}
-                                className="px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all"
-                                disabled={deleteLoading}
-                            >
-                                إلغاء
-                            </button>
-                            <button
-                                onClick={handleDeleteStudent}
-                                className="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all flex items-center gap-2"
-                                disabled={deleteLoading || !canDelete}
-                            >
-                                <Trash2 size={16} />
-                                {deleteLoading ? 'جاري الحذف...' : 'تأكيد الحذف'}
                             </button>
                         </div>
                     </div>
