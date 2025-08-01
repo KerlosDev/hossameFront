@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react';
-import { User, Mail, Phone, Clock, Filter, Ban, Search, MapPin, Book, AlertCircle, Download, Eye, Monitor, Smartphone, Tablet, Key } from 'lucide-react';
+import { User, Mail, Phone, Clock, Filter, Ban, Search, MapPin, Book, AlertCircle, Download, Eye, Monitor, Smartphone, Tablet, Key, Trash2 } from 'lucide-react';
 import { FaWhatsapp, FaGraduationCap } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
@@ -19,6 +19,8 @@ export default function StudentsList() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordResetLoading, setPasswordResetLoading] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     // New state for analytics
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
@@ -238,6 +240,46 @@ export default function StudentsList() {
             toast.error(error.message || 'حدث خطأ في إعادة تعيين كلمة المرور');
         } finally {
             setPasswordResetLoading(false);
+        }
+    };
+
+    // Delete user function
+    const handleDeleteUser = async () => {
+        if (!selectedStudent) return;
+
+        setDeleteLoading(true);
+        try {
+            const token = Cookies.get('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/students/${selectedStudent._id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                toast.success('تم حذف المستخدم بنجاح');
+                setShowDeleteConfirm(false);
+                setSelectedStudent(null);
+                // Refresh the students list
+                await fetchStudents();
+            } else {
+                throw new Error(data.message || 'فشل في حذف المستخدم');
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            toast.error(error.message || 'حدث خطأ في حذف المستخدم');
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -1116,6 +1158,17 @@ export default function StudentsList() {
                                 >
                                     <Key size={18} />
                                 </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedStudent(student);
+                                        setShowDeleteConfirm(true);
+                                    }}
+                                    className="p-2 bg-red-100 dark:bg-red-700/20 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-700/40 transition-colors"
+                                    title="حذف المستخدم"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -1401,6 +1454,13 @@ export default function StudentsList() {
                             >
                                 {selectedStudent.isBanned ? 'إلغاء الحظر' : 'حظر الطالب'}
                             </button>
+                            <button
+                                onClick={() => setShowDeleteConfirm(true)}
+                                className="px-4 py-2 rounded-xl bg-red-700 text-white hover:bg-red-800 transition-all flex items-center gap-2"
+                            >
+                                <Trash2 size={16} />
+                                حذف المستخدم
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1459,6 +1519,52 @@ export default function StudentsList() {
                                 disabled={passwordResetLoading}
                             >
                                 {passwordResetLoading ? 'جاري التحديث...' : 'تأكيد تغيير كلمة المرور'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete User Confirmation Modal */}
+            {showDeleteConfirm && selectedStudent && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 max-w-md w-full mx-4">
+                        <h3 className="text-xl font-arabicUI3 text-white mb-4">
+                            تأكيد حذف المستخدم
+                        </h3>
+
+                        <p className="text-white/80 mb-6">
+                            هل أنت متأكد من رغبتك في حذف المستخدم <span className="text-white font-bold">{selectedStudent.name}</span>؟
+                            <br />
+                            <span className="text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span>
+                        </p>
+
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                }}
+                                className="px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all"
+                                disabled={deleteLoading}
+                            >
+                                إلغاء
+                            </button>
+                            <button
+                                onClick={handleDeleteUser}
+                                className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all flex items-center gap-2"
+                                disabled={deleteLoading}
+                            >
+                                {deleteLoading ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        جاري الحذف...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 size={16} />
+                                        تأكيد الحذف
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
