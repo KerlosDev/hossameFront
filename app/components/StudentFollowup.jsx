@@ -12,7 +12,7 @@ import {
 import { jsPDF } from 'jspdf';
 import { Bar, Line } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
-import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRegCircle, FaChartBar, FaUsers, FaPlayCircle, FaTrophy, FaSearch, FaChartLine, FaUserCheck, FaClipboardCheck, FaStar, FaChevronDown, FaChevronUp, FaBookmark, FaPlay, FaHistory, FaBookOpen, FaBookReader, FaCircle, FaFileAlt, FaCalendar, FaCalendarAlt, FaCalendarWeek, FaQuestionCircle } from "react-icons/fa";
+import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRegCircle, FaChartBar, FaUsers, FaPlayCircle, FaTrophy, FaSearch, FaChartLine, FaUserCheck, FaClipboardCheck, FaStar, FaChevronDown, FaChevronUp, FaBookmark, FaPlay, FaHistory, FaBookOpen, FaBookReader, FaCircle, FaFileAlt, FaCalendar, FaCalendarAlt, FaCalendarWeek, FaQuestionCircle, FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import Cookies from 'js-cookie';
 
 const getAuthHeaders = () => ({
@@ -1505,45 +1505,97 @@ const StudentFollowup = () => {
                                 <button
                                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                     disabled={currentPage === 1}
-                                    className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 disabled:bg-white/5 disabled:opacity-50 rounded-lg transition-colors text-white"
+                                    className="px-4 py-2 bg-gradient-to-br from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 disabled:opacity-50 rounded-lg transition-all duration-300 text-white border border-blue-500/20 hover:border-blue-400/40"
                                 >
-                                    السابق
+                                    <span className="flex items-center">
+                                        <FaChevronRight className="ml-1" />
+                                        <span>السابق</span>
+                                    </span>
                                 </button>
 
-                                <div className="flex gap-2">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        let pageNumber;
-                                        if (totalPages <= 5) {
-                                            pageNumber = i + 1;
-                                        } else if (currentPage <= 3) {
-                                            pageNumber = i + 1;
-                                        } else if (currentPage >= totalPages - 2) {
-                                            pageNumber = totalPages - 4 + i;
-                                        } else {
-                                            pageNumber = currentPage - 2 + i;
-                                        }
-
-                                        return (
+                                <div className="flex items-center gap-2">
+                                    {/* Render page buttons based on current position */}
+                                    {(() => {
+                                        // Helper function for creating page buttons
+                                        const renderPageButton = (pageNum) => (
                                             <button
-                                                key={pageNumber}
-                                                onClick={() => setCurrentPage(pageNumber)}
-                                                className={`px-3 py-2 rounded-lg transition-colors ${currentPage === pageNumber
-                                                    ? 'bg-blue-500 text-white'
-                                                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                                                key={pageNum}
+                                                onClick={() => setCurrentPage(pageNum)}
+                                                className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-300 ${currentPage === pageNum
+                                                        ? 'bg-gradient-to-br from-blue-500/80 to-blue-600/80 text-white border border-blue-400/50'
+                                                        : 'bg-gradient-to-br from-white/5 to-white/10 text-white/70 hover:from-white/10 hover:to-white/20 border border-white/10 hover:border-white/20'
                                                     }`}
                                             >
-                                                {pageNumber}
+                                                {pageNum}
                                             </button>
                                         );
-                                    })}
+
+                                        const result = [];
+
+                                        // Case 1: Few pages (show all up to 6)
+                                        if (totalPages <= 6) {
+                                            for (let i = 1; i <= totalPages; i++) {
+                                                result.push(renderPageButton(i));
+                                            }
+                                            return result;
+                                        }
+
+                                        // Case 2: Near beginning (1, 2, 3, 4, 5, ..., totalPages)
+                                        if (currentPage < 4) {
+                                            for (let i = 1; i <= 5; i++) {
+                                                result.push(renderPageButton(i));
+                                            }
+
+                                            result.push(
+                                                <div key="ellipsis1" className="flex items-center justify-center w-10 h-10 text-white/50">...</div>
+                                            );
+
+                                            result.push(renderPageButton(totalPages));
+                                            return result;
+                                        }
+
+                                        // Case 3: Near end (1, ..., totalPages-4, totalPages-3, totalPages-2, totalPages-1, totalPages)
+                                        if (currentPage > totalPages - 3) {
+                                            result.push(renderPageButton(1));
+
+                                            result.push(
+                                                <div key="ellipsis2" className="flex items-center justify-center w-10 h-10 text-white/50">...</div>
+                                            );
+
+                                            for (let i = totalPages - 4; i <= totalPages; i++) {
+                                                result.push(renderPageButton(i));
+                                            }
+                                            return result;
+                                        }
+
+                                        // Case 4: Middle (1, ..., currentPage-1, currentPage, currentPage+1, ..., totalPages)
+                                        result.push(renderPageButton(1));
+                                        result.push(
+                                            <div key="ellipsis3" className="flex items-center justify-center w-10 h-10 text-white/50">...</div>
+                                        );
+
+                                        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                                            result.push(renderPageButton(i));
+                                        }
+
+                                        result.push(
+                                            <div key="ellipsis4" className="flex items-center justify-center w-10 h-10 text-white/50">...</div>
+                                        );
+                                        result.push(renderPageButton(totalPages));
+
+                                        return result;
+                                    })()}
                                 </div>
 
                                 <button
                                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                     disabled={currentPage === totalPages}
-                                    className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 disabled:bg-white/5 disabled:opacity-50 rounded-lg transition-colors text-white"
+                                    className="px-4 py-2 bg-gradient-to-br from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 disabled:opacity-50 rounded-lg transition-all duration-300 text-white border border-blue-500/20 hover:border-blue-400/40"
                                 >
-                                    التالي
+                                    <span className="flex items-center">
+                                        <span>التالي</span>
+                                        <FaChevronLeft className="mr-1" />
+                                    </span>
                                 </button>
                             </div>
                         )}
