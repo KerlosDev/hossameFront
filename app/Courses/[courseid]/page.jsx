@@ -34,6 +34,7 @@ const EnrollmentSection = dynamic(
 const CoursePage = () => {
     const params = useParams();
     const { courseid } = params;
+    const videoPlayerRef = useRef(null); // Create a reference for the video player
 
     const [courseInfo, setCourseInfo] = useState({});
     const [courseVideoChapters, setCourseVideoChapters] = useState([]);
@@ -192,6 +193,14 @@ const CoursePage = () => {
         setActiveIndex2(100); // Reset exam selection
 
         const selectedChapter = chapterDetails[chapterIndex];
+
+        // Scroll to the video player
+        if (videoPlayerRef.current) {
+            videoPlayerRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
 
         // Only record watch history if user is logged in and lesson has a video URL
         if (selectedLesson?.link && user?.token && courseid && selectedChapter) {
@@ -782,7 +791,7 @@ const CoursePage = () => {
                         {/* Video Player & Lesson Info */}
                         <div className="xl:col-span-2 space-y-6">
                             {/* Enhanced Video Player */}
-                            <div className="relative group">
+                            <div ref={videoPlayerRef} className="relative group">
                                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
                                 <div className="relative bg-black/90 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
                                     <div className="aspect-video">
