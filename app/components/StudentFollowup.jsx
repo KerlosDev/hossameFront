@@ -12,7 +12,7 @@ import {
 import { jsPDF } from 'jspdf';
 import { Bar, Line } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
-import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRegCircle, FaChartBar, FaUsers, FaPlayCircle, FaTrophy, FaSearch, FaChartLine, FaUserCheck, FaClipboardCheck, FaStar, FaChevronDown, FaChevronUp, FaBookmark, FaPlay, FaHistory, FaBookOpen, FaBookReader, FaCircle, FaFileAlt, FaCalendar, FaQuestionCircle } from "react-icons/fa";
+import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRegCircle, FaChartBar, FaUsers, FaPlayCircle, FaTrophy, FaSearch, FaChartLine, FaUserCheck, FaClipboardCheck, FaStar, FaChevronDown, FaChevronUp, FaBookmark, FaPlay, FaHistory, FaBookOpen, FaBookReader, FaCircle, FaFileAlt, FaCalendar, FaCalendarAlt, FaCalendarWeek, FaQuestionCircle } from "react-icons/fa";
 import Cookies from 'js-cookie';
 
 const getAuthHeaders = () => ({
@@ -38,7 +38,9 @@ const StudentFollowup = () => {
         mostActiveStudent: '',
         viewsLast24Hours: 0,
         viewsLastWeek: 0,
-        viewsLastMonth: 0
+        viewsLastMonth: 0,
+        mostViewedLessonData: null,
+        mostActiveStudentData: null
     });
     const [chartData, setChartData] = useState({
         labels: [],
@@ -63,6 +65,7 @@ const StudentFollowup = () => {
     const [filteredExams, setFilteredExams] = useState([]);
     const [inactivityThreshold] = useState(7); // Days to consider a student inactive
     const [watchHistory, setWatchHistory] = useState([]);
+    const [isMostViewedLessonExpanded, setIsMostViewedLessonExpanded] = useState(false);
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -95,24 +98,45 @@ const StudentFollowup = () => {
         fetchAllCoursesAndChapters();
         fetchViewsStatistics(); // Add this new function call
     }, [currentPage, sortBy, searchTerm]);
-    
+
     // Function to fetch views statistics
     const fetchViewsStatistics = async () => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/views-statistics`, {
                 headers: getAuthHeaders()
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
-                setStats(prevStats => ({
-                    ...prevStats,
-                    totalViews: data.data.totalViews,
-                    viewsLast24Hours: data.data.last24Hours,
-                    viewsLastWeek: data.data.lastWeek,
-                    viewsLastMonth: data.data.lastMonth
-                }));
+                setStats(prevStats => {
+                    // Format most viewed lesson text
+                    let mostViewedLessonText = 'لم يتم تحديده';
+                    if (data.data.mostViewedLesson) {
+                        const mvl = data.data.mostViewedLesson;
+                        mostViewedLessonText = `${mvl.lessonTitle} (${mvl.courseName})`;
+                    }
+
+                    // Format most active student text
+                    let mostActiveStudentText = 'لا يوجد';
+                    if (data.data.mostActiveStudent) {
+                        const mas = data.data.mostActiveStudent;
+                        mostActiveStudentText = mas.email;
+                    }
+
+                    return {
+                        ...prevStats,
+                        totalViews: data.data.totalViews,
+                        viewsLast24Hours: data.data.last24Hours,
+                        viewsLastWeek: data.data.lastWeek,
+                        viewsLastMonth: data.data.lastMonth,
+                        mostViewedLesson: mostViewedLessonText,
+                        mostActiveStudent: mostActiveStudentText,
+                        // Store the full objects as well for potential future use
+                        mostViewedLessonData: data.data.mostViewedLesson,
+                        mostActiveStudentData: data.data.mostActiveStudent
+                    };
+                });
             }
         } catch (error) {
             console.error('Error fetching views statistics:', error);
@@ -206,9 +230,8 @@ const StudentFollowup = () => {
 
                 setStats(prevStats => ({
                     ...prevStats, // Keep any existing stats like views periods
-                    uniqueStudents: studentsData.totalStudents, // Use total from server
-                    mostViewedLesson: 'لم يتم تحديده', // This info is not available in the new API
-                    mostActiveStudent: mostActiveStudent?.email || 'لا يوجد'
+                    uniqueStudents: studentsData.totalStudents // Use total from server
+                    // We get mostViewedLesson and mostActiveStudent from the API now
                 }));
 
                 // Set basic chart data
@@ -700,7 +723,7 @@ const StudentFollowup = () => {
         }
     };
 
-   
+
 
 
     const resetRatingForm = () => {
@@ -1173,7 +1196,34 @@ const StudentFollowup = () => {
                                     <FaPlayCircle className="text-green-400 text-xl" />
                                 </div>
                             </div>
-                            <p className="text-xl font-bold text-white">{stats.mostViewedLesson}</p>
+                            <div className="w-full">
+                                <div className="flex items-start justify-between">
+                                    <div className={`${isMostViewedLessonExpanded ? 'w-full' : 'w-4/5'} transition-all duration-300`}>
+                                        <p className={`text-xl font-bold text-white ${!isMostViewedLessonExpanded && "line-clamp-1"}`}>
+                                            {stats.mostViewedLesson}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsMostViewedLessonExpanded(!isMostViewedLessonExpanded)}
+                                        className="flex-shrink-0 ml-2 text-green-400 hover:text-green-300 transition-colors"
+                                        aria-label={isMostViewedLessonExpanded ? "عرض أقل" : "عرض المزيد"}
+                                    >
+                                        {isMostViewedLessonExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                                    </button>
+                                </div>
+                                {stats.mostViewedLessonData && (
+                                    <div className="flex justify-between items-center mt-2">
+                                        <p className="text-sm text-white/60">
+                                            {stats.mostViewedLessonData.totalViews} مشاهدة
+                                        </p>
+                                        {isMostViewedLessonExpanded && stats.mostViewedLessonData.chapterTitle && (
+                                            <p className="text-xs text-white/40">
+                                                {stats.mostViewedLessonData.chapterTitle}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/20 backdrop-blur-lg rounded-2xl p-6 border border-amber-500/20 hover:border-amber-400/30 transition-all duration-300 group">
                             <div className="flex items-start justify-between mb-4">
@@ -1182,7 +1232,51 @@ const StudentFollowup = () => {
                                     <FaTrophy className="text-amber-400 text-xl" />
                                 </div>
                             </div>
-                            <p className="text-lg font-bold text-white">{stats.mostActiveStudent}</p>
+                            <div>
+                                <p className="text-lg font-bold text-white">{stats.mostActiveStudent}</p>
+                                {stats.mostActiveStudentData && (
+                                    <p className="text-xs text-white/60 mt-1">
+                                        {stats.mostActiveStudentData.totalViews} مشاهدة
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Time-based view statistics */}
+                    <h3 className="text-xl font-bold text-white mt-10 mb-4">إحصائيات المشاهدات حسب الفترة</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Last 24 hours */}
+                        <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/20 backdrop-blur-lg rounded-2xl p-6 border border-amber-500/20 hover:border-amber-400/30 transition-all duration-300 group">
+                            <div className="flex items-start justify-between mb-4">
+                                <h3 className="text-white/80 font-arabicUI3 text-lg">آخر 24 ساعة</h3>
+                                <div className="p-2 bg-amber-500/20 rounded-xl group-hover:scale-110 transition-transform">
+                                    <FaClock className="text-amber-400 text-xl" />
+                                </div>
+                            </div>
+                            <p className="text-4xl font-bold text-white">{stats.viewsLast24Hours}</p>
+                        </div>
+
+                        {/* Last week */}
+                        <div className="bg-gradient-to-br from-indigo-500/20 to-indigo-600/20 backdrop-blur-lg rounded-2xl p-6 border border-indigo-500/20 hover:border-indigo-400/30 transition-all duration-300 group">
+                            <div className="flex items-start justify-between mb-4">
+                                <h3 className="text-white/80 font-arabicUI3 text-lg">آخر 7 أيام</h3>
+                                <div className="p-2 bg-indigo-500/20 rounded-xl group-hover:scale-110 transition-transform">
+                                    <FaCalendarWeek className="text-indigo-400 text-xl" />
+                                </div>
+                            </div>
+                            <p className="text-4xl font-bold text-white">{stats.viewsLastWeek}</p>
+                        </div>
+
+                        {/* Last month */}
+                        <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-lg rounded-2xl p-6 border border-emerald-500/20 hover:border-emerald-400/30 transition-all duration-300 group">
+                            <div className="flex items-start justify-between mb-4">
+                                <h3 className="text-white/80 font-arabicUI3 text-lg">آخر 30 يوم</h3>
+                                <div className="p-2 bg-emerald-500/20 rounded-xl group-hover:scale-110 transition-transform">
+                                    <FaCalendarAlt className="text-emerald-400 text-xl" />
+                                </div>
+                            </div>
+                            <p className="text-4xl font-bold text-white">{stats.viewsLastMonth}</p>
                         </div>
                     </div>
 
