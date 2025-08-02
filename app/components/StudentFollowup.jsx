@@ -69,7 +69,7 @@ const StudentFollowup = () => {
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const [studentsPerPage] = useState(10);
+    const [studentsPerPage, setStudentsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
     const [totalStudents, setTotalStudents] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -97,7 +97,7 @@ const StudentFollowup = () => {
         fetchLessonData();
         fetchAllCoursesAndChapters();
         fetchViewsStatistics(); // Add this new function call
-    }, [currentPage, sortBy, searchTerm]);
+    }, [currentPage, sortBy, searchTerm, studentsPerPage]);
 
     // Function to fetch views statistics
     const fetchViewsStatistics = async () => {
@@ -1319,7 +1319,17 @@ const StudentFollowup = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                             <div>
                                 <h3 className="text-2xl font-bold text-white mb-2">قائمة الطلاب</h3>
-                                <p className="text-white/60 text-sm">قائمة شاملة لجميع الطلاب مع تفاصيل نشاطهم</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-white/60 text-sm">قائمة شاملة لجميع الطلاب مع تفاصيل نشاطهم</p>
+                                    <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 px-3 py-1 rounded-lg border border-blue-500/20 text-xs text-white/80">
+                                        <span>ترتيب حسب: </span>
+                                        <span className="font-medium">
+                                            {sortBy === 'views' && 'المشاهدات'}
+                                            {sortBy === 'recent' && 'آخر نشاط'}
+                                            {sortBy === 'inactive' && 'غير نشط'}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex flex-wrap gap-3">
                                 <button
@@ -1362,9 +1372,7 @@ const StudentFollowup = () => {
                                     <span>غير نشط</span>
                                 </button>
                             </div>
-                        </div>
-
-                        {/* Search and Pagination Controls */}
+                        </div>                        {/* Search and Pagination Controls */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
                             <div className="flex items-center gap-4 w-full md:w-auto">
                                 <div className="relative flex-1 md:flex-none">
@@ -1390,11 +1398,30 @@ const StudentFollowup = () => {
                                 )}
                             </div>
 
-                            <div className="bg-white/5 px-4 py-2 rounded-xl flex items-center gap-2">
-                                <FaUsers className="text-white/40" />
-                                <span className="text-white/70 text-sm">
-                                    عرض {((currentPage - 1) * studentsPerPage) + 1} - {Math.min(currentPage * studentsPerPage, totalStudents)} من {totalStudents} طالب
-                                </span>
+                            <div className="flex items-center gap-4">
+                                {/* Students per page selector */}
+                                <div className="flex items-center gap-2 bg-gradient-to-br from-blue-500/20 to-blue-600/20 px-4 py-2 rounded-xl border border-blue-500/20">
+                                    <span className="text-white/70 text-sm">عدد الطلاب:</span>
+                                    <select
+                                        value={studentsPerPage}
+                                        onChange={(e) => {
+                                            setStudentsPerPage(parseInt(e.target.value));
+                                            setCurrentPage(1); // Reset to first page when changing items per page
+                                        }}
+                                        className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    >
+                                        <option className="bg-slate-800 text-white" value={10}>10</option>
+                                        <option className="bg-slate-800 text-white" value={50}>50</option>
+                                        <option className="bg-slate-800 text-white" value={100}>100</option>
+                                    </select>
+                                </div>
+
+                                <div className="bg-white/5 px-4 py-2 rounded-xl flex items-center gap-2">
+                                    <FaUsers className="text-white/40" />
+                                    <span className="text-white/70 text-sm">
+                                        عرض {((currentPage - 1) * studentsPerPage) + 1} - {Math.min(currentPage * studentsPerPage, totalStudents)} من {totalStudents} طالب
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -1522,8 +1549,8 @@ const StudentFollowup = () => {
                                                 key={pageNum}
                                                 onClick={() => setCurrentPage(pageNum)}
                                                 className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-300 ${currentPage === pageNum
-                                                        ? 'bg-gradient-to-br from-blue-500/80 to-blue-600/80 text-white border border-blue-400/50'
-                                                        : 'bg-gradient-to-br from-white/5 to-white/10 text-white/70 hover:from-white/10 hover:to-white/20 border border-white/10 hover:border-white/20'
+                                                    ? 'bg-gradient-to-br from-blue-500/80 to-blue-600/80 text-white border border-blue-400/50'
+                                                    : 'bg-gradient-to-br from-white/5 to-white/10 text-white/70 hover:from-white/10 hover:to-white/20 border border-white/10 hover:border-white/20'
                                                     }`}
                                             >
                                                 {pageNum}
