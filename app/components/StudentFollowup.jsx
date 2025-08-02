@@ -12,7 +12,7 @@ import {
 import { jsPDF } from 'jspdf';
 import { Bar, Line } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
-import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRegCircle, FaChartBar, FaUsers, FaPlayCircle, FaTrophy, FaSearch, FaChartLine, FaUserCheck, FaClipboardCheck, FaStar, FaChevronDown, FaChevronUp, FaBookmark, FaPlay, FaHistory, FaBookOpen, FaBookReader, FaCircle, FaFileAlt, FaCalendar, FaCalendarAlt, FaCalendarWeek, FaQuestionCircle, FaChevronRight, FaChevronLeft } from "react-icons/fa";
+import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRegCircle, FaChartBar, FaUsers, FaPlayCircle, FaTrophy, FaSearch, FaChartLine, FaUserCheck, FaClipboardCheck, FaStar, FaChevronDown, FaChevronUp, FaBookmark, FaPlay, FaHistory, FaBookOpen, FaBookReader, FaCircle, FaFileAlt, FaCalendar, FaCalendarAlt, FaCalendarWeek, FaQuestionCircle, FaChevronRight, FaChevronLeft, FaUserGraduate } from "react-icons/fa";
 import Cookies from 'js-cookie';
 
 const getAuthHeaders = () => ({
@@ -52,7 +52,7 @@ const StudentFollowup = () => {
     const [showLessonsModal, setShowLessonsModal] = useState(false);
     const [whatsappNumbers, setWhatsappNumbers] = useState({});
     const [studentChartData, setStudentChartData] = useState(null);
-    const [activeTab, setActiveTab] = useState('overview'); // 'overview' or 'details'
+    const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'details', or 'enrolled'
     const [quizResults, setQuizResults] = useState([]);
     const reportRef = useRef(null);
     const [allCourses, setAllCourses] = useState([]);
@@ -66,6 +66,15 @@ const StudentFollowup = () => {
     const [inactivityThreshold] = useState(7); // Days to consider a student inactive
     const [watchHistory, setWatchHistory] = useState([]);
     const [isMostViewedLessonExpanded, setIsMostViewedLessonExpanded] = useState(false);
+
+    // Enrolled students state
+    const [enrolledStudentList, setEnrolledStudentList] = useState([]);
+    const [enrolledCurrentPage, setEnrolledCurrentPage] = useState(1);
+    const [enrolledTotalPages, setEnrolledTotalPages] = useState(0);
+    const [enrolledTotalStudents, setEnrolledTotalStudents] = useState(0);
+    const [enrolledLoading, setEnrolledLoading] = useState(false);
+    const [enrolledSearchTerm, setEnrolledSearchTerm] = useState('');
+    const [enrolledSortBy, setEnrolledSortBy] = useState('views'); // 'views', 'recent' or 'inactive'
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -98,6 +107,13 @@ const StudentFollowup = () => {
         fetchAllCoursesAndChapters();
         fetchViewsStatistics(); // Add this new function call
     }, [currentPage, sortBy, searchTerm, studentsPerPage]);
+
+    // Effect to fetch enrolled students when tab changes or pagination/filter changes
+    useEffect(() => {
+        if (activeTab === 'enrolled') {
+            fetchEnrolledStudents();
+        }
+    }, [activeTab, enrolledCurrentPage, enrolledSortBy, enrolledSearchTerm, studentsPerPage]);
 
     // Function to fetch views statistics
     const fetchViewsStatistics = async () => {
@@ -140,6 +156,63 @@ const StudentFollowup = () => {
             }
         } catch (error) {
             console.error('Error fetching views statistics:', error);
+        }
+    };
+
+    const fetchEnrolledStudents = async () => {
+        try {
+            setEnrolledLoading(true);
+            const queryParams = new URLSearchParams({
+                page: enrolledCurrentPage.toString(),
+                limit: studentsPerPage.toString(),
+                sortBy: enrolledSortBy,
+                ...(enrolledSearchTerm && { search: enrolledSearchTerm })
+            });
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/enrolled-students?${queryParams}`, {
+                headers: getAuthHeaders()
+            });
+
+            const studentsData = await response.json();
+
+            if (studentsData.success) {
+                // Update pagination info
+                setEnrolledTotalPages(studentsData.totalPages);
+                setEnrolledTotalStudents(studentsData.totalStudents);
+
+                // Process student data with detailed enrollment information
+                const processedStudents = studentsData.data.map(student => {
+                    const totalWatchedLessons = student.activityStatus.totalWatchedLessons || 0;
+                    const enrolledCoursesCount = student.enrollmentStatus.enrolledCourses.length;
+                    const totalLessonsAvailable = student.enrollmentStatus.enrolledCourses.reduce((total, course) => {
+                        return total + course.chapters.reduce((chapterTotal, chapter) => {
+                            return chapterTotal + chapter.lessons.length;
+                        }, 0);
+                    }, 0);
+
+                    return {
+                        email: student.studentInfo.email,
+                        userName: student.studentInfo.name,
+                        totalViews: totalWatchedLessons,
+                        lastViewed: student.studentInfo.lastActivity,
+                        status: getStudentStatus(student.activityStatus),
+                        uniqueLessons: totalWatchedLessons,
+                        enrolledCourses: enrolledCoursesCount,
+                        totalLessonsAvailable,
+                        isEnrolled: student.enrollmentStatus.isEnrolled,
+                        enrollmentDetails: student.enrollmentStatus.enrolledCourses,
+                        lessons: [], // Will be populated by watch history if available
+                        lessonViews: {},
+                        hasWatchHistory: totalWatchedLessons > 0
+                    };
+                });
+
+                setEnrolledStudentList(processedStudents);
+            }
+        } catch (error) {
+            console.error('Error fetching enrolled students:', error);
+        } finally {
+            setEnrolledLoading(false);
         }
     };
 
@@ -1145,6 +1218,19 @@ const StudentFollowup = () => {
                             </div>
                         </button>
                     )}
+
+                    <button
+                        onClick={() => setActiveTab('enrolled')}
+                        className={`px-6 py-3 rounded-xl font-arabicUI3 transition-all duration-200 transform hover:scale-105 ${activeTab === 'enrolled'
+                            ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/25'
+                            : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                            }`}
+                    >
+                        <div className="flex items-center gap-2">
+                            <FaUserGraduate className={activeTab === 'enrolled' ? 'text-white' : 'text-white/70'} />
+                            <span>الطلاب المشتركين</span>
+                        </div>
+                    </button>
                 </div>
 
                 <div className="flex gap-2">
@@ -1166,7 +1252,196 @@ const StudentFollowup = () => {
                 </div>
             </div>
 
-            {activeTab === 'overview' ? (
+            {activeTab === 'enrolled' ? (
+                <div className="space-y-6">
+                    {/* Header with search and filters */}
+                    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-6 border border-white/10 shadow-xl">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <h2 className="text-2xl font-bold text-white font-arabicUI3">قائمة الطلاب المشتركين</h2>
+
+                            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                                {/* Search bar */}
+                                <div className="relative flex-grow">
+                                    <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
+                                        <FaSearch className="text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="search"
+                                        className="w-full p-3 pr-10 rounded-xl bg-slate-700/50 border border-slate-600/50 text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                                        placeholder="بحث عن طالب..."
+                                        value={enrolledSearchTerm}
+                                        onChange={(e) => {
+                                            setEnrolledSearchTerm(e.target.value);
+                                            setEnrolledCurrentPage(1); // Reset to first page on search
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Sort selector */}
+                                <select
+                                    className="p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                                    value={enrolledSortBy}
+                                    onChange={(e) => {
+                                        setEnrolledSortBy(e.target.value);
+                                        setEnrolledCurrentPage(1); // Reset to first page on sort change
+                                    }}
+                                >
+                                    <option value="views">الأكثر مشاهدة</option>
+                                    <option value="recent">النشاط الأخير</option>
+                                    <option value="inactive">غير نشط</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Enrolled Students Table */}
+                    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-6 border border-white/10 shadow-xl overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-slate-700">
+                                <thead className="bg-slate-800/70">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                            الطالب
+                                        </th>
+                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                            الكورسات
+                                        </th>
+                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                            المشاهدات
+                                        </th>
+                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                            النشاط
+                                        </th>
+                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                            الحالة
+                                        </th>
+                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                            تواصل
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-slate-800/30 divide-y divide-slate-700">
+                                    {enrolledLoading ? (
+                                        <tr>
+                                            <td colSpan="6" className="px-6 py-8 text-center text-white">
+                                                <div className="flex items-center justify-center">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                                                    <span className="ms-3">جاري التحميل...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : enrolledStudentList.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="px-6 py-8 text-center text-white">
+                                                لا يوجد طلاب مشتركين في أي كورس
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        enrolledStudentList.map((student, index) => (
+                                            <tr key={index}
+                                                className={`transition-all duration-150 hover:bg-slate-700/40 cursor-pointer ${selectedStudent?.email === student.email ? 'bg-green-900/30 border-l-4 border-green-500' : ''}`}
+                                                onClick={() => handleStudentSelect(student)}
+                                            >
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-semibold">
+                                                            {student.userName[0].toUpperCase()}
+                                                        </div>
+                                                        <div className="ms-4">
+                                                            <div className="text-sm font-medium text-white">{student.userName}</div>
+                                                            <div className="text-xs text-gray-400">{student.email}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                    <div className="flex items-center">
+                                                        <FaBookOpen className="mr-2 text-green-500" />
+                                                        <span>{student.enrolledCourses}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                    <div className="flex items-center">
+                                                        <FaEye className="mr-2 text-blue-500" />
+                                                        <span>{student.totalViews}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                    <div className="flex items-center">
+                                                        <FaClock className="mr-2 text-purple-500" />
+                                                        <span>{student.lastViewed ? formatDate(student.lastViewed) : 'لم يبدأ بعد'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${student.status.color} bg-opacity-10`}>
+                                                        {student.status.label}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    {whatsappNumbers[student.email]?.studentWhatsApp && (
+                                                        <a
+                                                            href={getWhatsAppLink(whatsappNumbers[student.email]?.studentWhatsApp)}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-green-400 hover:text-green-300 mr-3"
+                                                        >
+                                                            <FaWhatsapp size={20} />
+                                                        </a>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination Controls */}
+                        {enrolledTotalPages > 0 && (
+                            <div className="mt-6 flex justify-between items-center">
+                                <div className="text-sm text-gray-300">
+                                    إجمالي الطلاب: {enrolledTotalStudents} | الصفحة {enrolledCurrentPage} من {enrolledTotalPages}
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setEnrolledCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={enrolledCurrentPage <= 1}
+                                        className={`px-4 py-2 rounded-lg ${enrolledCurrentPage <= 1
+                                            ? 'bg-slate-700/50 text-gray-500 cursor-not-allowed'
+                                            : 'bg-slate-700 text-white hover:bg-slate-600'}`}
+                                    >
+                                        <FaChevronRight />
+                                    </button>
+                                    <button
+                                        onClick={() => setEnrolledCurrentPage(prev => Math.min(prev + 1, enrolledTotalPages))}
+                                        disabled={enrolledCurrentPage >= enrolledTotalPages}
+                                        className={`px-4 py-2 rounded-lg ${enrolledCurrentPage >= enrolledTotalPages
+                                            ? 'bg-slate-700/50 text-gray-500 cursor-not-allowed'
+                                            : 'bg-slate-700 text-white hover:bg-slate-600'}`}
+                                    >
+                                        <FaChevronLeft />
+                                    </button>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-300">عرض:</span>
+                                    <select
+                                        className="bg-slate-700 text-white rounded-lg px-2 py-1"
+                                        value={studentsPerPage}
+                                        onChange={(e) => {
+                                            setStudentsPerPage(Number(e.target.value));
+                                            setEnrolledCurrentPage(1); // Reset to first page
+                                        }}
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value={100}>100</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            ) : activeTab === 'overview' ? (
                 <>
                     {/* Stats Cards */}
                     {/* Main stats */}
