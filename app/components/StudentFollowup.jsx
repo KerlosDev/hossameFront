@@ -35,7 +35,10 @@ const StudentFollowup = () => {
         totalViews: 0,
         uniqueStudents: 0,
         mostViewedLesson: '',
-        mostActiveStudent: ''
+        mostActiveStudent: '',
+        viewsLast24Hours: 0,
+        viewsLastWeek: 0,
+        viewsLastMonth: 0
     });
     const [chartData, setChartData] = useState({
         labels: [],
@@ -90,7 +93,31 @@ const StudentFollowup = () => {
     useEffect(() => {
         fetchLessonData();
         fetchAllCoursesAndChapters();
+        fetchViewsStatistics(); // Add this new function call
     }, [currentPage, sortBy, searchTerm]);
+    
+    // Function to fetch views statistics
+    const fetchViewsStatistics = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analytics/views-statistics`, {
+                headers: getAuthHeaders()
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                setStats(prevStats => ({
+                    ...prevStats,
+                    totalViews: data.data.totalViews,
+                    viewsLast24Hours: data.data.last24Hours,
+                    viewsLastWeek: data.data.lastWeek,
+                    viewsLastMonth: data.data.lastMonth
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching views statistics:', error);
+        }
+    };
 
     const fetchLessonData = async () => {
         try {
@@ -177,12 +204,12 @@ const StudentFollowup = () => {
                 const mostActiveStudent = processedStudents.reduce((prev, current) =>
                     (current.totalViews > (prev?.totalViews || 0)) ? current : prev, null);
 
-                setStats({
-                    totalViews,
+                setStats(prevStats => ({
+                    ...prevStats, // Keep any existing stats like views periods
                     uniqueStudents: studentsData.totalStudents, // Use total from server
                     mostViewedLesson: 'لم يتم تحديده', // This info is not available in the new API
                     mostActiveStudent: mostActiveStudent?.email || 'لا يوجد'
-                });
+                }));
 
                 // Set basic chart data
                 setChartData({
@@ -1119,6 +1146,7 @@ const StudentFollowup = () => {
             {activeTab === 'overview' ? (
                 <>
                     {/* Stats Cards */}
+                    {/* Main stats */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-lg rounded-2xl p-6 border border-blue-500/20 hover:border-blue-400/30 transition-all duration-300 group">
                             <div className="flex items-start justify-between mb-4">
