@@ -25,6 +25,8 @@ const Page = ({ params }) => {
     const [error, setError] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [userData, setUserData] = useState(null);
+    const [wallets, setWallets] = useState([]);
+    const [walletsLoading, setWalletsLoading] = useState(true);
     // Track if component is mounted (client-side only)
     const isMounted = useRef(false);
     const [isClient, setIsClient] = useState(false);
@@ -110,11 +112,162 @@ const Page = ({ params }) => {
         }
     };
 
+    // Fetch wallet settings from API
+    const fetchWalletSettings = async () => {
+        setWalletsLoading(true);
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/wallets`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            // If API is not available yet, use fallback wallets
+            if (!response.ok) {
+                console.warn('Wallet settings API not available, using fallback values');
+                // Set default wallets as fallback
+                setWallets([
+                    {
+                        id: 'vodafone',
+                        name: 'فودافون كاش',
+                        phone: '01032714327',
+                        bgColor: 'from-[#ff3b42] to-[#FF8C8F]',
+                        logo: '/vodafone.png',
+                        textColor: 'text-white'
+                    },
+                    {
+                        id: 'instapay',
+                        name: 'انستا باي',
+                        phone: '01142876308',
+                        bgColor: 'from-slate-50 to-slate-100',
+                        logo: '/insta.png',
+                        textColor: 'text-[#532773]'
+                    }
+                ]);
+                return;
+            }
+            
+            const data = await response.json();
+            
+            // Filter only enabled wallets and format them for display
+            if (data && data.wallets) {
+                const enabledWallets = Object.entries(data.wallets)
+                    .filter(([_, wallet]) => wallet.enabled)
+                    .map(([key, wallet]) => ({
+                        id: key,
+                        name: getWalletDisplayName(key),
+                        phone: wallet.phone,
+                        bgColor: getWalletBgColor(key),
+                        logo: getWalletLogo(key),
+                        textColor: getWalletTextColor(key)
+                    }));
+                
+                if (enabledWallets.length > 0) {
+                    setWallets(enabledWallets);
+                } else {
+                    // If no wallets are enabled in the settings, use the fallback
+                    console.warn('No enabled wallets found in settings, using fallback values');
+                    setWallets([
+                        {
+                            id: 'vodafone',
+                            name: 'فودافون كاش',
+                            phone: '01032714327',
+                            bgColor: 'from-[#ff3b42] to-[#FF8C8F]',
+                            logo: '/vodafone.png',
+                            textColor: 'text-white'
+                        },
+                        {
+                            id: 'instapay',
+                            name: 'انستا باي',
+                            phone: '01142876308',
+                            bgColor: 'from-slate-50 to-slate-100',
+                            logo: '/insta.png',
+                            textColor: 'text-[#532773]'
+                        }
+                    ]);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching wallet settings:", error);
+            // Set default wallets as fallback
+            toast.error("تعذر جلب طرق الدفع، سيتم استخدام الطرق الافتراضية");
+            setWallets([
+                {
+                    id: 'vodafone',
+                    name: 'فودافون كاش',
+                    phone: '01032714327',
+                    bgColor: 'from-[#ff3b42] to-[#FF8C8F]',
+                    logo: '/vodafone.png',
+                    textColor: 'text-white'
+                },
+                {
+                    id: 'instapay',
+                    name: 'انستا باي',
+                    phone: '01142876308',
+                    bgColor: 'from-slate-50 to-slate-100',
+                    logo: '/insta.png',
+                    textColor: 'text-[#532773]'
+                }
+            ]);
+        } finally {
+            setWalletsLoading(false);
+        }
+    };
+
+    // Helper functions to get wallet display information
+    const getWalletDisplayName = (walletId) => {
+        const names = {
+            'vodafone': 'فودافون كاش',
+            'orange': 'أورانج كاش',
+            'etisalat': 'اتصالات كاش',
+            'instapay': 'انستا باي'
+        };
+        return names[walletId] || walletId;
+    };
+    
+    // Add token dependency to fetchWalletSettings
+    const memoizedFetchWalletSettings = useRef(fetchWalletSettings).current;
+
+    const getWalletBgColor = (walletId) => {
+        const colors = {
+            'vodafone': 'from-[#ff3b42] to-[#FF8C8F]',
+            'orange': 'from-[#FF6600] to-[#FF9966]',
+            'etisalat': 'from-[#6ac344] to-[#8fe868]',
+            'instapay': 'from-slate-50 to-slate-100'
+        };
+        return colors[walletId] || 'from-gray-500 to-gray-600';
+    };
+
+    const getWalletLogo = (walletId) => {
+        const logos = {
+            'vodafone': '/vodafone.png',
+            'orange': '/orange.png', // Fallback to existing image
+            'etisalat': '/eta.png', // Fallback to existing image
+            'instapay': '/insta.png'
+        };
+        return logos[walletId] || '';
+    };
+
+    const getWalletTextColor = (walletId) => {
+        const colors = {
+            'instapay': 'text-[#532773]'
+        };
+        return colors[walletId] || 'text-white';
+    };
+
     useEffect(() => {
         if (idpay) {
             getallcoures();
         }
     }, [idpay]);
+
+    // Separate effect to fetch wallet settings once we have the token
+    useEffect(() => {
+        if (token && isClient && idpay) {
+            fetchWalletSettings();
+        }
+    }, [token, isClient, idpay]);
 
     const handleclicknum = async () => {
         if (!token) {
@@ -127,6 +280,11 @@ const Page = ({ params }) => {
             return;
         }
 
+        if (wallets.length === 0) {
+            toast.error("لا توجد طرق دفع متاحة حالياً");
+            return;
+        }
+
         setLoading(true);
         try {
             if (!token) {
@@ -135,12 +293,12 @@ const Page = ({ params }) => {
                 return;
             }
 
-            // Submit data to the API
+            // Submit data to the API with available payment methods
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/active`, {
                 phoneNumber: number,
                 courseId: idpay,
-                price: courseInfo.price
-
+                price: courseInfo.price,
+                paymentMethods: wallets.map(w => w.id).join(',')
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -230,27 +388,71 @@ const Page = ({ params }) => {
             );
         }
 
+        // Show loading state while fetching wallet information
+        if (walletsLoading) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
+                    <p className="text-blue-400">جاري تحميل خيارات الدفع...</p>
+                </div>
+            );
+        }
+
+        // If no wallet is enabled, show message
+        if (wallets.length === 0) {
+            return (
+                <div className="text-center space-y-6 py-8">
+                    <div className="w-16 h-16 bg-yellow-500/20 rounded-full mx-auto flex items-center justify-center">
+                        <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="text-xl font-medium text-yellow-400">خيارات الدفع غير متاحة حالياً</h3>
+                        <p className="text-blue-400">يرجى التواصل مع الإدارة للحصول على طرق دفع بديلة</p>
+                    </div>
+                </div>
+            );
+        }
+
         // Show payment form directly
         return (
             <div className="space-y-4 sm:space-y-6">
                 <div className="space-y-4">
-                    <h3 dir='rtl' className="text-lg gap-4 sm:text-xl font-medium text-center flex  place-items-center"> طريقة الدفع فودافون كاش او انستا باي <span><BsCashCoin></BsCashCoin></span> </h3>
-                    <div className="bg-gradient-to-tr from-[#ff3b42] to-[#FF8C8F] p-4 sm:p-6 rounded-xl text-center space-y-3">
-                        <div className="space-y-2 flex flex-col items-center">
-                            <img src="/vodafone.png" alt="Vodafone Cash" className="w-40 filter brightness-0 invert mx-auto mb-2" />
-                            <p className="text-lg sm:text-xl">حول على رقم فودافون كاش</p>
-                            <p className="text-2xl sm:text-4xl font-bold tracking-wider">01032714327</p>
+                    <h3 dir='rtl' className="text-lg gap-4 sm:text-xl font-medium text-center flex place-items-center justify-center">
+                        طريقة الدفع
+                        <span><BsCashCoin /></span>
+                    </h3>
+                    
+                    {wallets.map((wallet, index) => (
+                        <div key={wallet.id} className={`bg-gradient-to-tr ${wallet.bgColor} p-4 sm:p-6 rounded-xl text-center space-y-3 ${wallet.textColor}`}>
+                            <div className="space-y-2 flex flex-col items-center">
+                                {wallet.logo && (
+                                    <img 
+                                        src={wallet.logo} 
+                                        alt={wallet.name} 
+                                        className={`w-40 mx-auto mb-2 ${wallet.id !== 'instapay' ? 'filter brightness-0 invert' : ''}`} 
+                                        onError={(e) => {
+                                            // If image fails to load, replace with a wallet icon
+                                            e.target.onerror = null;
+                                            e.target.style.display = 'none';
+                                            const parent = e.target.parentNode;
+                                            if (parent) {
+                                                const icon = document.createElement('div');
+                                                icon.className = 'text-4xl mb-2';
+                                                icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16"><path d="M0 3a2 2 0 0 1 2-2h13.5a.5.5 0 0 1 0 1H15v2a1 1 0 0 1 1 1v8.5a1.5 1.5 0 0 1-1.5 1.5h-12A2.5 2.5 0 0 1 0 12.5V3zm1 1.732V12.5A1.5 1.5 0 0 0 2.5 14h12a.5.5 0 0 0 .5-.5V5H2a1.99 1.99 0 0 1-1-.268zM1 3a1 1 0 0 0 1 1h12V2H2a1 1 0 0 0-1 1z"/></svg>';
+                                                parent.insertBefore(icon, e.target);
+                                            }
+                                        }}
+                                    />
+                                )}
+                                <p className="text-lg sm:text-xl">
+                                    {index === 0 ? `حول على رقم ${wallet.name}` : `او رقم ${wallet.name}`}
+                                </p>
+                                <p className="text-2xl sm:text-4xl font-bold tracking-wider">{wallet.phone}</p>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-slate-50 to-slate-100 text-[#532773] p-4 sm:p-6 rounded-xl text-center space-y-3">
-                        <div className="space-y-2 flex flex-col items-center">
-                            <img src="/insta.png" alt="Instapay" className="w-40 mx-auto mb-2" />
-                            <p className="text-lg sm:text-xl">او  رقم انستا باي</p>
-                            <p className="text-2xl sm:text-4xl font-bold tracking-wider">01142876308</p>
-                        </div>
-                    </div>
+                    ))}
                 </div>
 
                 <div className="space-y-4">

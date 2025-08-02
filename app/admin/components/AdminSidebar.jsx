@@ -3,7 +3,7 @@ import { useState } from 'react';
 import {
     User, Book, BarChart2, FileText, Settings as SettingsIcon,
     LogOut, CreditCard, Camera, Users, CheckCircle, AlertTriangle,
-    Bell
+    Bell, Wallet
 } from 'lucide-react';
 import { MdOutlineAdminPanelSettings } from 'react-icons/md';
 import { IoAnalyticsOutline } from 'react-icons/io5';
@@ -87,6 +87,13 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
             icon: <Bell size={20} />,
             tab: 'notifications',
             roles: ['admin'] // Only admin can manage notifications
+        },
+        {
+            id: 12,
+            label: "الإعدادات",
+            icon: <SettingsIcon size={20} />,
+            tab: 'settings',
+            roles: ['admin'] // Only admin can access settings
         }
     ];
 

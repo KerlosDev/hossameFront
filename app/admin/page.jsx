@@ -18,6 +18,7 @@ import NotFound from '../not-found';
 import AdminBooks from '../components/AdminBooks';
 import NotificationManagement from './components/NotificationManagement';
 import CoursesAnalyses from './components/CoursesAnalyses';
+import WalletSettings from './components/WalletSettings';
 
 
 export default function MathLMSAdmin() {
@@ -91,7 +92,7 @@ export default function MathLMSAdmin() {
         if (savedTab && adminData.userRole) {
             // Check if the saved tab is allowed for the user's role
             const allowedTabs = {
-                admin: ['dashboard', 'students', 'courses', 'examMangae', 'payments', 'analyses', 'exam', 'followup', 'offers', 'books', 'notifications'],
+                admin: ['dashboard', 'students', 'courses', 'examMangae', 'payments', 'analyses', 'exam', 'followup', 'offers', 'books', 'notifications', 'settings'],
                 instructor: ['examMangae']
             };
 
@@ -178,7 +179,7 @@ export default function MathLMSAdmin() {
                         {activeTab === 'dashboard' && adminData.userRole === 'admin' && (
                             <>
                                 <DashboardStats />
-                             </>
+                            </>
                         )}
 
                         {activeTab === 'students' && adminData.userRole === 'admin' && (
@@ -219,6 +220,10 @@ export default function MathLMSAdmin() {
 
                         {activeTab === 'analyses' && adminData.userRole === 'admin' && (
                             <CoursesAnalyses />
+                        )}
+
+                        {activeTab === 'settings' && adminData.userRole === 'admin' && (
+                            <WalletSettings />
                         )}
                     </main>
                 </div>

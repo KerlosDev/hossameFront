@@ -1,0 +1,11 @@
+/* Custom animations for WalletSettings component */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Add this to your globals.css or import this file in the WalletSettings component */
