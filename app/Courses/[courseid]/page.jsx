@@ -83,7 +83,8 @@ const CoursePage = () => {
                     image: course.imageUrl || '/pi.png',
                     nicknameforcourse: courseid,
                     _id: course._id,
-                    isEnrolled: isEnrolled // Add enrollment status to courseInfo
+                    isEnrolled: isEnrolled, // Add enrollment status to courseInfo
+                    courseLink: course.courseLink || { name: '', url: '' } // Add course link
                 });
 
                 // Set enrollment status
@@ -118,6 +119,7 @@ const CoursePage = () => {
                                 fileName: lesson.fileName,
                                 link: lesson.videoUrl || null,
                                 fileUrl: lesson.fileUrl || null,
+                                files: lesson.files || [], // Add files array
                                 locked: !lesson.videoUrl && !lesson.isFree, // Locked if no video URL and not free
                                 isFree: lesson.isFree
                             }))
@@ -644,6 +646,23 @@ const CoursePage = () => {
                                         </div>
                                     )}
 
+                                    {/* Course Link */}
+                                    {courseInfo.courseLink && courseInfo.courseLink.name && courseInfo.courseLink.url && (
+                                        <div className="inline-flex items-center gap-3 bg-blue-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-blue-400/30 shadow-lg">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                            <a
+                                                href={courseInfo.courseLink.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-300 font-semibold hover:text-blue-200 transition-colors"
+                                            >
+                                                {courseInfo.courseLink.name}
+                                            </a>
+                                        </div>
+                                    )}
+
                                     {/* Course Stats */}
                                     <div className="flex items-center gap-6 text-gray-400">
                                         <span className="flex items-center gap-2">
@@ -869,6 +888,54 @@ const CoursePage = () => {
                                                 الفصل {activeChapter + 1} من {courseVideoChapters.length}
                                             </span>
                                         </div>
+
+                                        {/* Lesson Files Section */}
+                                        {!isContentLocked && currentLesson && (
+                                            <div className="mt-6 space-y-4">
+                                                {/* Main File */}
+                                                {currentLesson.fileUrl && (
+                                                    <div>
+                                                        <h4 className="text-white/70 text-sm mb-2 font-medium">ملفات الدرس:</h4>
+                                                        <a
+                                                            href={currentLesson.fileUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300 transition-all duration-300 text-sm font-medium"
+                                                        >
+                                                            <File className="w-5 h-5" />
+                                                            <span>{currentLesson.fileName || "ملف الدرس"}</span>
+                                                            <svg className="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                            </svg>
+                                                        </a>
+                                                    </div>
+                                                )}
+
+                                                {/* Additional Files */}
+                                                {currentLesson.files && currentLesson.files.length > 0 && (
+                                                    <div>
+                                                        {!currentLesson.fileUrl && <h4 className="text-white/70 text-sm mb-2 font-medium">ملفات الدرس:</h4>}
+                                                        <div className="flex flex-wrap gap-3">
+                                                            {currentLesson.files.map((file, index) => (
+                                                                <a
+                                                                    key={`main-file-${index}`}
+                                                                    href={file.fileUrl}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 hover:text-blue-300 transition-all duration-300 text-sm font-medium"
+                                                                >
+                                                                    <File className="w-5 h-5" />
+                                                                    <span>{file.fileName}</span>
+                                                                    <svg className="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                                    </svg>
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1007,6 +1074,42 @@ const CoursePage = () => {
                                                                             )}
                                                                         </div>
                                                                     )}
+
+                                                                    {/* Additional Files Downloads */}
+                                                                    {lesson && lesson.files && lesson.files.length > 0 && (
+                                                                        <div className="mr-14 mt-2 space-y-2">
+                                                                            {lesson.files.map((file, fileIndex) => (
+                                                                                (isEnrolled || lesson.isFree) ? (
+                                                                                    <a
+                                                                                        key={`file-${fileIndex}`}
+                                                                                        href={file.fileUrl}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 hover:text-blue-300 transition-all duration-300 text-sm font-medium group"
+                                                                                    >
+                                                                                        <File className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                                                                        <span>{file.fileName}</span>
+                                                                                        {lesson.isFree && !isEnrolled && (
+                                                                                            <span className="px-2 py-1 bg-blue-500/20 border border-blue-400/30 rounded-md text-blue-300 text-xs font-bold">
+                                                                                                مجاني
+                                                                                            </span>
+                                                                                        )}
+                                                                                        <svg className="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                                                        </svg>
+                                                                                    </a>
+                                                                                ) : (
+                                                                                    <div
+                                                                                        key={`file-${fileIndex}`}
+                                                                                        className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-700/30 border border-gray-600/30 text-gray-500 text-sm font-medium"
+                                                                                    >
+                                                                                        <FaLock className="w-4 h-4" />
+                                                                                        <span>{file.fileName}</span>
+                                                                                    </div>
+                                                                                )
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -1035,7 +1138,55 @@ const CoursePage = () => {
                                     </div>
                                 </div>
 
-                                {/* Enhanced Quiz Section */}
+                                {/* Course Link Section - Visible to all but URL only for enrolled */}
+                                {courseInfo.courseLink && courseInfo.courseLink.name && (
+                                    <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+                                        <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 p-6 border-b border-white/10">
+                                            <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                                                <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                                    </svg>
+                                                </div>
+                                                روابط الكورس
+                                            </h3>
+                                        </div>
+                                        <div className="p-6">
+                                            {isEnrolled && courseInfo.courseLink.url ? (
+                                                // For enrolled users: Show clickable link with URL
+                                                <a
+                                                    href={courseInfo.courseLink.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-4 p-4 rounded-xl transition-all duration-300 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 hover:from-blue-500/20 hover:to-cyan-500/20 border border-blue-400/20 hover:border-blue-400/40"
+                                                >
+                                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-500/20">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                        </svg>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="text-white font-semibold mb-1">{courseInfo.courseLink.name}</h4>
+                                                        <p className="text-blue-300 text-sm truncate">{courseInfo.courseLink.url}</p>
+                                                    </div>
+                                                </a>
+                                            ) : (
+                                                // For non-enrolled users: Show non-clickable link with lock icon
+                                                <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/30">
+                                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-700/50">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="text-white font-semibold mb-1">{courseInfo.courseLink.name}</h4>
+                                                        <p className="text-gray-400 text-sm">اشترك في الكورس للوصول إلى الرابط</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}                                {/* Enhanced Quiz Section */}
                                 <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
                                     <div className="bg-gradient-to-r from-orange-600/20 to-red-600/20 p-6 border-b border-white/10">
                                         <h3 className="text-xl font-bold text-white flex items-center gap-3">

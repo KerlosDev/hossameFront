@@ -4,7 +4,9 @@ import axios from 'axios';
 import {
     FaEdit, FaTrash, FaPlus, FaSave, FaTimes, FaBook, FaVideo,
     FaQuestionCircle, FaSearch, FaFilter, FaBookmark, FaCopy, FaUpload,
-    FaGraduationCap, FaListUl, FaArchive, FaClock, FaCheck, FaArrowLeft
+    FaGraduationCap, FaListUl, FaArchive, FaClock, FaCheck, FaArrowLeft,
+    FaFile,
+    FaFileAlt
 } from 'react-icons/fa';
 import { HiOutlineUserGroup, HiOutlineClock, HiOutlineChartBar } from 'react-icons/hi';
 import { toast } from 'react-toastify';
@@ -30,7 +32,9 @@ const CourseManager = () => {
         isDraft: false,
         isScheduled: false,
         scheduledPublishDate: '',
-        publishStatus: 'draft'
+        publishStatus: 'draft',
+        courseLinkName: '',
+        courseLinkUrl: ''
     });
     const [uploadProgress, setUploadProgress] = useState(0);
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -45,6 +49,7 @@ const CourseManager = () => {
         videoUrl: '',
         fileName: '',
         fileUrl: '',
+        files: []
     });
     const [chapterLoading, setChapterLoading] = useState(false);
     const [lessonLoading, setLessonLoading] = useState(false);
@@ -172,6 +177,8 @@ const CourseManager = () => {
             formData.append('isScheduled', newCourse.isScheduled);
             formData.append('scheduledPublishDate', newCourse.scheduledPublishDate);
             formData.append('publishStatus', newCourse.publishStatus);
+            formData.append('courseLinkName', newCourse.courseLinkName || '');
+            formData.append('courseLinkUrl', newCourse.courseLinkUrl || '');
             formData.append("exams", JSON.stringify(selectedExams.map(exam => exam._id)));
 
             if (newCourse.imageFile) {
@@ -217,7 +224,9 @@ const CourseManager = () => {
                     isDraft: false,
                     isScheduled: false,
                     scheduledPublishDate: '',
-                    publishStatus: 'draft'
+                    publishStatus: 'draft',
+                    courseLinkName: '',
+                    courseLinkUrl: ''
                 });
                 setUploadProgress(0);
                 fetchCourses();
@@ -270,7 +279,9 @@ const CourseManager = () => {
                 isDraft: data.isDraft ?? false,
                 isScheduled: data.isScheduled ?? false,
                 scheduledPublishDate: data.scheduledPublishDate || '',
-                publishStatus: data.publishStatus || 'draft'
+                publishStatus: data.publishStatus || 'draft',
+                courseLinkName: data.courseLink?.name || '',
+                courseLinkUrl: data.courseLink?.url || ''
             });
             setSelectedExams(data.exams || []);
             setCurrentStep(1); // Reset to first step when opening a course
@@ -388,11 +399,22 @@ const CourseManager = () => {
         const updatedChapter = courseChapters.find(c => c._id === chapterId);
         if (!updatedChapter) return;
 
+        // Handle files array
+        const files = lessonInput.files || [];
+        // Also include the single file if provided (for backward compatibility)
+        if (lessonInput.fileName && lessonInput.fileUrl) {
+            files.push({
+                fileName: lessonInput.fileName,
+                fileUrl: lessonInput.fileUrl
+            });
+        }
+
         const newLessonObj = {
             title: lessonInput.title,
             videoUrl: lessonInput.videoUrl,
             fileName: lessonInput.fileName || '',
             fileUrl: lessonInput.fileUrl || '',
+            files: files
         };
 
         try {
@@ -403,7 +425,7 @@ const CourseManager = () => {
 
             setLessonInputs(prev => ({
                 ...prev,
-                [chapterId]: { title: '', videoUrl: '', fileName: '', fileUrl: '' }
+                [chapterId]: { title: '', videoUrl: '', fileName: '', fileUrl: '', files: [] }
             }));
         } catch (error) {
             console.error('Error adding lesson:', error);
@@ -796,10 +818,10 @@ const CourseManager = () => {
                     onChange={(e) => setFilter(e.target.value)}
                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all [&>option]:text-black"
                 >
-                    <option className=' text-black'  value="all">جميع الكورسات</option>
-                    <option  className=' text-black' value="active">الكورسات النشطة</option>
-                    <option   className=' text-black'value="draft">المسودات</option>
-                    <option   className=' text-black' value="scheduled">المجدولة للنشر</option>
+                    <option className=' text-black' value="all">جميع الكورسات</option>
+                    <option className=' text-black' value="active">الكورسات النشطة</option>
+                    <option className=' text-black' value="draft">المسودات</option>
+                    <option className=' text-black' value="scheduled">المجدولة للنشر</option>
                 </select>
             </div>
 
@@ -833,7 +855,7 @@ const CourseManager = () => {
                                             'bg-yellow-500/20 text-yellow-300 border-yellow-400/30 group-hover:bg-yellow-500/30' :
                                             'bg-emerald-500/20 text-emerald-300 border-emerald-400/30 group-hover:bg-emerald-500/30'}`}>
                                     <span className={`w-2 h-2 rounded-full animate-pulse ${course.publishStatus === 'scheduled' ? 'bg-purple-400' :
-                                            course.isDraft ? 'bg-yellow-400' : 'bg-emerald-400'
+                                        course.isDraft ? 'bg-yellow-400' : 'bg-emerald-400'
                                         }`}></span>
                                     {course.publishStatus === 'scheduled' ? 'مجدول' :
                                         course.isDraft ? 'مسودة' : 'منشور'}
@@ -1013,11 +1035,37 @@ const CourseManager = () => {
                                                              focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                                     required
                                                 >
-                                                    <option   className=' text-black' value="">اختر المستوى</option>
+                                                    <option className=' text-black' value="">اختر المستوى</option>
                                                     <option className=' text-black' value="الصف الأول الثانوي">الصف الأول الثانوي</option>
-                                                    <option  className=' text-black' value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
-                                                    <option  className=' text-black' value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                                                    <option className=' text-black' value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+                                                    <option className=' text-black' value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
                                                 </select>
+                                            </div>
+
+                                            {/* Course Link Name */}
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-arabicUI3 text-gray-400">اسم الرابط</label>
+                                                <input
+                                                    type="text"
+                                                    value={newCourse.courseLinkName}
+                                                    onChange={(e) => setNewCourse({ ...newCourse, courseLinkName: e.target.value })}
+                                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white 
+                                                             focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                                    placeholder="مثال: رابط الواتساب"
+                                                />
+                                            </div>
+
+                                            {/* Course Link URL */}
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-arabicUI3 text-gray-400">رابط الكورس</label>
+                                                <input
+                                                    type="url"
+                                                    value={newCourse.courseLinkUrl}
+                                                    onChange={(e) => setNewCourse({ ...newCourse, courseLinkUrl: e.target.value })}
+                                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white 
+                                                             focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                                    placeholder="https://example.com"
+                                                />
                                             </div>
 
                                             {/* Course Description */}
@@ -1149,21 +1197,28 @@ const CourseManager = () => {
                                                                         <div className="flex items-center gap-2">
                                                                             <FaVideo size={12} />
                                                                             <span className="text-gray-400">{lesson.title}</span>
-                                                                            {lesson.isFree && (
-                                                                                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
-                                                                                    مجاني
-                                                                                </span>
-                                                                            )}
+                                                                            <div className="flex gap-1">
+                                                                                {lesson.isFree && (
+                                                                                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
+                                                                                        مجاني
+                                                                                    </span>
+                                                                                )}
+                                                                                {(lesson.files?.length > 0 || lesson.fileUrl) && (
+                                                                                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full flex items-center gap-1">
+                                                                                        <FaFileAlt size={8} />
+                                                                                        {lesson.files?.length || 1} ملفات
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
                                                                         </div>
                                                                         <div className="flex items-center gap-2">
-                                                                            <button 
-                                                                                type="button" 
+                                                                            <button
+                                                                                type="button"
                                                                                 onClick={() => handleToggleLessonFree(chapter._id, lesson._id, !lesson.isFree)}
-                                                                                className={`p-1.5 rounded-lg transition-colors ${
-                                                                                    lesson.isFree 
-                                                                                        ? 'text-green-400 hover:bg-green-500/10' 
+                                                                                className={`p-1.5 rounded-lg transition-colors ${lesson.isFree
+                                                                                        ? 'text-green-400 hover:bg-green-500/10'
                                                                                         : 'text-gray-400 hover:bg-gray-500/10'
-                                                                                }`}
+                                                                                    }`}
                                                                                 title={lesson.isFree ? 'إلغاء المجاني' : 'جعل مجاني'}
                                                                             >
                                                                                 <FaBookmark size={12} />
@@ -1194,20 +1249,115 @@ const CourseManager = () => {
                                                                         placeholder="رابط الفيديو"
                                                                         className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
                                                                     />
-                                                                    <input
-                                                                        type="text"
-                                                                        value={lessonInputs[chapter._id]?.fileName || ''}
-                                                                        onChange={(e) => setLessonInputs(prev => ({ ...prev, [chapter._id]: { ...prev[chapter._id], fileName: e.target.value } }))}
-                                                                        placeholder="اسم الملف (اختياري)"
-                                                                        className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                                                                    />
-                                                                    <input
-                                                                        type="text"
-                                                                        value={lessonInputs[chapter._id]?.fileUrl || ''}
-                                                                        onChange={(e) => setLessonInputs(prev => ({ ...prev, [chapter._id]: { ...prev[chapter._id], fileUrl: e.target.value } }))}
-                                                                        placeholder="رابط الملف (اختياري)"
-                                                                        className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
-                                                                    />
+                                                                    {/* Files Section */}
+                                                                    <div className="border border-white/10 rounded-lg p-3 mt-2">
+                                                                        <div className="flex items-center justify-between mb-2">
+                                                                            <h6 className="text-white text-xs">الملفات المرفقة</h6>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const currentFiles = lessonInputs[chapter._id]?.files || [];
+                                                                                    setLessonInputs(prev => ({
+                                                                                        ...prev,
+                                                                                        [chapter._id]: {
+                                                                                            ...prev[chapter._id],
+                                                                                            files: [
+                                                                                                ...currentFiles,
+                                                                                                { fileName: '', fileUrl: '' }
+                                                                                            ]
+                                                                                        }
+                                                                                    }));
+                                                                                }}
+                                                                                className="p-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg text-xs flex items-center gap-1"
+                                                                            >
+                                                                                <FaPlus size={8} /> إضافة ملف
+                                                                            </button>
+                                                                        </div>
+
+                                                                        {/* Show each file input pair */}
+                                                                        {(lessonInputs[chapter._id]?.files || []).map((file, fileIndex) => (
+                                                                            <div key={fileIndex} className="flex gap-2 mb-2 items-center">
+                                                                                <div className="flex-1 grid grid-cols-2 gap-2">
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        value={file.fileName}
+                                                                                        onChange={(e) => {
+                                                                                            const updatedFiles = [...(lessonInputs[chapter._id]?.files || [])];
+                                                                                            updatedFiles[fileIndex] = {
+                                                                                                ...updatedFiles[fileIndex],
+                                                                                                fileName: e.target.value
+                                                                                            };
+                                                                                            setLessonInputs(prev => ({
+                                                                                                ...prev,
+                                                                                                [chapter._id]: {
+                                                                                                    ...prev[chapter._id],
+                                                                                                    files: updatedFiles
+                                                                                                }
+                                                                                            }));
+                                                                                        }}
+                                                                                        placeholder="اسم الملف"
+                                                                                        className="p-2 bg-white/5 border border-white/10 rounded-lg text-white text-xs"
+                                                                                    />
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        value={file.fileUrl}
+                                                                                        onChange={(e) => {
+                                                                                            const updatedFiles = [...(lessonInputs[chapter._id]?.files || [])];
+                                                                                            updatedFiles[fileIndex] = {
+                                                                                                ...updatedFiles[fileIndex],
+                                                                                                fileUrl: e.target.value
+                                                                                            };
+                                                                                            setLessonInputs(prev => ({
+                                                                                                ...prev,
+                                                                                                [chapter._id]: {
+                                                                                                    ...prev[chapter._id],
+                                                                                                    files: updatedFiles
+                                                                                                }
+                                                                                            }));
+                                                                                        }}
+                                                                                        placeholder="رابط الملف"
+                                                                                        className="p-2 bg-white/5 border border-white/10 rounded-lg text-white text-xs"
+                                                                                    />
+                                                                                </div>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        const updatedFiles = [...(lessonInputs[chapter._id]?.files || [])];
+                                                                                        updatedFiles.splice(fileIndex, 1);
+                                                                                        setLessonInputs(prev => ({
+                                                                                            ...prev,
+                                                                                            [chapter._id]: {
+                                                                                                ...prev[chapter._id],
+                                                                                                files: updatedFiles
+                                                                                            }
+                                                                                        }));
+                                                                                    }}
+                                                                                    className="p-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg"
+                                                                                >
+                                                                                    <FaTrash size={10} />
+                                                                                </button>
+                                                                            </div>
+                                                                        ))}
+
+                                                                        {/* For backward compatibility - single file */}
+                                                                        <div className="mt-2 grid grid-cols-2 gap-2">
+                                                                            <input
+                                                                                type="text"
+                                                                                value={lessonInputs[chapter._id]?.fileName || ''}
+                                                                                onChange={(e) => setLessonInputs(prev => ({ ...prev, [chapter._id]: { ...prev[chapter._id], fileName: e.target.value } }))}
+                                                                                placeholder="اسم الملف القديم (للتوافق)"
+                                                                                className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-xs"
+                                                                            />
+                                                                            <input
+                                                                                type="text"
+                                                                                value={lessonInputs[chapter._id]?.fileUrl || ''}
+                                                                                onChange={(e) => setLessonInputs(prev => ({ ...prev, [chapter._id]: { ...prev[chapter._id], fileUrl: e.target.value } }))}
+                                                                                placeholder="رابط الملف القديم (للتوافق)"
+                                                                                className="flex-1 p-2 bg-white/5 border border-white/10 rounded-lg text-white text-xs"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => handleAddLesson(chapter._id)}
@@ -1592,20 +1742,104 @@ const CourseManager = () => {
                                 className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"
                                 placeholder="رابط الفيديو"
                             />
-                            <input
-                                type="text"
-                                value={editingLesson.fileName || ""}
-                                onChange={(e) => setEditingLesson({ ...editingLesson, fileName: e.target.value })}
-                                className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"
-                                placeholder="اسم الملف (اختياري)"
-                            />
-                            <input
-                                type="text"
-                                value={editingLesson.fileUrl || ""}
-                                onChange={(e) => setEditingLesson({ ...editingLesson, fileUrl: e.target.value })}
-                                className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"
-                                placeholder="رابط الملف (اختياري)"
-                            />
+                            {/* Files Section */}
+                            <div className="border border-white/10 rounded-lg p-3 mb-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h5 className="text-white font-medium">الملفات المرفقة</h5>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEditingLesson({
+                                                ...editingLesson,
+                                                files: [...(editingLesson.files || []), { fileName: '', fileUrl: '' }]
+                                            });
+                                        }}
+                                        className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg text-sm flex items-center gap-2"
+                                    >
+                                        <FaPlus size={12} /> إضافة ملف جديد
+                                    </button>
+                                </div>
+
+                                {/* Files list */}
+                                <div className="space-y-3">
+                                    {(editingLesson.files || []).map((file, fileIndex) => (
+                                        <div key={fileIndex} className="flex gap-3 items-center">
+                                            <div className="flex-1 grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="text-xs text-gray-400">اسم الملف</label>
+                                                    <input
+                                                        type="text"
+                                                        value={file.fileName}
+                                                        onChange={(e) => {
+                                                            const updatedFiles = [...(editingLesson.files || [])];
+                                                            updatedFiles[fileIndex] = { ...file, fileName: e.target.value };
+                                                            setEditingLesson({
+                                                                ...editingLesson,
+                                                                files: updatedFiles
+                                                            });
+                                                        }}
+                                                        className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm mt-1"
+                                                        placeholder="اسم الملف"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs text-gray-400">رابط الملف</label>
+                                                    <input
+                                                        type="text"
+                                                        value={file.fileUrl}
+                                                        onChange={(e) => {
+                                                            const updatedFiles = [...(editingLesson.files || [])];
+                                                            updatedFiles[fileIndex] = { ...file, fileUrl: e.target.value };
+                                                            setEditingLesson({
+                                                                ...editingLesson,
+                                                                files: updatedFiles
+                                                            });
+                                                        }}
+                                                        className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm mt-1"
+                                                        placeholder="رابط الملف"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const updatedFiles = [...(editingLesson.files || [])];
+                                                    updatedFiles.splice(fileIndex, 1);
+                                                    setEditingLesson({
+                                                        ...editingLesson,
+                                                        files: updatedFiles
+                                                    });
+                                                }}
+                                                className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg mt-5"
+                                            >
+                                                <FaTrash size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* For backward compatibility */}
+                                <div className="mt-4 pt-4 border-t border-white/10">
+                                    <h6 className="text-sm text-gray-400 mb-2">الملف القديم (للتوافق)</h6>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input
+                                            type="text"
+                                            value={editingLesson.fileName || ""}
+                                            onChange={(e) => setEditingLesson({ ...editingLesson, fileName: e.target.value })}
+                                            className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
+                                            placeholder="اسم الملف (اختياري)"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={editingLesson.fileUrl || ""}
+                                            onChange={(e) => setEditingLesson({ ...editingLesson, fileUrl: e.target.value })}
+                                            className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
+                                            placeholder="رابط الملف (اختياري)"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="flex items-center gap-3">
                                 <input
                                     type="checkbox"
