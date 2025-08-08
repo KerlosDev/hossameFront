@@ -86,10 +86,12 @@ const QuizData = ({ params }) => {
 
             setQuiz({
                 title: examData.title,
-                questions: parsedQuestions
+                questions: parsedQuestions,
+                duration: examData.duration
             });
 
-            setTimeLeft(parsedQuestions.length * 120);
+            // Use duration from backend (convert minutes to seconds)
+            setTimeLeft(examData.duration * 60);
             setLoading(false);
 
         } catch (error) {
