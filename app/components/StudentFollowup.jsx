@@ -180,6 +180,41 @@ const StudentFollowup = () => {
                 setEnrolledTotalPages(studentsData.totalPages);
                 setEnrolledTotalStudents(studentsData.totalStudents);
 
+                // Update whatsappNumbers object for enrolled students
+                const enrolledWhatsappObject = studentsData.data.reduce((acc, student) => {
+                    acc[student.studentInfo.email] = {
+                        studentId: student.studentInfo.id,
+                        studentWhatsApp: student.studentInfo.phoneNumber,
+                        parentWhatsApp: student.studentInfo.parentPhoneNumber,
+                        name: student.studentInfo.name,
+                        lastActive: student.studentInfo.lastActivity,
+                        status: student.activityStatus.status,
+                        totalWatchedLessons: student.activityStatus.totalWatchedLessons,
+                        isEnrolled: student.enrollmentStatus.isEnrolled,
+                        enrolledCourses: student.enrollmentStatus.enrolledCourses.map(course => ({
+                            courseName: course.courseName,
+                            enrollmentDate: course.enrollmentDate,
+                            paymentStatus: course.paymentStatus,
+                            chapters: course.chapters.map(chapter => ({
+                                chapterTitle: chapter.chapterTitle,
+                                lessons: chapter.lessons.map(lesson => ({
+                                    lessonTitle: lesson.lessonTitle,
+                                    isWatched: lesson.isWatched,
+                                    watchCount: lesson.watchCount
+                                }))
+                            }))
+                        })),
+                        totalEnrollments: student.enrollmentStatus.totalEnrollments
+                    };
+                    return acc;
+                }, {});
+
+                // Merge with existing whatsappNumbers to avoid overwriting
+                setWhatsappNumbers(prevNumbers => ({
+                    ...prevNumbers,
+                    ...enrolledWhatsappObject
+                }));
+
                 // Process student data with detailed enrollment information
                 const processedStudents = studentsData.data.map(student => {
                     const totalWatchedLessons = student.activityStatus.totalWatchedLessons || 0;
@@ -203,7 +238,11 @@ const StudentFollowup = () => {
                         enrollmentDetails: student.enrollmentStatus.enrolledCourses,
                         lessons: [], // Will be populated by watch history if available
                         lessonViews: {},
-                        hasWatchHistory: totalWatchedLessons > 0
+                        hasWatchHistory: totalWatchedLessons > 0,
+                        // Add phone numbers from the API response
+                        phoneNumber: student.studentInfo.phoneNumber,
+                        parentPhoneNumber: student.studentInfo.parentPhoneNumber,
+                        studentId: student.studentInfo.id
                     };
                 });
 
@@ -1377,16 +1416,41 @@ const StudentFollowup = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    {whatsappNumbers[student.email]?.studentWhatsApp && (
-                                                        <a
-                                                            href={getWhatsAppLink(whatsappNumbers[student.email]?.studentWhatsApp)}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-green-400 hover:text-green-300 mr-3"
-                                                        >
-                                                            <FaWhatsapp size={20} />
-                                                        </a>
-                                                    )}
+                                                    <div className="flex flex-col gap-2">
+                                                        {student.phoneNumber && (
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <span className="text-xs text-gray-400">الطالب:</span>
+                                                                <a
+                                                                    href={getWhatsAppLink(student.phoneNumber)}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-green-400 hover:text-green-300 flex items-center gap-1"
+                                                                    title="تواصل مع الطالب"
+                                                                >
+                                                                    <FaWhatsapp size={16} />
+                                                                    <span className="text-xs">{student.phoneNumber}</span>
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                        {student.parentPhoneNumber && (
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <span className="text-xs text-gray-400">ولي الأمر:</span>
+                                                                <a
+                                                                    href={getWhatsAppLink(student.parentPhoneNumber)}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                                                                    title="تواصل مع ولي الأمر"
+                                                                >
+                                                                    <FaWhatsapp size={16} />
+                                                                    <span className="text-xs">{student.parentPhoneNumber}</span>
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                        {!student.phoneNumber && !student.parentPhoneNumber && (
+                                                            <span className="text-xs text-gray-500">لا يوجد أرقام</span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
