@@ -92,7 +92,7 @@ const Header = () => {
             if (userData) {
                 setUsername(userData.username);
                 setIsLoggedIn(true);
-                setIsAdmin(userData.role === 'admin' || userData.role === 'instructor');
+                setIsAdmin(userData.role === 'admin' || userData.role === 'instructor'|| userData.role === 'follow');
                 return;
             }
 
