@@ -279,7 +279,7 @@ const Header = () => {
                                 </h2>
                                 <span className="text-sm lg:text-base text-slate-500 dark:text-slate-400 font-arabicUI2
                                                group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                    مدرس الرياضيات 
+                                    مدرس الرياضيات
                                 </span>
                             </div>
                         </div>
@@ -590,8 +590,13 @@ const Header = () => {
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl 
                                           flex items-center justify-center shadow-lg">
-                                    <FaFlask className="text-2xl text-white" />
-                                </div>
+                                    <Image
+                                        src="/pi.png"
+                                        alt="Walter White Logo"
+                                        width={28}
+                                        height={28}
+                                        className="lg:w-8 lg:h-8 brightness-0 invert group-hover:animate-pulse"
+                                    />                                </div>
                                 <div>
                                     <h3 className="text-lg font-arabicUI2 font-bold text-slate-800 dark:text-white">
                                         حسام ميرة
@@ -792,7 +797,7 @@ const Header = () => {
                                         <div className="w-12 h-12 bg-white/20 rounded-xl 
                                                   flex items-center justify-center group-hover:scale-110 transition-transform
                                                   ring-2 ring-white/40">
-                                            <PiTestTubeBold className="text-white text-xl animate-duration-2000" />
+                                            <PiMathOperations className="text-white text-xl animate-duration-2000" />
                                         </div>
                                         <div className="flex-1 text-right relative z-10">
                                             <span className="block">انشاء حساب جديد</span>
