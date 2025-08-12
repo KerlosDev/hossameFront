@@ -704,7 +704,7 @@ const QuizData = ({ params }) => {
     }
 
     return (
-        <div dir='rtl' className="min-h-screen bg-slate-950 py-8 px-4 relative">
+        <div dir='rtl' className="min-h-screen bg-slate-950 py-4 sm:py-8 px-2 sm:px-4 relative">
             {/* Enhanced Progress Bar */}
             <div className="fixed top-0 left-0 right-0 z-50">
                 <div className="h-1 bg-slate-800">
@@ -713,7 +713,7 @@ const QuizData = ({ params }) => {
                         style={{ width: `${(currentQuestion / quiz.questions.length) * 100}%` }}
                     />
                 </div>
-                <div className="bg-slate-900/80 backdrop-blur-sm py-2 px-4 flex justify-between items-center text-xs text-slate-300">
+                <div className="bg-slate-900/80 backdrop-blur-sm py-2 px-2 sm:px-4 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0 text-xs text-slate-300">
                     <div className="flex items-center gap-2">
                         <span className="text-blue-400 font-medium">
                             {Object.keys(selectedAnswers).length} / {quiz.questions.length}
@@ -731,14 +731,14 @@ const QuizData = ({ params }) => {
 
 
             <div className="max-w-6xl font-arabicUI3  mx-auto">
-                <div className="bg-slate-900/50 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-slate-800">
+                <div className="bg-slate-900/50 backdrop-blur-lg rounded-2xl p-4 sm:p-8 shadow-xl border border-slate-800">
                     {/* Enhanced Header */}
-                    <header className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
-                        <div>
-                            <h1 className="text-3xl   font-arabicUI3 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                    <header className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+                        <div className="text-center md:text-right">
+                            <h1 className="text-2xl sm:text-3xl font-arabicUI3 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
                                 {quiz.title}
                             </h1>
-                            <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
                                 <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm">
                                     درجة النجاح: {examInfo?.passingScore || 60}%
                                 </span>
@@ -747,9 +747,9 @@ const QuizData = ({ params }) => {
 
                         <div className="flex items-center gap-4">
                             {/* Timer */}
-                            <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 rounded-lg">
-                                <AiOutlineClockCircle className="text-yellow-400" size={20} />
-                                <span className={`font-mono text-lg ${timeLeft < 300 ? 'text-red-400' : 'text-yellow-400'}`}>
+                            <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-800/50 rounded-lg">
+                                <AiOutlineClockCircle className="text-yellow-400" size={18} />
+                                <span className={`font-mono text-base sm:text-lg ${timeLeft < 300 ? 'text-red-400' : 'text-yellow-400'}`}>
                                     {formatTime(timeLeft)}
                                 </span>
                             </div>
@@ -758,15 +758,15 @@ const QuizData = ({ params }) => {
                     </header>
 
                     {/* Question Content */}
-                    <div className="space-y-8">
+                    <div className="space-y-6 sm:space-y-8">
                         {/* Question */}
-                        <div className="bg-slate-800/30 rounded-xl p-6">
-                            <div className="flex items-start gap-4">
-                                <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
+                        <div className="bg-slate-800/30 rounded-xl p-4 sm:p-6">
+                            <div className="flex items-start gap-3 sm:gap-4">
+                                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-base">
                                     {currentQuestion + 1}
                                 </div>
                                 <div className="flex-1">
-                                    <h2 className="text-xl text-slate-200 leading-relaxed mb-4">
+                                    <h2 className="text-lg sm:text-xl text-slate-200 leading-relaxed mb-4">
                                         {quiz.questions[currentQuestion].qus}
                                     </h2>
 
@@ -778,7 +778,7 @@ const QuizData = ({ params }) => {
                                                 alt="Question Image"
                                                 width={400}
                                                 height={300}
-                                                className="rounded-lg border border-slate-700"
+                                                className="rounded-lg border border-slate-700 max-w-full h-auto"
                                             />
                                         </div>
                                     )}
@@ -787,7 +787,7 @@ const QuizData = ({ params }) => {
                         </div>
 
                         {/* Answer Options */}
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 gap-3 sm:gap-4">
                             {['ا', 'ب', 'ج', 'د'].map((option, index) => {
                                 const englishOption = ['a', 'b', 'c', 'd'][index];
                                 const questionId = quiz.questions[currentQuestion].questionId;
@@ -798,17 +798,17 @@ const QuizData = ({ params }) => {
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => handleAnswerSelect(englishOption)}
-                                        className={`p-4 rounded-xl border-2 transition-all duration-300 text-right ${isSelected
+                                        className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 text-right ${isSelected
                                             ? 'border-blue-500 bg-blue-500/10 text-blue-300'
                                             : 'border-slate-700 bg-slate-800/30 hover:border-slate-600 text-slate-300 hover:bg-slate-800/50'
                                             }`}
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${isSelected ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-400'
+                                        <div className="flex items-center gap-3 sm:gap-4">
+                                            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-sm sm:text-base ${isSelected ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-400'
                                                 }`}>
                                                 {option}
                                             </div>
-                                            <span className="text-lg">
+                                            <span className="text-base sm:text-lg leading-relaxed">
                                                 {quiz.questions[currentQuestion][`opation${englishOption.toUpperCase()}`]}
                                             </span>
                                         </div>
@@ -835,11 +835,11 @@ const QuizData = ({ params }) => {
                         </AnimatePresence>
 
                         {/* Navigation */}
-                        <div className="flex justify-between items-center pt-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6">
                             <button
                                 onClick={handlePrevQuestion}
                                 disabled={currentQuestion === 0}
-                                className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-300 ${currentQuestion === 0
+                                className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-lg transition-all duration-300 ${currentQuestion === 0
                                     ? 'bg-slate-800/30 text-slate-600 cursor-not-allowed'
                                     : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
                                     }`}
@@ -848,12 +848,12 @@ const QuizData = ({ params }) => {
                                 السابق
                             </button>
 
-                            <div className="flex gap-2">
+                            <div className="flex gap-1 sm:gap-2 flex-wrap justify-center max-w-xs sm:max-w-none overflow-x-auto">
                                 {quiz.questions.map((_, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setCurrentQuestion(index)}
-                                        className={`w-10 h-10 rounded-lg transition-all duration-300 ${index === currentQuestion
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg transition-all duration-300 text-xs sm:text-sm flex-shrink-0 ${index === currentQuestion
                                             ? 'bg-blue-500 text-white'
                                             : selectedAnswers[quiz.questions[index].questionId]
                                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
@@ -868,7 +868,7 @@ const QuizData = ({ params }) => {
                             {currentQuestion === quiz.questions.length - 1 ? (
                                 <button
                                     onClick={handleSubmitQuiz}
-                                    className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300"
+                                    className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300"
                                 >
                                     <BsBookmarkCheck size={16} />
                                     تسليم الاختبار
@@ -876,7 +876,7 @@ const QuizData = ({ params }) => {
                             ) : (
                                 <button
                                     onClick={handleNextQuestion}
-                                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300"
+                                    className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300"
                                 >
                                     التالي
                                     <FaChevronLeft size={16} />
