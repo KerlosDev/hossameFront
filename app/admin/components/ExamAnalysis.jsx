@@ -1885,6 +1885,7 @@ export default function ExamAnalysis() {
                             </>
                         )}
 
+
                         {activeTab === 'students' && (
                             <div className="bg-gradient-to-br from-blue-900/20 to-indigo-900/20 backdrop-blur-xl rounded-xl p-6 border border-blue-800/30">
                                 <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
@@ -1943,12 +1944,12 @@ export default function ExamAnalysis() {
                                             <tbody>
                                                 {studentsByExam
                                                     .filter(item =>
-                                                        item.student.name.includes(searchTerm) ||
-                                                        item.student.email.includes(searchTerm)
+                                                        item.student?.name?.includes(searchTerm) ||
+                                                        item.student?.email?.includes(searchTerm)
                                                     )
                                                     .map((item, index) => (
                                                         <tr
-                                                            key={item.student.id}
+                                                            key={item.student?.id || index}
                                                             className={`border-t border-white/10 hover:bg-white/5 ${index < 3 ? (
                                                                 index === 0 ? 'bg-yellow-500/10' :
                                                                     index === 1 ? 'bg-gray-400/10' :
@@ -1971,25 +1972,31 @@ export default function ExamAnalysis() {
                                                                     }}
                                                                     className="hover:text-blue-400 transition-colors"
                                                                 >
-                                                                    {item.student.name}
+                                                                    {item.student?.name || 'غير محدد'}
                                                                 </button>
                                                             </td>
                                                             <td className="py-3 px-4">
-                                                                <span
-                                                                    className={`inline-block px-2 py-1 rounded text-xs font-bold ${item.bestAttempt.score >= 90 ? 'bg-green-500/20 text-green-400' :
-                                                                        item.bestAttempt.score >= 80 ? 'bg-blue-500/20 text-blue-400' :
-                                                                            item.bestAttempt.score >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
-                                                                                item.bestAttempt.score >= 60 ? 'bg-orange-500/20 text-orange-400' :
-                                                                                    'bg-red-500/20 text-red-400'
-                                                                        }`}
-                                                                >
-                                                                    {item.bestAttempt.score}%
-                                                                </span>
+                                                                {item.bestAttempt?.score ? (
+                                                                    <span
+                                                                        className={`inline-block px-2 py-1 rounded text-xs font-bold ${item.bestAttempt.score >= 90 ? 'bg-green-500/20 text-green-400' :
+                                                                            item.bestAttempt.score >= 80 ? 'bg-blue-500/20 text-blue-400' :
+                                                                                item.bestAttempt.score >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
+                                                                                    item.bestAttempt.score >= 60 ? 'bg-orange-500/20 text-orange-400' :
+                                                                                        'bg-red-500/20 text-red-400'
+                                                                            }`}
+                                                                    >
+                                                                        {item.bestAttempt.score}%
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-gray-400">لا توجد درجة</span>
+                                                                )}
                                                             </td>
-                                                            <td className="py-3 px-4">{item.totalAttempts}</td>
-                                                            <td className="py-3 px-4 text-gray-300">{formatDate(item.bestAttempt.examDate)}</td>
+                                                            <td className="py-3 px-4">{item.totalAttempts || 0}</td>
+                                                            <td className="py-3 px-4 text-gray-300">
+                                                                {item.bestAttempt?.examDate ? formatDate(item.bestAttempt.examDate) : 'غير محدد'}
+                                                            </td>
                                                             <td className="py-3 px-4">
-                                                                {item.student.phoneNumber && (
+                                                                {item.student?.phoneNumber && (
                                                                     <a
                                                                         href={getWhatsAppLink(item.student.phoneNumber)}
                                                                         target="_blank"
@@ -2008,7 +2015,6 @@ export default function ExamAnalysis() {
                                 )}
                             </div>
                         )}
-
 
                     </>
                 )}
@@ -2148,6 +2154,7 @@ export default function ExamAnalysis() {
                 </div>
             )}
 
+
             {/* Enhanced Modal for Student Details */}
             {showStudentModal && selectedStudent && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
@@ -2181,7 +2188,7 @@ export default function ExamAnalysis() {
                                         <User className="text-blue-400" size={40} />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="text-2xl font-bold text-white mb-2">{selectedStudent.student.name}</h4>
+                                        <h4 className="text-2xl font-bold text-white mb-2">{selectedStudent.student?.name || 'غير محدد'}</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <p className="text-gray-400 text-sm">البريد الإلكتروني</p>
@@ -2190,11 +2197,11 @@ export default function ExamAnalysis() {
                                                         <rect x="2" y="4" width="20" height="16" rx="2" />
                                                         <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                                                     </svg>
-                                                    {selectedStudent.student.email}
+                                                    {selectedStudent.student?.email || 'غير محدد'}
                                                 </p>
                                             </div>
                                             <div>
-                                                {selectedStudent.student.phoneNumber && (
+                                                {selectedStudent.student?.phoneNumber && (
                                                     <>
                                                         <p className="text-gray-400 text-sm">رقم الهاتف</p>
                                                         <div className="flex items-center gap-3">
@@ -2227,8 +2234,10 @@ export default function ExamAnalysis() {
                                     <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-blue-500/30 transition-colors">
                                         <h5 className="text-blue-400 mb-1 text-sm">أفضل درجة</h5>
                                         <div className="flex items-baseline gap-2">
-                                            <p className="text-2xl font-bold text-white">{selectedStudent.bestAttempt.score}%</p>
-                                            {selectedStudent.bestAttempt.rank && (
+                                            <p className="text-2xl font-bold text-white">
+                                                {selectedStudent.bestAttempt?.score || 0}%
+                                            </p>
+                                            {selectedStudent.bestAttempt?.rank && (
                                                 <span className="text-yellow-400 text-sm">
                                                     الترتيب: {selectedStudent.bestAttempt.rank}
                                                 </span>
@@ -2239,18 +2248,20 @@ export default function ExamAnalysis() {
                                     <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-green-500/30 transition-colors">
                                         <h5 className="text-green-400 mb-1 text-sm">الإجابات الصحيحة</h5>
                                         <p className="text-2xl font-bold text-white">
-                                            {selectedStudent.bestAttempt.correctAnswers} / {selectedStudent.bestAttempt.totalQuestions}
+                                            {selectedStudent.bestAttempt?.correctAnswers || 0} / {selectedStudent.bestAttempt?.totalQuestions || 0}
                                         </p>
                                     </div>
 
                                     <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-purple-500/30 transition-colors">
                                         <h5 className="text-purple-400 mb-1 text-sm">إجمالي المحاولات</h5>
-                                        <p className="text-2xl font-bold text-white">{selectedStudent.totalAttempts}</p>
+                                        <p className="text-2xl font-bold text-white">{selectedStudent.totalAttempts || 0}</p>
                                     </div>
 
                                     <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-orange-500/30 transition-colors">
                                         <h5 className="text-orange-400 mb-1 text-sm">تاريخ أفضل محاولة</h5>
-                                        <p className="text-lg font-bold text-white">{formatDate(selectedStudent.bestAttempt.examDate)}</p>
+                                        <p className="text-lg font-bold text-white">
+                                            {selectedStudent.bestAttempt?.examDate ? formatDate(selectedStudent.bestAttempt.examDate) : 'غير محدد'}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -2266,8 +2277,8 @@ export default function ExamAnalysis() {
                                     <ResponsiveContainer width="100%" height={250}>
                                         <LineChart data={selectedStudent.attempts.map((attempt, index) => ({
                                             name: `محاولة ${index + 1}`,
-                                            score: attempt.score,
-                                            date: formatDate(attempt.examDate)
+                                            score: attempt?.score || 0,
+                                            date: attempt?.examDate ? formatDate(attempt.examDate) : 'غير محدد'
                                         }))}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                                             <XAxis dataKey="name" stroke="#fff" />
@@ -2294,7 +2305,7 @@ export default function ExamAnalysis() {
                                         <div className="mt-4 pt-4 border-t border-white/10">
                                             <div className="flex justify-between items-center">
                                                 <div className="text-gray-300 text-sm">
-                                                    المحاولة الأولى: <span className="text-white">{selectedStudent.attempts[0].score}%</span>
+                                                    المحاولة الأولى: <span className="text-white">{selectedStudent.attempts[0]?.score || 0}%</span>
                                                 </div>
                                                 <div className="text-gray-300 text-sm">
                                                     التحسن: <span className={`${selectedStudent.improvement > 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -2302,7 +2313,7 @@ export default function ExamAnalysis() {
                                                     </span>
                                                 </div>
                                                 <div className="text-gray-300 text-sm">
-                                                    المحاولة الأخيرة: <span className="text-white">{selectedStudent.attempts[selectedStudent.attempts.length - 1].score}%</span>
+                                                    المحاولة الأخيرة: <span className="text-white">{selectedStudent.attempts[selectedStudent.attempts.length - 1]?.score || 0}%</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -2420,7 +2431,7 @@ export default function ExamAnalysis() {
                         <div className="bg-gray-900/80 border-t border-gray-800 p-6 flex justify-between items-center">
                             <div className="flex gap-3">
                                 <button
-                                    onClick={() => window.open(`mailto:${selectedStudent.student.email}?subject=متابعة أدائك في الاختبار: ${selectedExam}`)}
+                                    onClick={() => window.open(`mailto:${selectedStudent.student?.email}?subject=متابعة أدائك في الاختبار: ${selectedExam}`)}
                                     className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors flex items-center gap-2"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2430,7 +2441,7 @@ export default function ExamAnalysis() {
                                     <span>إرسال بريد إلكتروني</span>
                                 </button>
 
-                                {selectedStudent.student.phoneNumber && (
+                                {selectedStudent.student?.phoneNumber && (
                                     <a
                                         href={getWhatsAppLink(selectedStudent.student.phoneNumber)}
                                         target="_blank"
