@@ -45,7 +45,9 @@ const VideoPlayer = ({ videoUrl }) => {
         playerRef.current = new Plyr('#player', {
           controls: [
             'play-large',
+            'rewind',
             'play',
+            'fast-forward',
             'progress',
             'current-time',
             'mute',
@@ -79,6 +81,9 @@ const VideoPlayer = ({ videoUrl }) => {
         playerRef.current = new Plyr('#bunny-player', {
           controls: [
             'play-large',
+            'rewind',
+            'play',
+            'fast-forward',
             'progress',
             'current-time',
             'mute',
@@ -95,7 +100,7 @@ const VideoPlayer = ({ videoUrl }) => {
       }
 
       // Add mobile-specific event listeners for better performance
-     
+
     }
 
     // Cleanup player instance
@@ -117,7 +122,7 @@ const VideoPlayer = ({ videoUrl }) => {
   return (
     <div
       ref={containerRef}
-      className={`${aspectClass} w-full h-full relative`} 
+      className={`${aspectClass} w-full h-full relative`}
     />
   );
 };
