@@ -1,7 +1,5 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import Plyr from 'plyr';
-import 'plyr/dist/plyr.css';
 
 const VideoPlayer = ({ videoUrl }) => {
   const playerRef = useRef(null);
@@ -32,75 +30,81 @@ const VideoPlayer = ({ videoUrl }) => {
   const aspectClass = videoId ? 'aspect-w-16 aspect-h-9' : 'aspect-w-16 aspect-h-9';
 
   useEffect(() => {
+    let plyrInstance = null;
+    let Plyr = null;
+
     if (typeof window !== 'undefined' && videoId && containerRef.current) {
-      // Clear any previous player content
-      containerRef.current.innerHTML = '';
+      // Dynamically import Plyr and its CSS only on client
+      import('plyr').then((module) => {
+        Plyr = module.default;
+        import('plyr/dist/plyr.css');
 
-      if (videoType === 'youtube') {
-        // YouTube video setup
-        containerRef.current.innerHTML = `
-          <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="${videoId}"></div>
-        `;
+        // Clear any previous player content
+        containerRef.current.innerHTML = '';
 
-        playerRef.current = new Plyr('#player', {
-          controls: [
-            'play-large',
-            'rewind',
-            'play',
-            'fast-forward',
-            'progress',
-            'current-time',
-            'mute',
-            'volume',
-            'settings',
-            'fullscreen'
-          ],
-          settings: ['quality', 'speed'],
-          youtube: {
-            noCookie: false,
-            rel: 0,
-            showinfo: 0,
-            iv_load_policy: 3,
-            modestbranding: 1
-          }
-        });
-      } else if (videoType === 'bunny') {
-        // Bunny.net video setup
-        containerRef.current.innerHTML = `
-          <iframe 
-            id="bunny-player"
-            src="${videoUrl}"
-            loading="lazy"
-            style="border: none; position: absolute; top: 0; height: 100%; width: 100%;"
-            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-            allowfullscreen="true">
-          </iframe>
-        `;
+        if (videoType === 'youtube') {
+          // YouTube video setup
+          containerRef.current.innerHTML = `
+            <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="${videoId}"></div>
+          `;
 
-        // Apply Plyr to the iframe for consistent controls
-        playerRef.current = new Plyr('#bunny-player', {
-          controls: [
-            'play-large',
-            'rewind',
-            'play',
-            'fast-forward',
-            'progress',
-            'current-time',
-            'mute',
-            'volume',
-            'fullscreen'
-          ],
-          fullscreen: {
-            enabled: true,
-            fallback: true,
-            iosNative: true,
-            container: null
-          }
-        });
-      }
+          plyrInstance = new Plyr('#player', {
+            controls: [
+              'play-large',
+              'rewind',
+              'play',
+              'fast-forward',
+              'progress',
+              'current-time',
+              'mute',
+              'volume',
+              'settings',
+              'fullscreen'
+            ],
+            settings: ['quality', 'speed'],
+            youtube: {
+              noCookie: false,
+              rel: 0,
+              showinfo: 0,
+              iv_load_policy: 3,
+              modestbranding: 1
+            }
+          });
+        } else if (videoType === 'bunny') {
+          // Bunny.net video setup
+          containerRef.current.innerHTML = `
+            <iframe 
+              id="bunny-player"
+              src="${videoUrl}"
+              loading="lazy"
+              style="border: none; position: absolute; top: 0; height: 100%; width: 100%;"
+              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+              allowfullscreen="true">
+            </iframe>
+          `;
 
-      // Add mobile-specific event listeners for better performance
-
+          plyrInstance = new Plyr('#bunny-player', {
+            controls: [
+              'play-large',
+              'rewind',
+              'play',
+              'fast-forward',
+              'progress',
+              'current-time',
+              'mute',
+              'volume',
+              'fullscreen'
+            ],
+            fullscreen: {
+              enabled: true,
+              fallback: true,
+              iosNative: true,
+              container: null
+            }
+          });
+        }
+        playerRef.current = plyrInstance;
+      });
     }
 
     // Cleanup player instance
