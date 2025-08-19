@@ -14,6 +14,7 @@ import { Bar, Line } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
 import { FaUser, FaEye, FaClock, FaList, FaTimes, FaWhatsapp, FaDownload, FaFilePdf, FaImage, FaGraduationCap, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRegCircle, FaChartBar, FaUsers, FaPlayCircle, FaTrophy, FaSearch, FaChartLine, FaUserCheck, FaClipboardCheck, FaStar, FaChevronDown, FaChevronUp, FaBookmark, FaPlay, FaHistory, FaBookOpen, FaBookReader, FaCircle, FaFileAlt, FaCalendar, FaCalendarAlt, FaCalendarWeek, FaQuestionCircle, FaChevronRight, FaChevronLeft, FaUserGraduate } from "react-icons/fa";
 import Cookies from 'js-cookie';
+import { FaHeartCircleExclamation } from 'react-icons/fa6';
 
 const getAuthHeaders = () => ({
     'Content-Type': 'application/json',
@@ -2474,7 +2475,7 @@ const StudentFollowup = () => {
                                                                 ? 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-400 border border-yellow-500/20'
                                                                 : 'bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 border border-red-500/20'
                                                         }`}>
-                                                        {score >= 80 ? <FaCheckCircle /> : score >= 60 ? <FaExclamationCircle /> : <FaTimesCircle />}
+                                                        {score >= 80 ? <FaCheckCircle /> : score >= 60 ? <FaHeartCircleExclamation /> : <FaTimesCircle />}
                                                         <span>{quiz.quizGrade}/{quiz.numofqus} ({score}%)</span>
                                                     </div>
                                                 </div>
