@@ -17,6 +17,7 @@ import {
     Legend
 } from 'chart.js';
 import { FaHeartCircleExclamation } from "react-icons/fa6";
+import Link from "next/link";
 
 // Register ChartJS components
 ChartJS.register(
@@ -793,18 +794,22 @@ export default function StudentProfilePage() {
 
                                     {/* Contact Information */}
                                     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="flex items-center gap-3 bg-gradient-to-r from-green-500/20 to-green-600/20 px-5 py-3 rounded-xl border border-green-500/20">
-                                            <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
-                                                <FaWhatsapp className="text-green-400 text-xl" />
+                                        <Link href={`https://wa.me/20${userInfo.phoneNumber}`} target="_blank">
+                                            <div className="flex items-center gap-3 bg-gradient-to-r from-green-500/20 to-green-600/20 px-5 py-3 rounded-xl border border-green-500/20">
+                                                <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                                                    <FaWhatsapp className="text-green-400 text-xl" />
+                                                </div>
+                                                <span className="text-white font-medium">رقم الطالب: {userInfo.phoneNumber}</span>
                                             </div>
-                                            <span className="text-white font-medium">رقم الطالب: {userInfo.phoneNumber}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 bg-gradient-to-r from-green-500/20 to-green-600/20 px-5 py-3 rounded-xl border border-green-500/20">
-                                            <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
-                                                <FaWhatsapp className="text-green-400 text-xl" />
+                                        </Link>
+                                        <Link href={`https://wa.me/20${userInfo.parentPhoneNumber}`} target="_blank">
+                                            <div className="flex items-center gap-3 bg-gradient-to-r from-green-500/20 to-green-600/20 px-5 py-3 rounded-xl border border-green-500/20">
+                                                <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                                                    <FaWhatsapp className="text-green-400 text-xl" />
+                                                </div>
+                                                <span className="text-white font-medium">رقم ولي الأمر: {userInfo.parentPhoneNumber}</span>
                                             </div>
-                                            <span className="text-white font-medium">رقم ولي الأمر: {userInfo.parentPhoneNumber}</span>
-                                        </div>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
@@ -1001,7 +1006,7 @@ export default function StudentProfilePage() {
 
 
                     <WatchHistorySection />
-                    
+
                     <div className="gap-4 md:gap-8 lg:gap-12">
                         {/* Group watchHistory by courseId */}
                         {Object.values(watchHistory.reduce((acc, entry) => {
