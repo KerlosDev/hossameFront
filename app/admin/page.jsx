@@ -12,7 +12,7 @@ import PaymentsList from './components/PaymentsList';
 import ExamAnalysis from './components/ExamAnalysis';
 import CourseManager from './components/CourseManager';
 import ExamManage from './components/ExamManage';
-import StudentFollowup from '../components/StudentFollowup';
+import StudentFollowup from './components/StudentFollowup';
 import OffersManagement from './components/OffersManagement';
 import NotFound from '../not-found';
 import AdminBooks from '../components/AdminBooks';
@@ -24,7 +24,7 @@ import WalletSettings from './components/WalletSettings';
 export default function MathLMSAdmin() {
     const [isAdmin, setIsAdmin] = useState(null); // To track admin status
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState('dashboard');
+    const [activeTab, setActiveTab] = useState(null); // Start as null, set after role check
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -172,71 +172,72 @@ export default function MathLMSAdmin() {
             <MathBackground />
 
             <div className="relative z-10">
+                {/* Only render main content when activeTab is set */}
+                {activeTab && (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Sidebar */}
+                        <AdminSidebar
+                            activeTab={activeTab}
+                            setActiveTab={setActiveTab}
+                            adminData={adminData}
+                            showLogoutConfirm={showLogoutConfirm}
+                            setShowLogoutConfirm={setShowLogoutConfirm}
+                        />
 
-                {/* Main Content */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Sidebar */}
-                    <AdminSidebar
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        adminData={adminData}
-                        showLogoutConfirm={showLogoutConfirm}
-                        setShowLogoutConfirm={setShowLogoutConfirm}
-                    />
+                        {/* Main Content Area */}
+                        <main className="lg:col-span-9 space-y-6">
+                            {activeTab === 'dashboard' && adminData.userRole === 'admin' && (
+                                <>
+                                    <DashboardStats />
+                                </>
+                            )}
 
-                    {/* Main Content Area */}
-                    <main className="lg:col-span-9 space-y-6">
-                        {activeTab === 'dashboard' && adminData.userRole === 'admin' && (
-                            <>
-                                <DashboardStats />
-                            </>
-                        )}
+                            {activeTab === 'students' && adminData.userRole === 'admin' && (
+                                <StudentsList />
+                            )}
 
-                        {activeTab === 'students' && adminData.userRole === 'admin' && (
-                            <StudentsList />
-                        )}
+                            {activeTab === 'courses' && adminData.userRole === 'admin' && (
+                                <CourseManager />
+                            )}
 
-                        {activeTab === 'courses' && adminData.userRole === 'admin' && (
-                            <CourseManager />
-                        )}
+                            {activeTab === 'followup' && (adminData.userRole === 'admin' || adminData.userRole === 'follow') && (
+                                <StudentFollowup />
+                            )}
 
-                        {activeTab === 'followup' && (adminData.userRole === 'admin' || adminData.userRole === 'follow') && (
-                            <StudentFollowup />
-                        )}
+                            {activeTab === 'payments' && adminData.userRole === 'admin' && (
+                                <PaymentsList />
+                            )}
 
-                        {activeTab === 'payments' && adminData.userRole === 'admin' && (
-                            <PaymentsList />
-                        )}
+                            {activeTab === 'notifications' && adminData.userRole === 'admin' && (
+                                <NotificationManagement />
+                            )}
 
-                        {activeTab === 'notifications' && adminData.userRole === 'admin' && (
-                            <NotificationManagement />
-                        )}
+                            {activeTab === 'exam' && (adminData.userRole === 'admin' || adminData.userRole === 'follow') && (
+                                <ExamAnalysis />
+                            )}
 
-                        {activeTab === 'exam' && (adminData.userRole === 'admin' || adminData.userRole === 'follow') && (
-                            <ExamAnalysis />
-                        )}
+                            {activeTab === 'examMangae' && (adminData.userRole === 'admin' || adminData.userRole === 'instructor') && (
+                                <ExamManage />
+                            )}
 
-                        {activeTab === 'examMangae' && (adminData.userRole === 'admin' || adminData.userRole === 'instructor') && (
-                            <ExamManage />
-                        )}
+                            {activeTab === 'books' && adminData.userRole === 'admin' && (
+                                <AdminBooks />
+                            )}
 
-                        {activeTab === 'books' && adminData.userRole === 'admin' && (
-                            <AdminBooks />
-                        )}
+                            {activeTab === 'offers' && adminData.userRole === 'admin' && (
+                                <OffersManagement />
+                            )}
 
-                        {activeTab === 'offers' && adminData.userRole === 'admin' && (
-                            <OffersManagement />
-                        )}
+                            {activeTab === 'analyses' && adminData.userRole === 'admin' && (
+                                <CoursesAnalyses />
+                            )}
 
-                        {activeTab === 'analyses' && adminData.userRole === 'admin' && (
-                            <CoursesAnalyses />
-                        )}
-
-                        {activeTab === 'settings' && adminData.userRole === 'admin' && (
-                            <WalletSettings />
-                        )}
-                    </main>
-                </div>
+                            {activeTab === 'settings' && adminData.userRole === 'admin' && (
+                                <WalletSettings />
+                            )}
+                        </main>
+                    </div>
+                )}
             </div>
         </div>
     );

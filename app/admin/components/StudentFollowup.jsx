@@ -76,6 +76,7 @@ const StudentFollowup = () => {
     const [enrolledLoading, setEnrolledLoading] = useState(false);
     const [enrolledSearchTerm, setEnrolledSearchTerm] = useState('');
     const [enrolledSortBy, setEnrolledSortBy] = useState('views'); // 'views', 'recent' or 'inactive'
+    const [enrolledCourseFilter, setEnrolledCourseFilter] = useState('all'); // Add this state near other enrolled tab states
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -240,6 +241,7 @@ const StudentFollowup = () => {
                         lessons: [], // Will be populated by watch history if available
                         lessonViews: {},
                         hasWatchHistory: totalWatchedLessons > 0,
+                        studentId: student.studentInfo.id,
                         // Add phone numbers from the API response
                         phoneNumber: student.studentInfo.phoneNumber,
                         parentPhoneNumber: student.studentInfo.parentPhoneNumber,
@@ -330,7 +332,9 @@ const StudentFollowup = () => {
                         enrollmentDetails: student.enrollmentStatus.enrolledCourses,
                         lessons: [], // Will be populated by watch history if available
                         lessonViews: {},
-                        hasWatchHistory: totalWatchedLessons > 0
+                        hasWatchHistory: totalWatchedLessons > 0,
+                        studentId: student.studentInfo.id // <-- Add this line
+
                     };
                 });
 
@@ -527,64 +531,6 @@ const StudentFollowup = () => {
             '20' + cleanNumber.substring(1) :
             cleanNumber;
         return `https://wa.me/${fullNumber}`;
-    }; const prepareStudentChartData = () => {
-        // Initialize with all enrolled courses
-        const courseStats = {};
-
-        // First, add all enrolled courses with zero stats
-        if (selectedStudent && selectedStudent.enrollmentDetails) {
-            selectedStudent.enrollmentDetails.forEach(course => {
-                courseStats[course.courseName] = {
-                    totalViews: 0,
-                    uniqueLessons: new Set(),
-                    enrollmentDate: course.enrollmentDate,
-                    totalLessons: course.chapters.reduce((total, chapter) =>
-                        total + chapter.lessons.length, 0)
-                };
-            });
-        }
-
-        // Then add watch history data if available
-        if (watchHistory && watchHistory.length > 0) {
-            watchHistory.forEach(entry => {
-                const courseName = entry.courseId.name;
-                if (!courseStats[courseName]) {
-                    courseStats[courseName] = {
-                        totalViews: 0,
-                        uniqueLessons: new Set(),
-                        enrollmentDate: null,
-                        totalLessons: 0
-                    };
-                }
-                courseStats[courseName].totalViews += entry.watchedCount;
-                courseStats[courseName].uniqueLessons.add(entry.lessonId);
-            });
-        }
-
-        // Prepare chart data
-        return {
-            labels: Object.keys(courseStats),
-            datasets: [{
-                label: 'عدد المشاهدات',
-                data: Object.values(courseStats).map(stats => stats.totalViews),
-                backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                borderColor: 'rgb(59, 130, 246)',
-                borderWidth: 1
-            }, {
-                label: 'عدد الدروس المشاهدة',
-                data: Object.values(courseStats).map(stats => stats.uniqueLessons.size),
-                backgroundColor: 'rgba(147, 51, 234, 0.5)',
-                borderColor: 'rgb(147, 51, 234)',
-                borderWidth: 1
-            }, {
-                label: 'إجمالي الدروس المتاحة',
-                data: Object.values(courseStats).map(stats => stats.totalLessons),
-                backgroundColor: 'rgba(234, 179, 8, 0.5)',
-                borderColor: 'rgb(234, 179, 8)',
-                borderWidth: 1,
-                borderDash: [5, 5]
-            }]
-        };
     };
 
     const fetchQuizResults = async (studentId) => {
@@ -935,7 +881,8 @@ const StudentFollowup = () => {
                 }
             }
         }
-    }; const ExamSection = () => {
+    };
+    const ExamSection = () => {
         console.log("ExamSection rendering with:", {
             filteredExamsCount: filteredExams.length,
             quizResultsCount: quizResults.length,
@@ -1051,180 +998,12 @@ const StudentFollowup = () => {
         );
     };
 
-    const loadRatingForEdit = (rating) => {
-        setRatingStars(rating.stars);
-        setRatingStatus(rating.status);
-        setRatingComment(rating.comment || '');
-        setRatingWeek(rating.week);
-        setEditingRatingId(rating._id); // We'll use this to know it's an edit
-    };
 
-
-    const WatchHistorySection = () => {
-        // Get all enrolled courses from the selected student
-        const enrolledCourses = selectedStudent?.enrollmentDetails || [];
-
-        // Create a map of watched lessons by courseId for quick lookup
-        const watchedLessonsMap = new Map();
-        watchHistory.forEach(entry => {
-            if (!watchedLessonsMap.has(entry.courseId.name)) {
-                watchedLessonsMap.set(entry.courseId.name, new Set());
-            }
-            watchedLessonsMap.get(entry.courseId.name).add(entry.lessonId);
-        });
-
-        return (
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-xl">
-                <div className="flex items-start justify-between mb-6">
-                    <div>
-                        <h3 className="text-2xl font-bold text-white mb-2">سجل المشاهدة</h3>
-                        <p className="text-white/60 text-sm">تفاصيل مشاهدات الطالب للدروس المختلفة</p>
-                    </div>
-                    <div className="p-2 bg-blue-500/20 rounded-xl">
-                        <FaHistory className="text-blue-400 text-xl" />
-                    </div>
-                </div>
-                <div className="space-y-6">
-                    {/* Summary statistics */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl p-6 border border-blue-500/20 group hover:border-blue-400/40 transition-all duration-300">
-                            <div className="flex items-start justify-between mb-2">
-                                <div className="text-sm text-white/70">إجمالي المشاهدات</div>
-                                <div className="p-2 bg-blue-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                    <FaEye className="text-blue-400 text-xl" />
-                                </div>
-                            </div>
-                            <div className="text-3xl text-white font-bold">
-                                {watchHistory.reduce((sum, entry) => sum + entry.watchedCount, 0)}
-                            </div>
-                        </div>
-                        <div className="bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-xl p-6 border border-purple-500/20 group hover:border-purple-400/40 transition-all duration-300">
-                            <div className="flex items-start justify-between mb-2">
-                                <div className="text-sm text-white/70">الدروس المشاهدة</div>
-                                <div className="p-2 bg-purple-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                    <FaBookOpen className="text-purple-400" />
-                                </div>
-                            </div>
-                            <div className="text-3xl text-white font-bold">
-                                {new Set(watchHistory.map(entry => entry.lessonId)).size}
-                            </div>
-                        </div>
-                        <div className="bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-xl p-6 border border-green-500/20 group hover:border-green-400/40 transition-all duration-300">
-                            <div className="text-2xl font-bold text-green-400">
-                                {enrolledCourses.length}
-                            </div>
-                            <div className="text-sm text-white/60">الكورسات المسجل فيها</div>
-                        </div>
-                    </div>
-
-                    {/* Course List with Watch Status */}
-                    <div className="space-y-4">
-                        {enrolledCourses.map((course, courseIndex) => {
-                            const totalLessons = course.chapters.reduce((total, chapter) =>
-                                total + chapter.lessons.length, 0);
-                            const watchedLessons = watchedLessonsMap.get(course.courseName)?.size || 0;
-                            const progress = totalLessons > 0 ? (watchedLessons / totalLessons) * 100 : 0;
-
-                            return (
-                                <div key={courseIndex} className="bg-gradient-to-r from-slate-900/30 to-slate-800/30 rounded-xl p-6 border border-white/5 hover:border-white/10 transition-all duration-300">
-                                    <div className="mb-4">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-blue-500/20 rounded-xl">
-                                                    <FaGraduationCap className="text-blue-400" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-lg text-white font-medium mb-1">{course.courseName}</h4>
-                                                    <span className="text-sm text-white/60">
-                                                        تاريخ التسجيل: {new Date(course.enrollmentDate).toLocaleDateString('ar-EG')}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className={`px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2
-                                                ${progress >= 80
-                                                    ? 'bg-gradient-to-r from-green-500/20 to-green-600/20 text-green-400 border border-green-500/20'
-                                                    : progress >= 50
-                                                        ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-400 border border-blue-500/20'
-                                                        : 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-400 border border-yellow-500/20'
-                                                }`}>
-                                                <FaBookReader />
-                                                <span>{watchedLessons} / {totalLessons} درس</span>
-                                            </div>
-                                        </div>
-                                        {/* Progress bar */}
-                                        <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
-                                            <div
-                                                className={`h-full rounded-full transition-all duration-300 ${progress >= 80
-                                                    ? 'bg-gradient-to-r from-green-500 to-green-400'
-                                                    : progress >= 50
-                                                        ? 'bg-gradient-to-r from-blue-500 to-blue-400'
-                                                        : 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                                                    }`}
-                                                style={{ width: `${progress}%` }}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Chapter List */}
-                                    <div className="space-y-4 mt-6">
-                                        {course.chapters.map((chapter, chapterIndex) => (
-                                            <div key={chapterIndex} className="bg-gradient-to-r from-slate-800/30 to-slate-700/30 rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <div className="p-2 bg-purple-500/20 rounded-xl">
-                                                        <FaBookmark className="text-purple-400" />
-                                                    </div>
-                                                    <h5 className="text-lg text-white font-medium">{chapter.chapterTitle}</h5>
-                                                </div>
-                                                <div className="space-y-3">
-                                                    {chapter.lessons.map((lesson, lessonIndex) => {
-                                                        const watchEntry = watchHistory.find(entry =>
-                                                            entry.lessonTitle === lesson.lessonTitle && entry.courseId.name === course.courseName
-                                                        );
-
-                                                        return (
-                                                            <div
-                                                                key={lessonIndex}
-                                                                className="flex items-center justify-between bg-gradient-to-r from-slate-900/30 to-slate-800/30 p-4 rounded-xl border border-white/5 hover:border-white/10 transition-all duration-300"
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`p-2 rounded-xl ${watchEntry ? 'bg-green-500/20' : 'bg-white/10'}`}>
-                                                                        {lesson.isWatched || watchEntry ? (
-                                                                            <FaPlay className="text-green-400" />
-                                                                        ) : (
-                                                                            <FaCircle className="text-white/40" />
-                                                                        )}
-                                                                    </div>
-                                                                    <span className="text-white font-medium">{lesson.lessonTitle}</span>
-                                                                </div>
-                                                                {watchEntry && (
-                                                                    <div className="flex items-center gap-2 bg-green-500/20 px-3 py-1.5 rounded-xl">
-                                                                        <FaEye className="text-green-400" />
-                                                                        <span className="text-green-400 font-medium">
-                                                                            {watchEntry.watchedCount} مشاهدة
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {enrolledCourses.length === 0 && (
-                    <div className="text-center py-8 text-white/60">
-                        الطالب غير مسجل في أي كورس
-                    </div>
-                )}
-            </div>
+    const filteredEnrolledStudents = enrolledCourseFilter === 'all'
+        ? enrolledStudentList
+        : enrolledStudentList.filter(student =>
+            student.enrollmentDetails.some(course => course.courseName === enrolledCourseFilter)
         );
-    };
 
     return (
         <div ref={reportRef} className="p-6 space-y-6">
@@ -1271,6 +1050,7 @@ const StudentFollowup = () => {
                             <span>الطلاب المشتركين</span>
                         </div>
                     </button>
+                    
                 </div>
 
                 <div className="flex gap-2">
@@ -1294,12 +1074,13 @@ const StudentFollowup = () => {
 
             {activeTab === 'enrolled' ? (
                 <div className="space-y-6">
-                    {/* Header with search and filters */}
+                    {/* Header with search, filters, and course filter */}
                     <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-6 border border-white/10 shadow-xl">
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                             <h2 className="text-2xl font-bold text-white font-arabicUI3">قائمة الطلاب المشتركين</h2>
-
                             <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                                {/* Course Filter */}
+                                
                                 {/* Search bar */}
                                 <div className="relative flex-grow">
                                     <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
@@ -1312,7 +1093,7 @@ const StudentFollowup = () => {
                                         value={enrolledSearchTerm}
                                         onChange={(e) => {
                                             setEnrolledSearchTerm(e.target.value);
-                                            setEnrolledCurrentPage(1); // Reset to first page on search
+                                            setEnrolledCurrentPage(1);
                                         }}
                                     />
                                 </div>
@@ -1323,7 +1104,7 @@ const StudentFollowup = () => {
                                     value={enrolledSortBy}
                                     onChange={(e) => {
                                         setEnrolledSortBy(e.target.value);
-                                        setEnrolledCurrentPage(1); // Reset to first page on sort change
+                                        setEnrolledCurrentPage(1);
                                     }}
                                 >
                                     <option value="views">الأكثر مشاهدة</option>
@@ -1340,48 +1121,36 @@ const StudentFollowup = () => {
                             <table className="min-w-full divide-y divide-slate-700">
                                 <thead className="bg-slate-800/70">
                                     <tr>
-                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            الطالب
-                                        </th>
-                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            الكورسات
-                                        </th>
-                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            المشاهدات
-                                        </th>
-                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            النشاط
-                                        </th>
-                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            الحالة
-                                        </th>
-                                        <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            تواصل
-                                        </th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">الطالب</th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">الكورسات</th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">المشاهدات</th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">النشاط</th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">الحالة</th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">تواصل</th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">الملف</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-slate-800/30 divide-y divide-slate-700">
                                     {enrolledLoading ? (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-8 text-center text-white">
+                                            <td colSpan="7" className="px-6 py-8 text-center text-white">
                                                 <div className="flex items-center justify-center">
                                                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
                                                     <span className="ms-3">جاري التحميل...</span>
                                                 </div>
                                             </td>
                                         </tr>
-                                    ) : enrolledStudentList.length === 0 ? (
+                                    ) : filteredEnrolledStudents.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-8 text-center text-white">
-                                                لا يوجد طلاب مشتركين في أي كورس
+                                            <td colSpan="7" className="px-6 py-8 text-center text-white">
+                                                لا يوجد طلاب مشتركين في هذا الكورس
                                             </td>
                                         </tr>
                                     ) : (
-                                        enrolledStudentList.map((student, index) => (
+                                        filteredEnrolledStudents.map((student, index) => (
                                             <tr key={index}
                                                 className={`transition-all duration-150 hover:bg-slate-700/40 cursor-pointer ${selectedStudent?.email === student.email ? 'bg-green-900/30 border-l-4 border-green-500' : ''}`}
-                                                onClick={() => handleStudentSelect(student)}
-                                            >
+                                             >
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
                                                         <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-semibold">
@@ -1394,9 +1163,12 @@ const StudentFollowup = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                                    <div className="flex items-center">
-                                                        <FaBookOpen className="mr-2 text-green-500" />
-                                                        <span>{student.enrolledCourses}</span>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {student.enrollmentDetails.map((course, idx) => (
+                                                            <span key={idx} className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded-lg text-xs mr-1">
+                                                                {course.courseName}
+                                                            </span>
+                                                        ))}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
@@ -1452,6 +1224,17 @@ const StudentFollowup = () => {
                                                             <span className="text-xs text-gray-500">لا يوجد أرقام</span>
                                                         )}
                                                     </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                    <a
+                                                        href={`/admin/${student.studentId}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors inline-flex items-center gap-2"
+                                                    >
+                                                        <FaList className="text-blue-400" />
+                                                        <span className="text-white text-sm font-medium">عرض الملف</span>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         ))
@@ -1852,12 +1635,15 @@ const StudentFollowup = () => {
                                                     </div>
                                                 </td>
                                                 <td className="py-4 px-4 text-center">
-                                                    <button
-                                                        onClick={() => handleStudentSelect(student)}
-                                                        className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
+                                                    <a
+                                                        href={`/admin/${student.studentId}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors inline-flex items-center gap-2"
                                                     >
                                                         <FaList className="text-blue-400" />
-                                                    </button>
+                                                        <span className="text-white text-sm font-medium">عرض الملف</span>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         ))}
@@ -1871,6 +1657,7 @@ const StudentFollowup = () => {
                             <div className="flex justify-center items-center gap-4 mt-6">
                                 <button
                                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+
                                     disabled={currentPage === 1}
                                     className="px-4 py-2 bg-gradient-to-br from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 disabled:opacity-50 rounded-lg transition-all duration-300 text-white border border-blue-500/20 hover:border-blue-400/40"
                                 >
@@ -1968,582 +1755,8 @@ const StudentFollowup = () => {
                         )}
                     </div>
                 </>
-            ) : (
-                selectedStudent && (
-                    <div className="space-y-6">
-                        {/* Student Info Cards */}
-
-
-                        {/* Course Progress Section */}
-
-
-                        {/* Redesigned Student Profile Section */}
-                        {activeTab === 'details' && selectedStudent && (
-                            <div className="space-y-6">
-                                {/* Student Profile Header */}
-                                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-xl">
-                                    <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
-                                        <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center transform hover:scale-105 transition-all duration-300 shadow-lg shadow-blue-500/25">
-                                            <span className="text-4xl text-white font-bold">
-                                                {selectedStudent.userName[0].toUpperCase()}
-                                            </span>
-                                        </div>
-                                        <div className="flex-1">
-                                            <h2 className="text-3xl font-bold text-white mb-3">{selectedStudent.userName}</h2>
-                                            <div className="flex flex-wrap gap-4">
-                                                <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl px-4 py-2 border border-blue-500/20">
-                                                    <FaEye className="text-blue-400" />
-                                                    <span className="text-white font-medium">
-                                                        {watchHistory.reduce((total, entry) => total + entry.watchedCount, 0)} مشاهدة
-                                                    </span>
-                                                </div>
-                                                {watchHistory.length > 0 && (
-                                                    <div className="flex items-center gap-2 bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-xl px-4 py-2 border border-green-500/20">
-                                                        <FaClock className="text-green-400" />
-                                                        <span className="text-white font-medium">
-                                                            آخر نشاط: {new Date(watchHistory[0].lastWatchedAt).toLocaleDateString('ar-EG')}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Contact Information */}
-                                            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {whatsappNumbers[selectedStudent.email]?.studentWhatsApp && (
-                                                    <a href={`https://wa.me/2${whatsappNumbers[selectedStudent.email].studentWhatsApp}`}
-                                                        target="_blank"
-                                                        className="flex items-center gap-3 bg-gradient-to-r from-green-500/20 to-green-600/20 px-5 py-3 rounded-xl border border-green-500/20 hover:border-green-400/40 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/10 group">
-                                                        <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                                                            <FaWhatsapp className="text-green-400 text-xl" />
-                                                        </div>
-                                                        <span className="text-white font-medium">رقم الطالب: {whatsappNumbers[selectedStudent.email].studentWhatsApp}</span>
-                                                    </a>
-                                                )}
-                                                {whatsappNumbers[selectedStudent.email]?.parentWhatsApp && (
-                                                    <a href={`https://wa.me/2${whatsappNumbers[selectedStudent.email].parentWhatsApp}`}
-                                                        target="_blank"
-                                                        className="flex items-center gap-3 bg-gradient-to-r from-green-500/20 to-green-600/20 px-5 py-3 rounded-xl border border-green-500/20 hover:border-green-400/40 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/10 group">
-                                                        <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                                                            <FaWhatsapp className="text-green-400 text-xl" />
-                                                        </div>
-                                                        <span className="text-white font-medium">رقم ولي الأمر: {whatsappNumbers[selectedStudent.email].parentWhatsApp}</span>
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Enrollment Status */}
-                                {selectedStudent.enrollmentStatus?.enrolledCourses?.length > 0 && (
-                                    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-xl">
-                                        <div className="flex items-start justify-between mb-6">
-                                            <div>
-                                                <h3 className="text-2xl font-bold text-white mb-2">الكورسات المشترك بها</h3>
-                                                <p className="text-white/60 text-sm">قائمة الكورسات المسجل بها الطالب وحالة كل كورس</p>
-                                            </div>
-                                            <div className="p-2 bg-blue-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                                <FaGraduationCap className="text-blue-400 text-xl" />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {selectedStudent.enrollmentStatus.enrolledCourses.map((course, idx) => (
-                                                <div key={idx} className="bg-gradient-to-r from-slate-800/30 to-slate-900/30 rounded-xl p-6 border border-white/5 hover:border-white/10 transition-all duration-300 group">
-                                                    <div className="flex justify-between items-center mb-3">
-                                                        <div>
-                                                            <h4 className="text-lg font-medium text-white">{course.courseName}</h4>
-                                                            {course.fromPackage && course.packageName && (
-                                                                <div className="text-xs text-blue-400 mt-1">من باقة: {course.packageName}</div>
-                                                            )}
-                                                        </div>
-                                                        <span className={`px-4 py-1.5 rounded-xl text-sm font-medium ${course.paymentStatus === 'paid'
-                                                            ? 'bg-gradient-to-r from-green-500/20 to-green-600/20 text-green-400 border border-green-500/20'
-                                                            : 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-400 border border-yellow-500/20'
-                                                            }`}>
-                                                            {course.paymentStatus === 'paid' ? 'مفعل' : 'قيد الانتظار'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-white/60 text-sm">
-                                                        <FaCalendar className="text-blue-400" />
-                                                        تاريخ التسجيل: {new Date(course.enrollmentDate).toLocaleDateString('ar-EG')}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Activity Status */}
-                                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-xl">
-                                    <div className="flex items-start justify-between mb-6">
-                                        <div>
-                                            <h3 className="text-2xl font-bold text-white mb-2">حالة النشاط</h3>
-                                            <p className="text-white/60 text-sm">إحصائيات وتفاصيل نشاط الطالب</p>
-                                        </div>
-                                        <div className="p-2 bg-purple-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                            <FaChartLine className="text-purple-400 text-xl" />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <div className="bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl p-6 border border-blue-500/20 group hover:border-blue-400/40 transition-all duration-300">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="text-sm text-white/70">إجمالي المشاهدات</div>
-                                                <div className="p-2 bg-blue-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                                    <FaEye className="text-blue-400" />
-                                                </div>
-                                            </div>
-                                            <div className="text-3xl text-white font-bold">
-                                                {watchHistory.reduce((total, entry) => total + entry.watchedCount, 0)}
-                                            </div>
-                                        </div>
-                                        <div className="bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-xl p-6 border border-purple-500/20 group hover:border-purple-400/40 transition-all duration-300">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="text-sm text-white/70">الحالة</div>
-                                                <div className="p-2 bg-purple-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                                    <FaUserCheck className="text-purple-400" />
-                                                </div>
-                                            </div>
-                                            <div className={`text-3xl font-bold ${selectedStudent.status?.color}`}>
-                                                {selectedStudent.status?.label}
-                                            </div>
-                                        </div>
-                                        <div className="bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-xl p-6 border border-green-500/20 group hover:border-green-400/40 transition-all duration-300">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="text-sm text-white/70">آخر نشاط</div>
-                                                <div className="p-2 bg-green-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                                    <FaClock className="text-green-400" />
-                                                </div>
-                                            </div>
-                                            <div className="text-2xl text-white font-bold">
-                                                {watchHistory.length > 0
-                                                    ? new Date(watchHistory[0].lastWatchedAt).toLocaleDateString('ar-EG')
-                                                    : 'لم يبدأ بعد'}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Watch History Section */}
-
-                                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-8 border border-white/10 shadow-xl">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div>
-                                            <h3 className="text-2xl font-bold text-white mb-2">تقييم الطالب الأسبوعي</h3>
-                                            <p className="text-white/60 text-sm">قم بتقييم أداء الطالب هذا الأسبوع</p>
-                                        </div>
-                                        <div className="p-2 bg-yellow-500/20 rounded-xl">
-                                            <FaStar className="text-yellow-400 text-xl" />
-                                        </div>
-                                    </div>
-
-                                    {/* Rating Form */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                        <div>
-                                            <label className="text-white/70 block mb-1">التقييم (نجوم)</label>
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                max={5}
-                                                value={ratingStars}
-                                                onChange={(e) => setRatingStars(Number(e.target.value))}
-                                                className="w-full p-3 rounded-xl bg-white/5 text-white focus:outline-none border border-white/10"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-white/70 block mb-1">الحالة</label>
-                                            <select
-                                                value={ratingStatus}
-                                                onChange={(e) => setRatingStatus(e.target.value)}
-                                                className="w-full font-arabicUI3 p-3 rounded-xl bg-white/5 text-white focus:outline-none border border-white/10"
-                                            >
-                                                <option className='text-black' value="good">جيد</option>
-                                                <option className='text-black' value="bad">ضعيف</option>
-                                                <option className='text-black' value="average">متوسط</option>
-                                                <option className='text-black' value="excellent">ممتاز</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="text-white/70 block mb-1">ملاحظة</label>
-                                            <input
-                                                type="text"
-                                                value={ratingComment}
-                                                onChange={(e) => setRatingComment(e.target.value)}
-                                                className="w-full p-3 rounded-xl bg-white/5 text-white focus:outline-none border border-white/10"
-                                            />
-                                        </div>
-
-                                    </div>
-                                    <button
-                                        onClick={submitRating}
-                                        disabled={ratingLoading}
-                                        className="px-6 py-3 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 font-bold transition"
-                                    >
-                                        {ratingLoading ? 'جارٍ الإرسال...' : 'حفظ التقييم'}
-                                    </button>
-
-                                    {editingRatingId && (
-                                        <button
-                                            onClick={resetRatingForm}
-                                            className="ml-4 px-6 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold transition"
-                                        >
-                                            إلغاء التعديل
-                                        </button>
-                                    )}
-
-
-                                    {/* Past Ratings */}
-                                    <div className="mt-8">
-                                        <h4 className="text-white text-lg font-semibold mb-4">التقييمات السابقة</h4>
-                                        {studentRatings.map((rating, idx) => (
-                                            <div key={idx} className="p-4 rounded-xl border border-white/10 bg-white/5 text-white">
-                                                <div className="flex justify-between items-center">
-                                                    <div className="font-bold text-yellow-400">
-                                                        {rating.stars} ⭐ - {
-                                                            rating.status === 'good' ? 'جيد' :
-                                                                rating.status === 'bad' ? 'ضعيف' :
-                                                                    rating.status === 'average' ? 'متوسط' :
-                                                                        rating.status === 'excellent' ? 'ممتاز' : rating.status
-                                                        }
-                                                    </div>
-                                                    <span className="text-sm text-white/60">{rating.week}</span>
-                                                </div>
-                                                {rating.comment && (
-                                                    <div className="mt-1 text-sm text-white/80">{rating.comment}</div>
-                                                )}
-                                                <button
-                                                    onClick={() => loadRatingForEdit(rating)}
-                                                    className="mt-2 text-sm text-blue-400 underline hover:text-blue-300"
-                                                >
-                                                    تعديل
-                                                </button>
-                                            </div>
-                                        ))}
-
-                                    </div>
-                                </div>
-
-
-                                <WatchHistorySection />
-
-
-                            </div>
-                        )}                        {/* Course Progress Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Group watchHistory by courseId */}
-                            {Object.values(watchHistory.reduce((acc, entry) => {
-                                const courseId = entry.courseId._id;
-                                if (!acc[courseId]) {
-                                    acc[courseId] = {
-                                        courseId: courseId,
-                                        courseName: entry.courseId.name,
-                                        chapters: {},
-                                        totalViews: 0,
-                                        uniqueLessons: new Set(),
-                                        watchedLessons: []
-                                    };
-                                }
-
-                                // Add lesson to unique lessons set
-                                acc[courseId].uniqueLessons.add(entry.lessonId);
-
-                                // Add to total views
-                                acc[courseId].totalViews += entry.watchedCount;
-
-                                // Add to watched lessons array
-                                acc[courseId].watchedLessons.push({
-                                    lessonId: entry.lessonId,
-                                    lessonTitle: entry.lessonTitle,
-                                    chapterTitle: entry.chapterId.title,
-                                    watchedCount: entry.watchedCount,
-                                    lastWatchedAt: entry.lastWatchedAt
-                                });
-
-                                // Group by chapters
-                                if (!acc[courseId].chapters[entry.chapterId._id]) {
-                                    acc[courseId].chapters[entry.chapterId._id] = {
-                                        title: entry.chapterId.title,
-                                        lessons: []
-                                    };
-                                }
-                                acc[courseId].chapters[entry.chapterId._id].lessons.push({
-                                    lessonId: entry.lessonId,
-                                    lessonTitle: entry.lessonTitle,
-                                    watchedCount: entry.watchedCount,
-                                    lastWatchedAt: entry.lastWatchedAt
-                                });
-
-                                return acc;
-                            }, {})).map((course, index) => (
-                                <div key={index} className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-xl group">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-white mb-2">{course.courseName}</h3>
-                                            <p className="text-white/60 text-sm">سجل مشاهدة الطالب في هذا الكورس</p>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-blue-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                                <FaPlayCircle className="text-blue-400 text-xl" />
-                                            </div>
-                                            <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                                                {course.totalViews} مشاهدة
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-6">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="bg-white/5 rounded-lg p-4">
-                                                <div className="text-sm text-white/70 mb-1">الدروس المشاهدة</div>
-                                                <div className="text-xl text-white font-bold">
-                                                    {course.uniqueLessons.size} درس
-                                                </div>
-                                            </div>
-                                            <div className="bg-white/5 rounded-lg p-4">
-                                                <div className="text-sm text-white/70 mb-1">الفصول</div>
-                                                <div className="text-xl text-white font-bold">
-                                                    {Object.keys(course.chapters).length} فصل
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Lesson List Controls */}
-                                        <div className="flex justify-between items-center">
-                                            <button
-                                                onClick={() => setExpandedCourses(prev => ({
-                                                    ...prev,
-                                                    [course.courseId]: !prev[course.courseId]
-                                                }))}
-                                                className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl transition-all duration-200 group"
-                                            >
-                                                {expandedCourses[course.courseId] ? (
-                                                    <FaChevronUp className="text-blue-400 group-hover:scale-110 transition-transform" />
-                                                ) : (
-                                                    <FaChevronDown className="text-blue-400 group-hover:scale-110 transition-transform" />
-                                                )}
-                                                <span className="text-white font-medium">
-                                                    {expandedCourses[course.courseId] ? 'إخفاء الدروس' : 'عرض الدروس'}
-                                                </span>
-                                            </button>
-                                            {expandedCourses[course.courseId] && (
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => setLessonFilter(prev => ({
-                                                            ...prev,
-                                                            [course.courseId]: prev[course.courseId] === 'watched' ? null : 'watched'
-                                                        }))}
-                                                        className={`px-3 py-1 rounded-lg text-sm transition-colors ${lessonFilter[course.courseId] === 'watched'
-                                                            ? 'bg-green-500/20 text-green-400'
-                                                            : 'bg-white/5 text-white/70'
-                                                            }`}
-                                                    >
-                                                        تم المشاهدة
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setLessonFilter(prev => ({
-                                                            ...prev,
-                                                            [course.courseId]: prev[course.courseId] === 'unwatched' ? null : 'unwatched'
-                                                        }))}
-                                                        className={`px-3 py-1 rounded-lg text-sm transition-colors ${lessonFilter[course.courseId] === 'unwatched'
-                                                            ? 'bg-red-500/20 text-red-400'
-                                                            : 'bg-white/5 text-white/70'
-                                                            }`}
-                                                    >
-                                                        لم تتم المشاهدة
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>                                        {/* Chapters and Lessons List */}
-                                        {expandedCourses[course.courseId] && (
-                                            <div className="mt-4 space-y-4">
-                                                {Object.values(course.chapters).map((chapter, chapterIdx) => (
-                                                    <div key={chapterIdx} className="space-y-3 bg-gradient-to-r from-slate-900/30 to-slate-800/30 rounded-xl p-6 border border-white/5">
-                                                        <div className="flex items-center gap-3 mb-4">
-                                                            <div className="p-2 bg-purple-500/20 rounded-xl">
-                                                                <FaBookmark className="text-purple-400" />
-                                                            </div>
-                                                            <h4 className="text-lg text-white font-medium">{chapter.title}</h4>
-                                                        </div>
-                                                        {chapter.lessons.map((lesson, lessonIdx) => (
-                                                            <div key={lessonIdx}
-                                                                className="flex items-center justify-between bg-gradient-to-r from-green-500/10 to-green-600/10 p-4 rounded-xl border border-green-500/10 hover:border-green-500/20 transition-all duration-300"
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="p-2 bg-green-500/20 rounded-xl">
-                                                                        <FaPlay className="text-green-400" />
-                                                                    </div>
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-white font-medium">{lesson.lessonTitle}</span>
-                                                                        <span className="text-sm text-white/50 flex items-center gap-2">
-                                                                            <FaClock className="text-blue-400" />
-                                                                            آخر مشاهدة: {new Date(lesson.lastWatchedAt).toLocaleDateString('ar-EG')}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 bg-green-500/20 px-3 py-1.5 rounded-xl">
-                                                                    <FaEye className="text-green-400" />
-                                                                    <span className="text-green-400 font-medium">
-                                                                        {lesson.watchedCount} مشاهدة
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Exam Section */}
-                        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-xl">
-                            <div className="flex items-start justify-between mb-6">
-                                <div>
-                                    <h3 className="text-2xl font-bold text-white mb-2">الاختبارات والتقييمات</h3>
-                                    <p className="text-white/60 text-sm">نتائج الطالب في الاختبارات والتقييمات المختلفة</p>
-                                </div>
-                                <div className="p-2 bg-amber-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                    <FaClipboardCheck className="text-amber-400 text-xl" />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                <div className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 rounded-xl p-6 border border-amber-500/20 group hover:border-amber-400/40 transition-all duration-300">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="text-sm text-white/70">معدل النجاح</div>
-                                        <div className="p-2 bg-amber-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                            <FaTrophy className="text-amber-400" />
-                                        </div>
-                                    </div>
-                                    <div className="text-3xl text-white font-bold">
-                                        {quizResults.length > 0
-                                            ? Math.round((quizResults.reduce((acc, quiz) => acc + (quiz.quizGrade / quiz.numofqus * 100), 0) / quizResults.length)) + '%'
-                                            : '0%'}
-                                    </div>
-                                </div>
-
-                                <div className="bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-xl p-6 border border-green-500/20 group hover:border-green-400/40 transition-all duration-300">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="text-sm text-white/70">الاختبارات المكتملة</div>
-                                        <div className="p-2 bg-green-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                            <FaCheckCircle className="text-green-400" />
-                                        </div>
-                                    </div>
-                                    <div className="text-3xl text-white font-bold">{quizResults.length}</div>
-                                </div>
-
-                                <div className="bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl p-6 border border-blue-500/20 group hover:border-blue-400/40 transition-all duration-300">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="text-sm text-white/70">أعلى درجة</div>
-                                        <div className="p-2 bg-blue-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                            <FaStar className="text-blue-400" />
-                                        </div>
-                                    </div>
-                                    <div className="text-3xl text-white font-bold">
-                                        {quizResults.length > 0
-                                            ? Math.round(Math.max(...quizResults.map(quiz => (quiz.quizGrade / quiz.numofqus * 100)))) + '%'
-                                            : '0%'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                {quizResults.length === 0 ? (
-                                    <div className="text-center py-8 text-white/60">
-                                        لم يقم الطالب بإجراء أي اختبارات بعد
-                                    </div>
-                                ) : (
-                                    quizResults.map((quiz, index) => {
-                                        const score = Math.round((quiz.quizGrade / quiz.numofqus) * 100);
-                                        return (
-                                            <div key={index} className="bg-gradient-to-r from-slate-900/30 to-slate-800/30 rounded-xl p-6 border border-white/5 hover:border-white/10 transition-all duration-300">
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 bg-purple-500/20 rounded-xl">
-                                                            <FaFileAlt className="text-purple-400" />
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="text-lg font-medium text-white mb-1">{quiz.nameofquiz}</h4>
-                                                            <p className="text-sm text-white/60">محاولة {quiz.attemptNumber}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className={`px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2
-                                                        ${score >= 80
-                                                            ? 'bg-gradient-to-r from-green-500/20 to-green-600/20 text-green-400 border border-green-500/20'
-                                                            : score >= 60
-                                                                ? 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-400 border border-yellow-500/20'
-                                                                : 'bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-400 border border-red-500/20'
-                                                        }`}>
-                                                        {score >= 80 ? <FaCheckCircle /> : score >= 60 ? <FaHeartCircleExclamation /> : <FaTimesCircle />}
-                                                        <span>{quiz.quizGrade}/{quiz.numofqus} ({score}%)</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-6 text-sm text-white/60">
-                                                    <div className="flex items-center gap-2">
-                                                        <FaCalendar className="text-blue-400" />
-                                                        <span>{new Date(quiz.submittedAt).toLocaleDateString('ar-EG')}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <FaQuestionCircle className="text-purple-400" />
-                                                        <span>{quiz.numofqus} سؤال</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Recent Activity Chart */}
-                        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-xl">
-                            <div className="flex items-start justify-between mb-6">
-                                <div>
-                                    <h3 className="text-2xl font-bold text-white mb-2">نشاط المشاهدة</h3>
-                                    <p className="text-white/60 text-sm">رسم بياني يوضح نشاط مشاهدة الطالب للدروس</p>
-                                </div>
-                                <div className="p-2 bg-blue-500/20 rounded-xl group-hover:scale-110 transition-transform">
-                                    <FaChartBar className="text-blue-400 text-xl" />
-                                </div>
-                            </div>
-                            <div className="bg-gradient-to-br from-slate-900/30 to-slate-800/30 rounded-xl p-6 border border-white/5">
-                                <div className="h-[400px]">
-                                    <Bar
-                                        data={prepareStudentChartData(selectedStudent)}
-                                        options={{
-                                            ...chartOptions,
-                                            indexAxis: 'y',
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                                ...chartOptions.plugins,
-                                                legend: {
-                                                    display: false
-                                                }
-                                            },
-                                            scales: {
-                                                ...chartOptions.scales,
-                                                x: {
-                                                    ...chartOptions.scales?.x,
-                                                    grid: {
-                                                        color: 'rgba(255, 255, 255, 0.05)'
-                                                    }
-                                                },
-                                                y: {
-                                                    ...chartOptions.scales?.y,
-                                                    grid: {
-                                                        color: 'rgba(255, 255, 255, 0.05)'
-                                                    }
-                                                }
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )
-            )}
+            ) : (<div className="flex items-center justify-center w-full h-full text-white">لا توجد بيانات لعرضها</div>)
+            }
         </div>
     );
 };

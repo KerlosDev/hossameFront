@@ -5,6 +5,8 @@ import {
     PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
     PolarGrid, PolarAngleAxis, PolarRadiusAxis, ScatterChart, Scatter, ComposedChart, ReferenceLine
 } from 'recharts';
+import { saveAs } from 'file-saver';
+
 import {
     Book, Users, Award, Clock, TrendingUp, AlertTriangle, Brain, Target,
     CheckCircle, RotateCw, Search, Download, FileText, Medal, Star, User,
@@ -24,6 +26,7 @@ import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 import { format, subDays, subMonths, parseISO, isAfter } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import dayjs from "dayjs"; // Install with: npm install dayjs
 
 export default function ExamAnalysis() {
     const reportRef = useRef(null);
@@ -106,9 +109,61 @@ export default function ExamAnalysis() {
     const [topPerformers, setTopPerformers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [studentListLoading, setStudentListLoading] = useState(false);
+
     const [showStudentModal, setShowStudentModal] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [selectedQuestionForDetails, setSelectedQuestionForDetails] = useState(null);
+    // New: State for students who did not participate
+    const [notTakenStudents, setNotTakenStudents] = useState([]);
+    const [notTakenLoading, setNotTakenLoading] = useState(false);
+    const [notTakenSearch, setNotTakenSearch] = useState('');
+    const [selectedExamForNotTaken, setSelectedExamForNotTaken] = useState('all');
+    const [showNotTaken, setShowNotTaken] = useState(false);
+
+    // Fetch students who did not participate in the exam
+    const fetchNotTakenStudents = async (examId) => {
+        if (!examId || examId === 'all') {
+            setNotTakenStudents([]);
+            return;
+        }
+        setNotTakenLoading(true);
+        try {
+            const token = Cookies.get('token');
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/examResult/not-taken/${examId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotTakenStudents(response.data.data || []);
+        } catch (error) {
+            setNotTakenStudents([]);
+            console.error('Error fetching not-taken students:', error);
+        } finally {
+            setNotTakenLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchExamsList = async () => {
+            try {
+                const token = Cookies.get('token');
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/exam/simple/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                setAvailableExams(response.data.exams || []);
+            } catch (error) {
+                setAvailableExams([]);
+                console.error('Error fetching exams list:', error);
+            }
+        };
+        fetchExamsList();
+    }, []);
+    // Fetch when exam changes
+    useEffect(() => {
+        if (selectedExamForNotTaken && selectedExamForNotTaken !== 'all') {
+            fetchNotTakenStudents(selectedExamForNotTaken);
+        }
+        // Do NOT depend on activeTab
+    }, [selectedExamForNotTaken]);
+    // ...existing code...
     const [examStats, setExamStats] = useState({
         averageScore: 75,
         medianScore: 78,
@@ -119,6 +174,27 @@ export default function ExamAnalysis() {
         kurtosis: 2.8,
         cronbachAlpha: 0.87
     });
+
+    const exportNotTakenToExcel = () => {
+        try {
+            if (!notTakenStudents.length) return;
+            const data = notTakenStudents.map((item, idx) => ({
+                '#': idx + 1,
+                'الاسم': item.name || '',
+                'البريد الإلكتروني': item.email || '',
+                'رقم الهاتف': item.phoneNumber || '',
+                'رقم ولي الأمر': item.parentPhoneNumber || '',
+                'تاريخ الاشتراك': item.enrollmentTime ? dayjs(item.enrollmentTime).format('YYYY-MM-DD HH:mm') : '',
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "الطلاب الغير مشاركين");
+            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            saveAs(new Blob([wbout], { type: "application/octet-stream" }), `الطلاب_الغير_مشاركين_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+        } catch (error) {
+            console.error('Error exporting not-taken students to Excel:', error);
+        }
+    };
 
     useEffect(() => {
         fetchExamResults();
@@ -153,13 +229,7 @@ export default function ExamAnalysis() {
             const results = response.data.data;
 
             // Extract unique exam titles
-            const examTitles = new Set();
-            results.forEach(student => {
-                student.results.forEach(exam => {
-                    examTitles.add(exam.examTitle);
-                });
-            });
-            setAvailableExams(Array.from(examTitles));
+
 
             // Process results for statistics
             processExamStats(results);
@@ -200,7 +270,7 @@ export default function ExamAnalysis() {
         setStudentListLoading(true);
         try {
             const token = Cookies.get('token');
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/examResult/by-exam/${examId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/examResult/by-exam-id/${examId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -237,6 +307,7 @@ export default function ExamAnalysis() {
                     'Authorization': `Bearer ${token}`
                 }
             });
+
 
             setStudentsByExam(response.data.data);
         } catch (error) {
@@ -666,8 +737,8 @@ export default function ExamAnalysis() {
 
     // Function to format date
     const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString('ar-EG', options);
+        // Show date and time (hour:minute)
+        return dayjs(dateString).format('YYYY-MM-DD HH:mm');
     };
 
     // Function to get WhatsApp link
@@ -833,14 +904,15 @@ export default function ExamAnalysis() {
                         <div className="w-full md:w-auto flex-1">
                             <label className="block text-gray-300 text-sm font-medium mb-2">اختر الامتحان</label>
                             <div className="relative">
+
                                 <select
                                     value={selectedExam}
                                     onChange={(e) => setSelectedExam(e.target.value)}
                                     className="w-full bg-white/10 text-white border border-white/20 rounded-lg p-3 pl-10 appearance-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                                 >
                                     <option className="text-black" value="all">جميع الاختبارات</option>
-                                    {availableExams.map((exam, index) => (
-                                        <option className="text-black" key={index} value={exam}>{exam}</option>
+                                    {availableExams.map((exam) => (
+                                        <option className="text-black" key={exam.id} value={exam.id}>{exam.name}</option>
                                     ))}
                                 </select>
                                 <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -1034,6 +1106,22 @@ export default function ExamAnalysis() {
 
 
                     <button
+                        onClick={() => setActiveTab('notTaken')}
+                        className={`flex items-center gap-2 px-5 py-4 border-b-2 whitespace-nowrap ${activeTab === 'notTaken'
+                            ? 'border-blue-500 text-blue-400'
+                            : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                            } transition-all`}
+                    >
+                        <AlertTriangle size={18} />
+                        <span>الطلاب الغير مشاركون</span>
+                        {notTakenStudents.length > 0 && activeTab === 'notTaken' && (
+                            <span className="ml-2 bg-red-500/20 text-red-400 text-xs py-1 px-2 rounded-full">
+                                {notTakenStudents.length}
+                            </span>
+                        )}
+                    </button>
+
+                    <button
                         onClick={() => setActiveTab('comparison')}
                         className={`flex items-center gap-2 px-5 py-4 border-b-2 whitespace-nowrap ${activeTab === 'comparison'
                             ? 'border-blue-500 text-blue-400'
@@ -1053,7 +1141,6 @@ export default function ExamAnalysis() {
             {/* محتوى التقرير */}
             <div ref={reportRef}>
                 {loading ? (
-                    // Loading skeleton
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
                         {[1, 2, 3, 4, 5, 6].map(i => (
                             <div key={i} className="bg-white/10 backdrop-blur-xl rounded-xl p-6 border border-white/20 h-32" />
@@ -1061,6 +1148,123 @@ export default function ExamAnalysis() {
                     </div>
                 ) : (
                     <>
+                        {activeTab === 'notTaken' && (
+                            <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 backdrop-blur-xl rounded-xl p-6 border border-red-800/30">
+                                <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+                                    <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                                        <AlertTriangle className="text-red-400" />
+                                        <span>
+                                            {selectedExamForNotTaken === 'all' ?
+                                                'اختر امتحاناً لعرض الطلاب الغير مشاركين' :
+                                                `الطلاب الغير مشاركون في امتحان: ${availableExams.find(e => e.id === selectedExamForNotTaken)?.name || ''}`}
+                                        </span>
+                                    </h3>
+                                    <div className="flex gap-4 items-center">
+                                        <select
+                                            value={selectedExamForNotTaken}
+                                            onChange={e => setSelectedExamForNotTaken(e.target.value)}
+                                            className="bg-white/10 border border-white/20 text-white rounded-lg px-3 py-2 text-sm min-w-[200px]"
+                                        >
+                                            <option className="text-black" value="all">جميع الاختبارات</option>
+                                            {availableExams.map((exam, idx) => (
+                                                <option className="text-black" key={exam.id || idx} value={exam.id}>{exam.name}</option>
+                                            ))}
+                                        </select>
+                                        {selectedExamForNotTaken !== 'all' && (
+                                            <input
+                                                type="text"
+                                                placeholder="بحث عن طالب..."
+                                                value={notTakenSearch}
+                                                onChange={e => setNotTakenSearch(e.target.value)}
+                                                className="bg-white/10 border border-white/20 rounded-lg py-2 px-4 w-64 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                            />
+                                        )}
+                                    </div>
+                                    {selectedExamForNotTaken !== 'all' && (
+                                        <button
+                                            onClick={exportNotTakenToExcel}
+                                            className="flex items-center gap-2 px-4 py-2 bg-green-600/80 hover:bg-green-700 text-white rounded-lg transition-colors"
+                                        >
+                                            <FaFileExcel size={18} />
+                                            <span>تصدير كـ Excel</span>
+                                        </button>
+                                    )}
+                                </div>
+                                {selectedExamForNotTaken === 'all' ? (
+                                    <div className="text-center py-12 text-gray-400">
+                                        <Clipboard className="mx-auto mb-4" size={48} />
+                                        <p>يرجى اختيار امتحان من القائمة أعلاه لعرض الطلاب الغير مشاركين</p>
+                                    </div>
+                                ) : notTakenLoading ? (
+                                    <div className="text-center py-12">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500 mx-auto mb-4"></div>
+                                        <p className="text-gray-400">جاري تحميل بيانات الطلاب...</p>
+                                    </div>
+                                ) : notTakenStudents.length === 0 ? (
+                                    <div className="text-center py-12 text-gray-400">
+                                        <AlertTriangle className="mx-auto mb-4" size={48} />
+                                        <p>لا يوجد طلاب غير مشاركين في هذا الامتحان</p>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto rounded-2xl shadow-lg bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700/60">
+                                        <table className="w-full text-white min-w-[900px]">
+                                            <thead>
+                                                <tr className="bg-gradient-to-r from-blue-900/60 to-purple-900/60 text-white">
+                                                    <th className="py-4 px-3 text-center font-bold text-base w-12">#</th>
+                                                    <th className="py-4 px-3 text-center font-bold text-base w-40">الاسم</th>
+                                                    <th className="py-4 px-3 text-center font-bold text-base w-56">البريد الإلكتروني</th>
+                                                    <th className="py-4 px-3 text-center font-bold text-base w-36">رقم الهاتف</th>
+                                                    <th className="py-4 px-3 text-center font-bold text-base w-36">رقم ولي الأمر</th>
+                                                    <th className="py-4 px-3 text-center font-bold text-base w-44">تاريخ الاشتراك</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {notTakenStudents
+                                                    .filter(item =>
+                                                        (item.name?.includes(notTakenSearch) || item.email?.includes(notTakenSearch) || item.phoneNumber?.includes(notTakenSearch))
+                                                    )
+                                                    .map((item, idx) => (
+                                                        <tr key={item._id || idx} className={`transition-all duration-150 ${idx % 2 === 0 ? 'bg-slate-800/60' : 'bg-slate-900/40'} hover:bg-blue-900/30 group`}>
+                                                            <td className="py-3 px-3 font-bold text-lg text-blue-300 text-center align-middle group-hover:text-blue-400">{idx + 1}</td>
+                                                            <td className="py-3 px-3 font-medium max-w-[180px] truncate text-center align-middle group-hover:text-white" title={item.name}>{item.name || 'غير محدد'}</td>
+                                                            <td className="py-3 px-3 text-blue-400 text-center align-middle group-hover:text-blue-200 max-w-[220px] truncate" title={item.email}>{item.email || 'غير محدد'}</td>
+                                                            <td className="py-3 px-3 text-center align-middle">
+                                                                {item.phoneNumber ? (
+                                                                    <a
+                                                                        href={`https://wa.me/20${item.phoneNumber.replace(/^0+/, '')}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-green-600/80 hover:bg-green-700 text-white font-semibold shadow transition"
+                                                                        title={`تواصل واتساب: +20${item.phoneNumber.replace(/^0+/, '')}`}
+                                                                    >
+                                                                        <FaWhatsapp className="text-lg" />
+                                                                        +20{item.phoneNumber.replace(/^0+/, '')}
+                                                                    </a>
+                                                                ) : 'غير محدد'}
+                                                            </td>
+                                                            <td className="py-3 px-3 text-center align-middle">
+                                                                {item.parentPhoneNumber ? (
+                                                                    <a
+                                                                        href={`https://wa.me/20${item.parentPhoneNumber.replace(/^0+/, '')}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-green-600/80 hover:bg-green-700 text-white font-semibold shadow transition"
+                                                                        title={`تواصل واتساب: +20${item.parentPhoneNumber.replace(/^0+/, '')}`}
+                                                                    >
+                                                                        <FaWhatsapp className="text-lg" />
+                                                                        +20{item.parentPhoneNumber.replace(/^0+/, '')}
+                                                                    </a>
+                                                                ) : 'غير محدد'}
+                                                            </td>
+                                                            <td className="py-3 px-3 text-gray-400 text-center align-middle group-hover:text-white">{item.enrollmentTime ? dayjs(item.enrollmentTime).format('YYYY-MM-DD HH:mm') : 'غير محدد'}</td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         {activeTab === 'overview' && (
                             <>
                                 {/* Summary Statistics Banner */}
@@ -1892,9 +2096,9 @@ export default function ExamAnalysis() {
                                     <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                                         <Users className="text-blue-400" />
                                         <span>
-                                            {selectedExam === 'all' ?
-                                                'اختر امتحاناً محدداً لعرض الطلاب المشاركين' :
-                                                `الطلاب المشاركون في امتحان: ${selectedExam}`
+                                            {selectedExam === 'all'
+                                                ? 'اختر امتحاناً محدداً لعرض الطلاب المشاركين'
+                                                : `الطلاب المشاركون في امتحان: ${availableExams.find(e => e.id === selectedExam)?.name || ''}`
                                             }
                                         </span>
                                     </h3>
@@ -1933,82 +2137,110 @@ export default function ExamAnalysis() {
                                         <table className="w-full text-white">
                                             <thead>
                                                 <tr className="bg-white/10">
-                                                    <th className="py-3 px-4 text-right">الترتيب</th>
+                                                    <th className="py-3 px-4 text-right">#</th>
                                                     <th className="py-3 px-4 text-right">الاسم</th>
                                                     <th className="py-3 px-4 text-right">الدرجة</th>
                                                     <th className="py-3 px-4 text-right">عدد المحاولات</th>
+                                                    <th className="py-3 px-4 text-right">الوقت المستغرق</th>
                                                     <th className="py-3 px-4 text-right">تاريخ أفضل محاولة</th>
                                                     <th className="py-3 px-4 text-right">تواصل</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {studentsByExam
+                                                {[...studentsByExam]
                                                     .filter(item =>
                                                         item.student?.name?.includes(searchTerm) ||
                                                         item.student?.email?.includes(searchTerm)
                                                     )
-                                                    .map((item, index) => (
-                                                        <tr
-                                                            key={item.student?.id || index}
-                                                            className={`border-t border-white/10 hover:bg-white/5 ${index < 3 ? (
-                                                                index === 0 ? 'bg-yellow-500/10' :
-                                                                    index === 1 ? 'bg-gray-400/10' :
-                                                                        'bg-amber-700/10'
-                                                            ) : ''}`}
-                                                        >
-                                                            <td className="py-3 px-4">
-                                                                <div className="flex items-center">
-                                                                    {index === 0 && <FaTrophy className="text-yellow-500 mr-2" />}
-                                                                    {index === 1 && <FaMedal className="text-gray-400 mr-2" />}
-                                                                    {index === 2 && <FaRibbon className="text-amber-700 mr-2" />}
-                                                                    {index + 1}
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-3 px-4 font-medium">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedStudent(item);
-                                                                        setShowStudentModal(true);
-                                                                    }}
-                                                                    className="hover:text-blue-400 transition-colors"
-                                                                >
-                                                                    {item.student?.name || 'غير محدد'}
-                                                                </button>
-                                                            </td>
-                                                            <td className="py-3 px-4">
-                                                                {item.bestAttempt?.score ? (
-                                                                    <span
-                                                                        className={`inline-block px-2 py-1 rounded text-xs font-bold ${item.bestAttempt.score >= 90 ? 'bg-green-500/20 text-green-400' :
-                                                                            item.bestAttempt.score >= 80 ? 'bg-blue-500/20 text-blue-400' :
-                                                                                item.bestAttempt.score >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
-                                                                                    item.bestAttempt.score >= 60 ? 'bg-orange-500/20 text-orange-400' :
-                                                                                        'bg-red-500/20 text-red-400'
-                                                                            }`}
+                                                    .sort((a, b) => {
+                                                        if (b.bestAttempt?.score !== a.bestAttempt?.score) {
+                                                            return b.bestAttempt?.score - a.bestAttempt?.score;
+                                                        }
+                                                        return new Date(a.bestAttempt?.examDate) - new Date(b.bestAttempt?.examDate);
+                                                    })
+                                                    .map((item, index) => {
+                                                        // Format timeSpent (seconds) to mm:ss
+                                                        const timeSpentSec = item.bestAttempt?.timeSpent || 0;
+                                                        const min = Math.floor(timeSpentSec / 60);
+                                                        const sec = timeSpentSec % 60;
+                                                        let timeColor = 'bg-gray-500/20 text-gray-300';
+                                                        if (timeSpentSec <= 60) timeColor = 'bg-green-500/20 text-green-400';
+                                                        else if (timeSpentSec <= 120) timeColor = 'bg-orange-500/20 text-orange-400';
+                                                        else if (timeSpentSec > 120) timeColor = 'bg-red-500/20 text-red-400';
+                                                        return (
+                                                            <tr
+                                                                key={item.student?.id || index}
+                                                                className={`border-t border-white/10 hover:bg-blue-900/10 transition-all duration-150 ${index % 2 === 0 ? 'bg-white/5' : ''} ${index < 3 ? (
+                                                                    index === 0 ? 'bg-yellow-500/10' :
+                                                                        index === 1 ? 'bg-gray-400/10' :
+                                                                            'bg-amber-700/10'
+                                                                ) : ''}`}
+                                                            >
+                                                                <td className="py-3 px-4 font-bold text-lg text-blue-300 text-center">
+                                                                    <div className="flex items-center justify-center">
+                                                                        {index === 0 && <FaTrophy className="text-yellow-500 mr-2" />}
+                                                                        {index === 1 && <FaMedal className="text-gray-400 mr-2" />}
+                                                                        {index === 2 && <FaRibbon className="text-amber-700 mr-2" />}
+                                                                        {index + 1}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-3 px-4 font-medium max-w-[180px] truncate" title={item.student?.name}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setSelectedStudent(item);
+                                                                            setShowStudentModal(true);
+                                                                        }}
+                                                                        className="hover:text-blue-400 transition-colors"
                                                                     >
-                                                                        {item.bestAttempt.score}%
+                                                                        {item.student?.name || 'غير محدد'}
+                                                                    </button>
+                                                                </td>
+                                                                <td className="py-3 px-4">
+                                                                    {item.bestAttempt?.score ? (
+                                                                        <span
+                                                                            className={`inline-block px-2 py-1 rounded text-xs font-bold ${item.bestAttempt.score >= 90 ? 'bg-green-500/20 text-green-400' :
+                                                                                item.bestAttempt.score >= 80 ? 'bg-blue-500/20 text-blue-400' :
+                                                                                    item.bestAttempt.score >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
+                                                                                        item.bestAttempt.score >= 60 ? 'bg-orange-500/20 text-orange-400' :
+                                                                                            'bg-red-500/20 text-red-400'
+                                                                                }`}
+                                                                        >
+                                                                            {item.bestAttempt.score}%
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="text-gray-400">لا توجد درجة</span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="py-3 px-4 text-center">
+                                                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-500/10 text-blue-300 font-semibold">
+                                                                        <RotateCw size={14} className="inline-block" />
+                                                                        {item.totalAttempts || 0}
                                                                     </span>
-                                                                ) : (
-                                                                    <span className="text-gray-400">لا توجد درجة</span>
-                                                                )}
-                                                            </td>
-                                                            <td className="py-3 px-4">{item.totalAttempts || 0}</td>
-                                                            <td className="py-3 px-4 text-gray-300">
-                                                                {item.bestAttempt?.examDate ? formatDate(item.bestAttempt.examDate) : 'غير محدد'}
-                                                            </td>
-                                                            <td className="py-3 px-4">
-                                                                {item.student?.phoneNumber && (
-                                                                    <a
-                                                                        href={getWhatsAppLink(item.student.phoneNumber)}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="inline-flex items-center justify-center p-2 bg-green-600/20 hover:bg-green-600/40 text-green-500 rounded-lg transition-colors"
-                                                                    >
-                                                                        <FaWhatsapp size={18} />
-                                                                    </a>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                                </td>
+                                                                <td className="py-3 px-4 text-center">
+                                                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded font-semibold ${timeColor}`} title={`${min} دقيقة ${sec} ثانية`}>
+                                                                        <Clock size={14} className="inline-block" />
+                                                                        {min > 0 ? `${min}د` : ''} {sec > 0 ? `${sec}ث` : min === 0 ? '0ث' : ''}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="py-3 px-4 text-gray-300">
+                                                                    {item.bestAttempt?.examDate ? formatDate(item.bestAttempt.examDate) : 'غير محدد'}
+                                                                </td>
+                                                                <td className="py-3 px-4">
+                                                                    {item.student?.phoneNumber && (
+                                                                        <a
+                                                                            href={getWhatsAppLink(item.student.phoneNumber)}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="inline-flex items-center justify-center p-2 bg-green-600/20 hover:bg-green-600/40 text-green-500 rounded-lg transition-colors"
+                                                                        >
+                                                                            <FaWhatsapp size={18} />
+                                                                        </a>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                             </tbody>
                                         </table>
                                     </div>

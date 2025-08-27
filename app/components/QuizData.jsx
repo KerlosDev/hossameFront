@@ -372,7 +372,9 @@ const QuizData = ({ params }) => {
                 passed: serverResults.passed,
                 showResults: examInfo?.showResultsImmediately !== false,
                 serverMessage: serverResults.message,
-                questionResults: serverResults.results?.questionResults || []
+                questionResults: serverResults.results?.questionResults || [],
+                timeSpent: serverResults.results?.timeSpent || serverResults.timeSpent || null,
+                examId: serverResults.results?.examId || serverResults.examId || quizid
             });
 
             setQuizComplete(true);
