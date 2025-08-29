@@ -2218,9 +2218,9 @@ export default function ExamAnalysis() {
                                                                     </span>
                                                                 </td>
                                                                 <td className="py-3 px-4 text-center">
-                                                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded font-semibold ${timeColor}`} title={`${min} دقيقة ${sec} ثانية`}>
+                                                                    <span dir='rtl' className={`inline-flex items-center gap-1 px-2 py-1 rounded font-semibold ${timeColor}`} title={`${min} دقيقة ${sec} ثانية`}>
                                                                         <Clock size={14} className="inline-block" />
-                                                                        {min > 0 ? `${min}د` : ''} {sec > 0 ? `${sec}ث` : min === 0 ? '0ث' : ''}
+                                                                        {min > 0 ? `${min}د` : ''}      {sec > 0 ? `${sec}ث` : min === 0 ? '0ث' : ''}
                                                                     </span>
                                                                 </td>
                                                                 <td className="py-3 px-4 text-gray-300">
