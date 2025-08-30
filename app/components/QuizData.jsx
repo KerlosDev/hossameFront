@@ -28,6 +28,8 @@ const QuizData = ({ params }) => {
     const [showInstructions, setShowInstructions] = useState(false);
     const [remainingAttempts, setRemainingAttempts] = useState(null);
     const [examAvailability, setExamAvailability] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const router = useRouter();
 
     // Convert English letters to Arabic letters
@@ -396,6 +398,8 @@ const QuizData = ({ params }) => {
 
     // Modified handleSubmitQuiz to support partial submit and show result
     const handleSubmitQuiz = async (isPartial = false) => {
+        if (isSubmitting) return; // Prevent multiple submissions
+        setIsSubmitting(true);
         // Check for unanswered questions
         const totalQuestions = quiz.questions.length;
         const answeredQuestions = Object.keys(selectedAnswers).length;
@@ -463,6 +467,8 @@ const QuizData = ({ params }) => {
                 });
                 setQuizComplete(true);
                 localStorage.removeItem(`quiz_${quizid}_answers`);
+                setIsSubmitting(false); // <-- Add this after successful submit
+
                 return;
             }
 
@@ -489,6 +495,7 @@ const QuizData = ({ params }) => {
             console.error('Error submitting quiz:', error);
 
             let errorMessage = 'حدث خطأ أثناء حفظ النتائج';
+            setIsSubmitting(false); // <-- Add this in error case
 
             if (error.response) {
                 if (error.response.status === 401) {
@@ -972,12 +979,18 @@ const QuizData = ({ params }) => {
                                 ))}
                             </div>
 
+
                             {currentQuestion === quiz.questions.length - 1 ? (
                                 <button
                                     onClick={handleSubmitQuiz}
-                                    className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300"
+                                    disabled={isSubmitting}
+                                    className={`flex items-center gap-2 px-4 sm:px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
                                 >
-                                    <BsBookmarkCheck size={16} />
+                                    {isSubmitting ? (
+                                        <span className="animate-spin mr-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                                    ) : (
+                                        <BsBookmarkCheck size={16} />
+                                    )}
                                     تسليم الاختبار
                                 </button>
                             ) : (
