@@ -589,7 +589,7 @@ const QuizData = ({ params }) => {
                             </div>
                         )}
 
-                        <div className="text-slate-300 leading-relaxed whitespace-pre-wrap">
+                        <div dir='rtl' className="text-slate-300 leading-relaxed whitespace-pre-wrap">
                             {examInfo.instructions}
                         </div>
                     </div>
