@@ -80,53 +80,53 @@ const EnrollmentSection = ({ courseInfo }) => {
         return (
             <div className="relative group">
                 {/* Glowing background effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-500/20 dark:to-emerald-500/20 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-8">
+                <div className="relative bg-white/90 dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl p-8">
                     <div className="space-y-6">
                         {/* Free Course Badge */}
                         <div className="text-center">
-                            <div className="inline-flex items-center gap-3 bg-green-500/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-green-400/30 shadow-lg">
-                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                <FaUnlock className="text-green-400 text-lg" />
-                                <span className="text-green-300 font-semibold text-lg">كورس مجاني تماماً</span>
+                            <div className="inline-flex items-center gap-3 bg-green-100 dark:bg-green-500/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-green-200 dark:border-green-400/30 shadow-lg">
+                                <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse"></div>
+                                <FaUnlock className="text-green-600 dark:text-green-400 text-lg" />
+                                <span className="text-green-600 dark:text-green-300 font-semibold text-lg">كورس مجاني تماماً</span>
                             </div>
                         </div>
 
                         {/* Price Display */}
                         <div className="text-center space-y-2">
                             <div className="relative">
-                                <h3 className="text-5xl font-black text-transparent bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text">
+                                <h3 className="text-5xl font-black text-transparent bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-400 dark:to-emerald-400 bg-clip-text">
                                     مجاني
                                 </h3>
-                                <div className="absolute inset-0 text-5xl font-black text-green-400/20 blur-sm">
+                                <div className="absolute inset-0 text-5xl font-black text-green-500/20 dark:text-green-400/20 blur-sm">
                                     مجاني
                                 </div>
                             </div>
-                            <p className="text-gray-300 font-medium">وصول مدى الحياة بدون تكلفة</p>
+                            <p className="text-gray-600 dark:text-gray-300 font-medium">وصول مدى الحياة بدون تكلفة</p>
                         </div>
 
                         {/* Features List */}
                         <div className="space-y-3">
-                            <div className="flex items-center gap-3 text-gray-300">
-                                <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                                    <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                <div className="w-5 h-5 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center">
+                                    <svg className="w-3 h-3 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                     </svg>
                                 </div>
                                 <span>جميع دروس الكورس</span>
                             </div>
-                            <div className="flex items-center gap-3 text-gray-300">
-                                <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                                    <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                <div className="w-5 h-5 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center">
+                                    <svg className="w-3 h-3 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                     </svg>
                                 </div>
                                 <span>الاختبارات التفاعلية</span>
                             </div>
-                            <div className="flex items-center gap-3 text-gray-300">
-                                <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                                    <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                <div className="w-5 h-5 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center">
+                                    <svg className="w-3 h-3 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                     </svg>
                                 </div>
@@ -153,7 +153,7 @@ const EnrollmentSection = ({ courseInfo }) => {
                             <button
                                 onClick={handleEnrollFree}
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-2xl p-4 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none flex items-center justify-center gap-3"
+                                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 dark:disabled:from-gray-600 dark:disabled:to-gray-700 text-white rounded-2xl p-4 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none flex items-center justify-center gap-3"
                             >
                                 <FaGraduationCap className="text-lg" />
                                 <span>{loading ? 'جاري التسجيل...' : 'ابدأ التعلم مجاناً'}</span>
@@ -171,56 +171,56 @@ const EnrollmentSection = ({ courseInfo }) => {
     return (
         <div className="relative group">
             {/* Glowing background effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-            <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-8">
+            <div className="relative bg-white/90 dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl p-8">
                 <div className="space-y-6">
                     {isLoggedIn ? (
                         enrolled ? (
                             <div className="space-y-6">
                                 {/* Enrolled Status Badge */}
                                 <div className="text-center">
-                                    <div className="inline-flex items-center gap-3 bg-emerald-500/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-emerald-400/30 shadow-lg">
-                                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                                        <BsLightningChargeFill className="text-emerald-400 text-lg" />
-                                        <span className="text-emerald-300 font-semibold text-lg">تم تفعيل الكورس</span>
+                                    <div className="inline-flex items-center gap-3 bg-emerald-100 dark:bg-emerald-500/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-emerald-200 dark:border-emerald-400/30 shadow-lg">
+                                        <div className="w-2 h-2 bg-emerald-500 dark:bg-emerald-400 rounded-full animate-pulse"></div>
+                                        <BsLightningChargeFill className="text-emerald-600 dark:text-emerald-400 text-lg" />
+                                        <span className="text-emerald-600 dark:text-emerald-300 font-semibold text-lg">تم تفعيل الكورس</span>
                                     </div>
                                 </div>
 
                                 {/* Access Status */}
                                 <div className="text-center space-y-2">
                                     <div className="relative">
-                                        <h3 className="text-4xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text">
+                                        <h3 className="text-4xl font-black text-transparent bg-gradient-to-r from-emerald-500 to-green-500 dark:from-emerald-400 dark:to-green-400 bg-clip-text">
                                             مُفعَّل
                                         </h3>
-                                        <div className="absolute inset-0 text-4xl font-black text-emerald-400/20 blur-sm">
+                                        <div className="absolute inset-0 text-4xl font-black text-emerald-500/20 dark:text-emerald-400/20 blur-sm">
                                             مُفعَّل
                                         </div>
                                     </div>
-                                    <p className="text-gray-300 font-medium">يمكنك الآن الوصول لجميع المحتويات</p>
+                                    <p className="text-gray-600 dark:text-gray-300 font-medium">يمكنك الآن الوصول لجميع المحتويات</p>
                                 </div>
 
                                 {/* Features for enrolled users */}
                                 <div className="space-y-3">
-                                    <div className="flex items-center gap-3 text-gray-300">
-                                        <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                                            <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                        <div className="w-5 h-5 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                            <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                             </svg>
                                         </div>
                                         <span>جميع الدروس مفتوحة</span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-gray-300">
-                                        <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                                            <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                        <div className="w-5 h-5 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                            <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                             </svg>
                                         </div>
                                         <span>تحميل الملفات والمواد</span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-gray-300">
-                                        <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                                            <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                        <div className="w-5 h-5 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                            <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                             </svg>
                                         </div>
@@ -238,55 +238,55 @@ const EnrollmentSection = ({ courseInfo }) => {
                             <div className="space-y-6">
                                 {/* Premium Badge */}
                                 <div className="text-center">
-                                    <div className="inline-flex items-center gap-3 bg-blue-500/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-blue-400/30 shadow-lg">
-                                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                                        <BsLightningChargeFill className="text-blue-400 text-lg" />
-                                        <span className="text-blue-300 font-semibold text-lg">كورس مدفوع</span>
+                                    <div className="inline-flex items-center gap-3 bg-blue-100 dark:bg-blue-500/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-blue-200 dark:border-blue-400/30 shadow-lg">
+                                        <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse"></div>
+                                        <BsLightningChargeFill className="text-blue-600 dark:text-blue-400 text-lg" />
+                                        <span className="text-blue-600 dark:text-blue-300 font-semibold text-lg">كورس مدفوع</span>
                                     </div>
                                 </div>
 
                                 {/* Price Display */}
                                 <div className="text-center space-y-2">
                                     <div className="relative">
-                                        <h3 className="text-5xl font-black text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">
+                                        <h3 className="text-5xl font-black text-transparent bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 bg-clip-text">
                                             {courseInfo.price}
                                         </h3>
-                                        <div className="absolute inset-0 text-5xl font-black text-blue-400/20 blur-sm">
+                                        <div className="absolute inset-0 text-5xl font-black text-blue-500/20 dark:text-blue-400/20 blur-sm">
                                             {courseInfo.price}
                                         </div>
                                     </div>
-                                    <p className="text-gray-300 font-medium">جنيه - اشتراك لمرة واحدة</p>
+                                    <p className="text-gray-600 dark:text-gray-300 font-medium">جنيه - اشتراك لمرة واحدة</p>
                                 </div>
 
                                 {/* Premium Features */}
                                 <div className="space-y-3">
-                                    <div className="flex items-center gap-3 text-gray-300">
-                                        <div className="w-5 h-5 bg-blue-500/20 rounded-full flex items-center justify-center">
-                                            <svg className="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                        <div className="w-5 h-5 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center">
+                                            <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                             </svg>
                                         </div>
                                         <span>وصول مدى الحياة</span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-gray-300">
-                                        <div className="w-5 h-5 bg-blue-500/20 rounded-full flex items-center justify-center">
-                                            <svg className="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                        <div className="w-5 h-5 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center">
+                                            <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                             </svg>
                                         </div>
                                         <span>جميع الدروس والمواد</span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-gray-300">
-                                        <div className="w-5 h-5 bg-blue-500/20 rounded-full flex items-center justify-center">
-                                            <svg className="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                        <div className="w-5 h-5 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center">
+                                            <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                             </svg>
                                         </div>
                                         <span>شهادة إتمام معتمدة</span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-gray-300">
-                                        <div className="w-5 h-5 bg-blue-500/20 rounded-full flex items-center justify-center">
-                                            <svg className="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                        <div className="w-5 h-5 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center">
+                                            <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                             </svg>
                                         </div>
@@ -310,43 +310,43 @@ const EnrollmentSection = ({ courseInfo }) => {
                         <div className="space-y-6">
                             {/* Login Required Badge */}
                             <div className="text-center">
-                                <div className="inline-flex items-center gap-3 bg-orange-500/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-orange-400/30 shadow-lg">
-                                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                                    <FaLock className="text-orange-400 text-lg" />
-                                    <span className="text-orange-300 font-semibold text-lg">تسجيل دخول مطلوب</span>
+                                <div className="inline-flex items-center gap-3 bg-orange-100 dark:bg-orange-500/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-orange-200 dark:border-orange-400/30 shadow-lg">
+                                    <div className="w-2 h-2 bg-orange-500 dark:bg-orange-400 rounded-full animate-pulse"></div>
+                                    <FaLock className="text-orange-600 dark:text-orange-400 text-lg" />
+                                    <span className="text-orange-600 dark:text-orange-300 font-semibold text-lg">تسجيل دخول مطلوب</span>
                                 </div>
                             </div>
 
                             {/* Price Display */}
                             <div className="text-center space-y-2">
                                 <div className="relative">
-                                    <h3 className="text-5xl font-black text-transparent bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text">
+                                    <h3 className="text-5xl font-black text-transparent bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 bg-clip-text">
                                         {courseInfo.price}
                                     </h3>
-                                    <div className="absolute inset-0 text-5xl font-black text-orange-400/20 blur-sm">
+                                    <div className="absolute inset-0 text-5xl font-black text-orange-500/20 dark:text-orange-400/20 blur-sm">
                                         {courseInfo.price}
                                     </div>
                                 </div>
-                                <p className="text-gray-300 font-medium">جنيه - سجل دخول للاشتراك</p>
+                                <p className="text-gray-600 dark:text-gray-300 font-medium">جنيه - سجل دخول للاشتراك</p>
                             </div>
 
                             {/* Login Benefits */}
                             <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-gray-400">
-                                    <div className="w-5 h-5 bg-gray-600/20 rounded-full flex items-center justify-center">
-                                        <FaLock className="w-3 h-3 text-gray-500" />
+                                <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400">
+                                    <div className="w-5 h-5 bg-gray-200 dark:bg-gray-600/20 rounded-full flex items-center justify-center">
+                                        <FaLock className="w-3 h-3 text-gray-500 dark:text-gray-500" />
                                     </div>
                                     <span>وصول مدى الحياة</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-gray-400">
-                                    <div className="w-5 h-5 bg-gray-600/20 rounded-full flex items-center justify-center">
-                                        <FaLock className="w-3 h-3 text-gray-500" />
+                                <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400">
+                                    <div className="w-5 h-5 bg-gray-200 dark:bg-gray-600/20 rounded-full flex items-center justify-center">
+                                        <FaLock className="w-3 h-3 text-gray-500 dark:text-gray-500" />
                                     </div>
                                     <span>جميع الدروس والمواد</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-gray-400">
-                                    <div className="w-5 h-5 bg-gray-600/20 rounded-full flex items-center justify-center">
-                                        <FaLock className="w-3 h-3 text-gray-500" />
+                                <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400">
+                                    <div className="w-5 h-5 bg-gray-200 dark:bg-gray-600/20 rounded-full flex items-center justify-center">
+                                        <FaLock className="w-3 h-3 text-gray-500 dark:text-gray-500" />
                                     </div>
                                     <span>شهادة إتمام معتمدة</span>
                                 </div>
@@ -354,7 +354,7 @@ const EnrollmentSection = ({ courseInfo }) => {
 
                             {/* Login Button */}
                             <Link href="/sign-in" className="block">
-                                <button className="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white rounded-2xl p-4 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-3">
+                                <button className="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-400 hover:to-gray-500 dark:from-gray-600 dark:to-gray-700 dark:hover:from-gray-500 dark:hover:to-gray-600 text-white rounded-2xl p-4 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-3">
                                     <FaLock className="text-lg" />
                                     <span>تسجيل دخول</span>
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

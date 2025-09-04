@@ -12,6 +12,33 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 
+// Date conversion utility functions for Egypt timezone (UTC+2)
+const convertUTCToLocalDateTimeInput = (utcDate) => {
+    if (!utcDate) return '';
+    
+    // Create a new date object and adjust for Egypt timezone (UTC+2)
+    const localDate = new Date(utcDate);
+    
+    // Format for datetime-local input (YYYY-MM-DDThh:mm)
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    const hours = String(localDate.getHours()).padStart(2, '0');
+    const minutes = String(localDate.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+const convertLocalToUTCDate = (localDateString) => {
+    if (!localDateString) return '';
+    
+    // Create Date object from the local datetime-local input
+    const localDate = new Date(localDateString);
+    
+    // Convert to ISO string for server storage (will be in UTC)
+    return localDate.toISOString();
+};
+
 // Create axios instance with base configuration
 const api = axios.create({
     baseURL: `${process.env.NEXT_PUBLIC_API_URL}`
@@ -538,8 +565,9 @@ const ExamManage = () => {
             showResultsImmediately: fullExam.showResultsImmediately !== false,
             shuffleQuestions: fullExam.shuffleQuestions || false,
             isActive: fullExam.isActive !== false,
-            startDate: fullExam.startDate ? new Date(fullExam.startDate).toISOString().slice(0, 16) : '',
-            endDate: fullExam.endDate ? new Date(fullExam.endDate).toISOString().slice(0, 16) : '',
+            // Convert UTC dates to Egypt local time for display in the form
+            startDate: fullExam.startDate ? convertUTCToLocalDateTimeInput(new Date(fullExam.startDate)) : '',
+            endDate: fullExam.endDate ? convertUTCToLocalDateTimeInput(new Date(fullExam.endDate)) : '',
             instructions: fullExam.instructions || '',
             questions: fullExam.questions.map(q => ({
                 title: q.title,
@@ -605,10 +633,12 @@ const ExamManage = () => {
             formData.append('shuffleQuestions', newExam.shuffleQuestions);
             formData.append('isActive', newExam.isActive);
             if (newExam.startDate && newExam.startDate.trim() !== '') {
-                formData.append('startDate', newExam.startDate);
+                // Convert local date to UTC when sending to server
+                formData.append('startDate', convertLocalToUTCDate(newExam.startDate));
             }
             if (newExam.endDate && newExam.endDate.trim() !== '') {
-                formData.append('endDate', newExam.endDate);
+                // Convert local date to UTC when sending to server
+                formData.append('endDate', convertLocalToUTCDate(newExam.endDate));
             }
             formData.append('instructions', newExam.instructions);
 
@@ -1327,7 +1357,10 @@ const ExamCreationForm = ({
                         <input
                             type="datetime-local"
                             value={newExam.startDate}
-                            onChange={(e) => setNewExam({ ...newExam, startDate: e.target.value })}
+                            onChange={(e) => {
+                                // Store the local time as is, without timezone conversion
+                                setNewExam({ ...newExam, startDate: e.target.value });
+                            }}
                             className="w-full p-4 bg-white/80 border-2 border-gray-200 rounded-2xl text-gray-800 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
                         />
                     </div>
@@ -1339,7 +1372,10 @@ const ExamCreationForm = ({
                         <input
                             type="datetime-local"
                             value={newExam.endDate}
-                            onChange={(e) => setNewExam({ ...newExam, endDate: e.target.value })}
+                            onChange={(e) => {
+                                // Store the local time as is, without timezone conversion  
+                                setNewExam({ ...newExam, endDate: e.target.value });
+                            }}
                             className="w-full p-4 bg-white/80 border-2 border-gray-200 rounded-2xl text-gray-800 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
                         />
                     </div>
@@ -1527,10 +1563,24 @@ const ExamCard = ({ exam, onDelete, onEdit }) => {
                         {(exam.startDate || exam.endDate) && (
                             <div className="flex gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                                 {exam.startDate && (
-                                    <span>البداية: {new Date(exam.startDate).toLocaleDateString('ar-EG')}</span>
+                                    <span>البداية: {new Date(exam.startDate).toLocaleString('ar-EG', {
+                                        timeZone: 'Africa/Cairo',
+                                        year: 'numeric',
+                                        month: 'numeric',
+                                        day: 'numeric',
+                                        hour: 'numeric',
+                                        minute: 'numeric'
+                                    })}</span>
                                 )}
                                 {exam.endDate && (
-                                    <span>النهاية: {new Date(exam.endDate).toLocaleDateString('ar-EG')}</span>
+                                    <span>النهاية: {new Date(exam.endDate).toLocaleString('ar-EG', {
+                                        timeZone: 'Africa/Cairo',
+                                        year: 'numeric',
+                                        month: 'numeric',
+                                        day: 'numeric',
+                                        hour: 'numeric',
+                                        minute: 'numeric'
+                                    })}</span>
                                 )}
                             </div>
                         )}

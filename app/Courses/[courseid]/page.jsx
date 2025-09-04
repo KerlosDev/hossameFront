@@ -15,7 +15,7 @@ import { File } from 'lucide-react';
 // Dynamically import Plyr with no SSR to avoid hydration issues
 const Plyr = dynamic(() => import('plyr-react'), {
     ssr: false,
-    loading: () => <div className="w-full h-full bg-gray-900 flex items-center justify-center">جاري تحميل...</div>
+    loading: () => <div className="w-full h-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-700 dark:text-white">جاري تحميل...</div>
 });
 
 const CoursePageSkeleton = dynamic(() => import('../../admin/components/CoursePageSkeleton'));
@@ -242,7 +242,7 @@ const CoursePage = () => {
                 <Head>
                     <title>جاري التحميل... -  حسام ميرة </title>
                 </Head>
-                <div dir='rtl' className="min-h-screen   text-white font-arabicUI3">
+                <div dir='rtl' className="min-h-screen text-gray-800 dark:text-white font-arabicUI3 bg-gradient-to-br from-blue-100 via-white to-slate-50 dark:from-[#0A1121] dark:via-[#0F1629] dark:to-[#1A202C]">
                     {/* Animated Background */}
                     <div className="fixed inset-0 pointer-events-none overflow-hidden">
                         <div className="absolute h-full w-full bg-[url('/grid.svg')] opacity-[0.03]" />
@@ -255,13 +255,13 @@ const CoursePage = () => {
                     <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                         {/* Loading Status Indicator */}
                         <div className="mb-8 text-center">
-                            <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20">
+                            <div className="inline-flex items-center gap-3 bg-gray-100 dark:bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-gray-200 dark:border-white/20 shadow-sm">
                                 <div className="flex space-x-1">
                                     <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
                                     <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                                     <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                                 </div>
-                                <span className="text-white/80 font-medium">جاري تحميل المحتوى...</span>
+                                <span className="text-gray-700 dark:text-white/80 font-medium">جاري تحميل المحتوى...</span>
                             </div>
                         </div>
 
@@ -272,46 +272,44 @@ const CoursePage = () => {
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                                     {/* Course Image Skeleton */}
                                     <div className="lg:col-span-1">
-                                        <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-white/5 backdrop-blur-xl border border-white/10">
-                                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 animate-pulse">
+                                        <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-gray-100/80 dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-md">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-blue-200/30 to-purple-200/30 dark:from-blue-500/10 dark:to-purple-500/10 animate-pulse">
                                                 <div className="absolute inset-0 flex items-center justify-center">
-                                                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center animate-pulse">
-                                                        <svg className="w-8 h-8 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <div className="w-16 h-16 bg-gray-200/70 dark:bg-white/10 rounded-2xl flex items-center justify-center animate-pulse">
+                                                        <svg className="w-8 h-8 text-gray-400 dark:text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
                                                 {/* Floating icon skeleton */}
-                                                <div className="absolute top-4 right-4 w-12 h-12 bg-white/10 rounded-xl animate-pulse"></div>
+                                                <div className="absolute top-4 right-4 w-12 h-12 bg-gray-200/70 dark:bg-white/10 rounded-xl animate-pulse"></div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    {/* Course Info Skeleton */}
+                                    </div>                                    {/* Course Info Skeleton */}
                                     <div className="lg:col-span-2 flex flex-col justify-center space-y-6">
                                         {/* Badge skeleton */}
-                                        <div className="w-32 h-12 bg-white/10 backdrop-blur-md rounded-xl animate-pulse"></div>
+                                        <div className="w-32 h-12 bg-gray-100 dark:bg-white/10 backdrop-blur-md rounded-xl animate-pulse shadow-sm"></div>
 
                                         {/* Title skeleton */}
                                         <div className="space-y-3">
-                                            <div className="w-3/4 h-12 bg-gradient-to-r from-white/10 to-blue-500/10 rounded-xl animate-pulse"></div>
-                                            <div className="w-1/2 h-8 bg-white/5 rounded-lg animate-pulse"></div>
+                                            <div className="w-3/4 h-12 bg-gradient-to-r from-gray-100 to-blue-100/30 dark:from-white/10 dark:to-blue-500/10 rounded-xl animate-pulse shadow-sm"></div>
+                                            <div className="w-1/2 h-8 bg-gray-100/80 dark:bg-white/5 rounded-lg animate-pulse shadow-sm"></div>
                                         </div>
 
                                         {/* Description skeleton */}
                                         <div className="space-y-2">
-                                            <div className="w-full h-4 bg-white/5 rounded animate-pulse"></div>
-                                            <div className="w-5/6 h-4 bg-white/5 rounded animate-pulse"></div>
-                                            <div className="w-3/4 h-4 bg-white/5 rounded animate-pulse"></div>
+                                            <div className="w-full h-4 bg-gray-100/80 dark:bg-white/5 rounded animate-pulse shadow-sm"></div>
+                                            <div className="w-5/6 h-4 bg-gray-100/80 dark:bg-white/5 rounded animate-pulse shadow-sm"></div>
+                                            <div className="w-3/4 h-4 bg-gray-100/80 dark:bg-white/5 rounded animate-pulse shadow-sm"></div>
                                         </div>
 
                                         {/* Price and features skeleton */}
                                         <div className="flex flex-wrap items-center gap-4">
-                                            <div className="w-32 h-12 bg-green-500/20 rounded-xl animate-pulse"></div>
-                                            <div className="w-28 h-12 bg-emerald-500/20 rounded-xl animate-pulse"></div>
+                                            <div className="w-32 h-12 bg-green-100/50 dark:bg-green-500/20 rounded-xl animate-pulse shadow-sm"></div>
+                                            <div className="w-28 h-12 bg-emerald-100/50 dark:bg-emerald-500/20 rounded-xl animate-pulse shadow-sm"></div>
                                             <div className="flex items-center gap-4">
-                                                <div className="w-16 h-6 bg-white/5 rounded animate-pulse"></div>
-                                                <div className="w-20 h-6 bg-white/5 rounded animate-pulse"></div>
+                                                <div className="w-16 h-6 bg-gray-100/80 dark:bg-white/5 rounded animate-pulse shadow-sm"></div>
+                                                <div className="w-20 h-6 bg-gray-100/80 dark:bg-white/5 rounded animate-pulse shadow-sm"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -322,26 +320,26 @@ const CoursePage = () => {
                                     {/* Main Content Skeleton */}
                                     <div className="xl:col-span-3 space-y-6">
                                         {/* Description Card Skeleton */}
-                                        <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
+                                        <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-md">
                                             <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-6 h-6 bg-blue-500/20 rounded-lg animate-pulse"></div>
-                                                <div className="w-32 h-6 bg-white/10 rounded animate-pulse"></div>
+                                                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-500/20 rounded-lg animate-pulse"></div>
+                                                <div className="w-32 h-6 bg-gray-100 dark:bg-white/10 rounded animate-pulse"></div>
                                             </div>
                                             <div className="space-y-3">
-                                                <div className="w-full h-4 bg-white/5 rounded animate-pulse"></div>
-                                                <div className="w-11/12 h-4 bg-white/5 rounded animate-pulse"></div>
-                                                <div className="w-4/5 h-4 bg-white/5 rounded animate-pulse"></div>
-                                                <div className="w-3/4 h-4 bg-white/5 rounded animate-pulse"></div>
+                                                <div className="w-full h-4 bg-gray-100 dark:bg-white/5 rounded animate-pulse"></div>
+                                                <div className="w-11/12 h-4 bg-gray-100 dark:bg-white/5 rounded animate-pulse"></div>
+                                                <div className="w-4/5 h-4 bg-gray-100 dark:bg-white/5 rounded animate-pulse"></div>
+                                                <div className="w-3/4 h-4 bg-gray-100 dark:bg-white/5 rounded animate-pulse"></div>
                                             </div>
                                         </div>
 
                                         {/* Instructor Card Skeleton */}
-                                        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+                                        <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-md">
                                             {/* Header */}
-                                            <div className="bg-gradient-to-r from-purple-600/20 via-blue-600/15 to-indigo-600/20 p-6 border-b border-white/10">
+                                            <div className="bg-gradient-to-r from-purple-100 via-blue-100 to-indigo-100 dark:from-purple-600/20 dark:via-blue-600/15 dark:to-indigo-600/20 p-6 border-b border-gray-200 dark:border-white/10">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 bg-white/10 rounded-xl animate-pulse"></div>
-                                                    <div className="w-24 h-6 bg-white/10 rounded animate-pulse"></div>
+                                                    <div className="w-8 h-8 bg-gray-200 dark:bg-white/10 rounded-xl animate-pulse"></div>
+                                                    <div className="w-24 h-6 bg-gray-200 dark:bg-white/10 rounded animate-pulse"></div>
                                                 </div>
                                             </div>
                                             {/* Content */}
@@ -349,24 +347,24 @@ const CoursePage = () => {
                                                 <div className="flex items-start gap-6">
                                                     {/* Profile image skeleton */}
                                                     <div className="relative flex-shrink-0">
-                                                        <div className="w-20 h-20 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-2xl animate-pulse"></div>
-                                                        <div className="absolute -bottom-2 -right-2 w-7 h-7 bg-green-500/30 rounded-full animate-pulse"></div>
+                                                        <div className="w-20 h-20 bg-gradient-to-br from-purple-200 to-blue-200 dark:from-purple-500/20 dark:to-blue-500/20 rounded-2xl animate-pulse"></div>
+                                                        <div className="absolute -bottom-2 -right-2 w-7 h-7 bg-green-200 dark:bg-green-500/30 rounded-full animate-pulse"></div>
                                                     </div>
                                                     {/* Details skeleton */}
                                                     <div className="flex-1 space-y-4">
                                                         <div className="flex items-center gap-2">
-                                                            <div className="w-32 h-6 bg-white/10 rounded animate-pulse"></div>
-                                                            <div className="w-5 h-5 bg-blue-500/30 rounded-full animate-pulse"></div>
+                                                            <div className="w-32 h-6 bg-gray-200 dark:bg-white/10 rounded animate-pulse"></div>
+                                                            <div className="w-5 h-5 bg-blue-200 dark:bg-blue-500/30 rounded-full animate-pulse"></div>
                                                         </div>
                                                         <div className="space-y-2">
                                                             <div className="flex items-center gap-2">
-                                                                <div className="w-4 h-4 bg-purple-400/30 rounded animate-pulse"></div>
-                                                                <div className="w-16 h-4 bg-white/5 rounded animate-pulse"></div>
+                                                                <div className="w-4 h-4 bg-purple-200 dark:bg-purple-400/30 rounded animate-pulse"></div>
+                                                                <div className="w-16 h-4 bg-gray-100 dark:bg-white/5 rounded animate-pulse"></div>
                                                             </div>
                                                             <div className="flex flex-wrap gap-2">
-                                                                <div className="w-20 h-6 bg-purple-500/10 rounded-lg animate-pulse"></div>
-                                                                <div className="w-16 h-6 bg-blue-500/10 rounded-lg animate-pulse"></div>
-                                                                <div className="w-24 h-6 bg-teal-500/10 rounded-lg animate-pulse"></div>
+                                                                <div className="w-20 h-6 bg-purple-100 dark:bg-purple-500/10 rounded-lg animate-pulse"></div>
+                                                                <div className="w-16 h-6 bg-blue-100 dark:bg-blue-500/10 rounded-lg animate-pulse"></div>
+                                                                <div className="w-24 h-6 bg-teal-100 dark:bg-teal-500/10 rounded-lg animate-pulse"></div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -378,11 +376,11 @@ const CoursePage = () => {
                                     {/* Sidebar Skeleton */}
                                     <div className="xl:col-span-1">
                                         <div className="sticky top-8">
-                                            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+                                            <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 p-6 shadow-md">
                                                 <div className="space-y-4">
-                                                    <div className="w-full h-12 bg-white/10 rounded-xl animate-pulse"></div>
-                                                    <div className="w-3/4 h-8 bg-white/5 rounded-lg animate-pulse"></div>
-                                                    <div className="w-full h-16 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl animate-pulse"></div>
+                                                    <div className="w-full h-12 bg-gray-100 dark:bg-white/10 rounded-xl animate-pulse"></div>
+                                                    <div className="w-3/4 h-8 bg-gray-100 dark:bg-white/5 rounded-lg animate-pulse"></div>
+                                                    <div className="w-full h-16 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-500/10 dark:to-purple-500/10 rounded-xl animate-pulse"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -396,8 +394,8 @@ const CoursePage = () => {
                                 <div className="xl:col-span-2 space-y-6">
                                     {/* Enhanced Video Player Skeleton */}
                                     <div className="relative group">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-75 animate-pulse"></div>
-                                        <div className="relative w-full h-auto rounded-xl overflow-hidden bg-gray-900">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-200/50 to-purple-200/50 dark:from-blue-500/20 dark:to-purple-500/20 rounded-3xl blur-xl opacity-75 animate-pulse"></div>
+                                        <div className="relative w-full h-auto rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-900 shadow-md">
                                             <div className="aspect-video bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
                                                 <div className="text-center space-y-4">
                                                     <div className="w-24 h-24 mx-auto bg-white/5 rounded-2xl flex items-center justify-center animate-pulse">
@@ -527,6 +525,14 @@ const CoursePage = () => {
                         height: 100%;
                         width: 100%;
                     }
+                    
+                    @media (prefers-color-scheme: light) {
+                        .plyr-container {
+                            --plyr-menu-background: rgba(240, 245, 250, 0.95);
+                            --plyr-menu-color: #1f2937;
+                        }
+                    }
+                    
                     .plyr {
                         height: 100%; 
                         width: 100%;
@@ -577,7 +583,7 @@ const CoursePage = () => {
                     }
                 `}</style>
             </Head>
-            <div dir='rtl' className="min-h-screen bg-gradient-to-br from-[#0A1121] via-[#0F1629] to-[#1A202C] text-white font-arabicUI3">
+            <div dir='rtl' className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-slate-50 dark:from-[#0A1121] dark:via-[#0F1629] dark:to-[#1A202C] text-gray-800 dark:text-white font-arabicUI3">
                 {/* Enhanced Animated Background */}
 
 
@@ -601,8 +607,8 @@ const CoursePage = () => {
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                                     {/* Floating Icon */}
-                                    <div className="absolute top-4 right-4 w-12 h-12 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 flex items-center justify-center shadow-xl">
-                                        <FaChalkboardTeacher className="text-blue-400 text-lg" />
+                                    <div className="absolute top-4 right-4 w-12 h-12 bg-white/80 dark:bg-white/10 backdrop-blur-md rounded-xl border border-gray-200 dark:border-white/20 flex items-center justify-center shadow-xl">
+                                        <FaChalkboardTeacher className="text-blue-500 dark:text-blue-400 text-lg" />
                                     </div>
                                 </div>
                             </div>
@@ -610,53 +616,53 @@ const CoursePage = () => {
                             {/* Course Info - Takes More Space */}
                             <div className="lg:col-span-2 flex flex-col justify-center space-y-6">
                                 {/* Course Badge */}
-                                <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl border border-white/20 shadow-lg w-fit">
-                                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                                    <FaChalkboardTeacher className="text-blue-400 text-lg" />
-                                    <span className="text-blue-300 font-semibold">كورس {courseInfo.level || "تعليمي"}</span>
+                                <div className="inline-flex items-center gap-3 bg-white/80 dark:bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl border border-gray-200 dark:border-white/20 shadow-lg w-fit">
+                                    <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse"></div>
+                                    <FaChalkboardTeacher className="text-blue-500 dark:text-blue-400 text-lg" />
+                                    <span className="text-blue-600 dark:text-blue-300 font-semibold">كورس {courseInfo.level || "تعليمي"}</span>
                                 </div>
 
                                 {/* Course Title */}
-                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
-                                    <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-800 dark:text-white leading-tight">
+                                    <span className="bg-gradient-to-r from-gray-800 via-blue-700 to-purple-700 dark:from-white dark:via-blue-100 dark:to-purple-100 bg-clip-text text-transparent">
                                         {courseInfo.nameofcourse}
                                     </span>
                                 </h1>
 
                                 {/* Course Description Preview */}
-                                <p className="text-gray-300 text-lg leading-relaxed line-clamp-3">
+                                <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed line-clamp-3">
                                     {courseInfo.description}
                                 </p>
 
                                 {/* Price and Features Row */}
                                 <div className="flex flex-wrap items-center gap-4">
-                                    <div className="inline-flex items-center gap-3 bg-green-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-green-400/30 shadow-lg">
-                                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                        <span className="text-green-300 font-bold text-lg">
+                                    <div className="inline-flex items-center gap-3 bg-green-100/80 dark:bg-green-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-green-200 dark:border-green-400/30 shadow-lg">
+                                        <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse"></div>
+                                        <span className="text-green-700 dark:text-green-300 font-bold text-lg">
                                             {courseInfo.isFree ? 'مجاني تماماً' : `${courseInfo.price} جنيه`}
                                         </span>
                                     </div>
 
                                     {isEnrolled && (
-                                        <div className="inline-flex items-center gap-3 bg-emerald-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-emerald-400/30 shadow-lg">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <div className="inline-flex items-center gap-3 bg-emerald-100/80 dark:bg-emerald-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-emerald-200 dark:border-emerald-400/30 shadow-lg">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                             </svg>
-                                            <span className="text-emerald-300 font-semibold">مشترك بالفعل</span>
+                                            <span className="text-emerald-600 dark:text-emerald-300 font-semibold">مشترك بالفعل</span>
                                         </div>
                                     )}
 
                                     {/* Course Link */}
                                     {courseInfo.courseLink && courseInfo.courseLink.name && courseInfo.courseLink.url && (
-                                        <div className="inline-flex items-center gap-3 bg-blue-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-blue-400/30 shadow-lg">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div className="inline-flex items-center gap-3 bg-blue-100/80 dark:bg-blue-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-blue-200 dark:border-blue-400/30 shadow-lg">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                             </svg>
                                             <a
                                                 href={courseInfo.courseLink.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-blue-300 font-semibold hover:text-blue-200 transition-colors"
+                                                className="text-blue-600 dark:text-blue-300 font-semibold hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
                                             >
                                                 {courseInfo.courseLink.name}
                                             </a>
@@ -664,7 +670,7 @@ const CoursePage = () => {
                                     )}
 
                                     {/* Course Stats */}
-                                    <div className="flex items-center gap-6 text-gray-400">
+                                    <div className="flex items-center gap-6 text-gray-500 dark:text-gray-400">
                                         <span className="flex items-center gap-2">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
@@ -687,32 +693,32 @@ const CoursePage = () => {
                             {/* Main Content Area */}
                             <div className="xl:col-span-3 space-y-6">
                                 {/* Course Description Card - More Compact */}
-                                <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl">
-                                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
-                                        <div className="w-6 h-6 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                                            <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-xl">
+                                    <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-3">
+                                        <div className="w-6 h-6 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                            <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
                                         </div>
                                         تفاصيل الكورس
                                     </h2>
-                                    <pre className="text-gray-300 text-base leading-relaxed whitespace-pre-line"
+                                    <pre className="text-gray-700 dark:text-gray-300 text-base leading-relaxed whitespace-pre-line"
                                         style={{ fontFamily: 'inherit', background: 'none', border: 'none', padding: 0, margin: 0 }}>
                                         {courseInfo.description}
                                     </pre>
                                 </div>
 
                                 {/* Enhanced Professional Instructor Card */}
-                                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+                                <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-xl overflow-hidden">
                                     {/* Header with Gradient Background */}
-                                    <div className="bg-gradient-to-r from-purple-600/20 via-blue-600/15 to-indigo-600/20 p-6 border-b border-white/10">
-                                        <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                                                <svg className="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="bg-gradient-to-r from-purple-100 via-blue-100 to-indigo-100 dark:from-purple-600/20 dark:via-blue-600/15 dark:to-indigo-600/20 p-6 border-b border-gray-200 dark:border-white/10">
+                                        <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-white dark:bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-sm">
+                                                <svg className="w-5 h-5 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                                 </svg>
                                             </div>
-                                            <span className="bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
+                                            <span className="bg-gradient-to-r from-gray-800 to-purple-700 dark:from-white dark:to-purple-100 bg-clip-text text-transparent">
                                                 المُحاضِر
                                             </span>
                                         </h3>
@@ -725,10 +731,10 @@ const CoursePage = () => {
                                             <div className="relative flex-shrink-0">
                                                 <div className="relative">
                                                     {/* Animated Border Ring */}
-                                                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 rounded-2xl blur opacity-30 animate-pulse"></div>
+                                                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-300 via-blue-300 to-green-300 dark:from-purple-500 dark:via-blue-500 dark:to-green-500 rounded-2xl blur opacity-30 animate-pulse"></div>
 
                                                     {/* Profile Image */}
-                                                    <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-white/20 shadow-xl">
+                                                    <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-white/20 shadow-xl">
                                                         <img
                                                             src="/prof.jpg"
                                                             alt="أ / حسام ميرة"
@@ -740,7 +746,7 @@ const CoursePage = () => {
 
                                                     {/* Status Indicator */}
                                                     <div className="absolute -bottom-2 -right-2 flex items-center justify-center">
-                                                        <div className="w-7 h-7 bg-gradient-to-r from-green-400 to-emerald-500 border-3 border-white/30 rounded-full flex items-center justify-center shadow-lg">
+                                                        <div className="w-7 h-7 bg-gradient-to-r from-green-400 to-emerald-500 border-3 border-white dark:border-white/30 rounded-full flex items-center justify-center shadow-lg">
                                                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                             </svg>
@@ -753,8 +759,8 @@ const CoursePage = () => {
                                             <div className="flex-1 space-y-4">
                                                 {/* Name and Title */}
                                                 <div className="space-y-2">
-                                                    <h4 className="text-xl font-bold text-white flex items-center gap-2">
-                                                        <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+                                                    <h4 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                                        <span className="bg-gradient-to-r from-gray-800 via-blue-700 to-purple-700 dark:from-white dark:via-blue-100 dark:to-purple-100 bg-clip-text text-transparent">
                                                             أ / حسام ميرة                                                        </span>
                                                         {/* Verification Badge */}
                                                         <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
@@ -772,19 +778,19 @@ const CoursePage = () => {
                                                 {/* Specializations */}
                                                 <div className="space-y-2">
                                                     <div className="flex items-center gap-2">
-                                                        <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                                                         </svg>
-                                                        <span className="text-gray-400 text-sm font-medium">التخصصات:</span>
+                                                        <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">التخصصات:</span>
                                                     </div>
                                                     <div className="flex flex-wrap gap-2">
-                                                        <span className="px-2 py-1 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-400/20 rounded-lg text-purple-300 text-xs font-medium">
+                                                        <span className="px-2 py-1 bg-gradient-to-r from-purple-200/50 to-blue-200/50 dark:from-purple-500/10 dark:to-blue-500/10 border border-purple-300/40 dark:border-purple-400/20 rounded-lg text-purple-600 dark:text-purple-300 text-xs font-medium">
                                                             البحتة
                                                         </span>
-                                                        <span className="px-2 py-1 bg-gradient-to-r from-blue-500/10 to-teal-500/10 border border-blue-400/20 rounded-lg text-blue-300 text-xs font-medium">
+                                                        <span className="px-2 py-1 bg-gradient-to-r from-blue-200/50 to-teal-200/50 dark:from-blue-500/10 dark:to-teal-500/10 border border-blue-300/40 dark:border-blue-400/20 rounded-lg text-blue-600 dark:text-blue-300 text-xs font-medium">
                                                             التطبيقية
                                                         </span>
-                                                        <span className="px-2 py-1 bg-gradient-to-r from-teal-500/10 to-green-500/10 border border-teal-400/20 rounded-lg text-teal-300 text-xs font-medium">
+                                                        <span className="px-2 py-1 bg-gradient-to-r from-teal-200/50 to-green-200/50 dark:from-teal-500/10 dark:to-green-500/10 border border-teal-300/40 dark:border-teal-400/20 rounded-lg text-teal-600 dark:text-teal-300 text-xs font-medium">
                                                             اخر
                                                         </span>
                                                     </div>
@@ -811,22 +817,22 @@ const CoursePage = () => {
                         <div className="xl:col-span-2 space-y-6">
                             {/* Enhanced Video Player */}
                             <div ref={videoPlayerRef} className="relative group">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                <div className="relative bg-black/90 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-200/40 to-purple-200/40 dark:from-blue-500/20 dark:to-purple-500/20 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div className="relative bg-gray-100 dark:bg-black/90 backdrop-blur-xl rounded-3xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-2xl">
                                     <div className="aspect-video">
                                         {currentVideoUrl && !isContentLocked && isReady ? (
                                             <VideoPlayer videoUrl={currentVideoUrl} />
                                         ) : (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+                                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
                                                 <div className="text-center space-y-6 p-8">
-                                                    <div className="w-24 h-24 mx-auto bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
-                                                        <FaLock className="text-4xl text-gray-500" />
+                                                    <div className="w-24 h-24 mx-auto bg-gray-200 dark:bg-white/5 rounded-2xl flex items-center justify-center border border-gray-300 dark:border-white/10 shadow-md">
+                                                        <FaLock className="text-4xl text-gray-400 dark:text-gray-500" />
                                                     </div>
                                                     <div>
-                                                        <h3 className="text-xl font-bold text-white mb-2">
+                                                        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
                                                             {isContentLocked ? "المحتوى محمي" : "اختر درساً للبدء"}
                                                         </h3>
-                                                        <p className="text-gray-400 leading-relaxed max-w-md">
+                                                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed max-w-md">
                                                             {!user ?
                                                                 courseVideoChapters.some(chapter =>
                                                                     chapter.lessons?.some(lesson => lesson.isFree)
@@ -854,23 +860,23 @@ const CoursePage = () => {
                             </div>
 
                             {/* Current Lesson Info Card */}
-                            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl">
+                            <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-gray-200 dark:border-white/10 shadow-xl">
                                 <div className="flex items-start gap-6">
-                                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <FaPlay className="text-blue-400 text-lg" />
+                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                                        <FaPlay className="text-blue-600 dark:text-blue-400 text-lg" />
                                     </div>
                                     <div className="flex-1">
-                                        <h2 className="text-2xl font-bold text-white mb-3">
+                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">
                                             {courseVideoChapters.length > 0 ? courseVideoChapters[activeChapter]?.nameofchapter : "المحتوى غير متاح"}
                                         </h2>
-                                        <h3 className="text-lg text-blue-300 mb-4 font-medium flex items-center gap-3">
+                                        <h3 className="text-lg text-blue-600 dark:text-blue-300 mb-4 font-medium flex items-center gap-3">
                                             <span>
                                                 {courseVideoChapters.length > 0 && courseVideoChapters[activeChapter]?.lessons.length > 0
                                                     ? courseVideoChapters[activeChapter]?.lessons[activeLesson]?.name
                                                     : "يرجى الاشتراك لعرض محتوى الدروس"}
                                             </span>
                                             {courseVideoChapters[activeChapter]?.lessons[activeLesson]?.isFree && !isEnrolled && (
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/20 border border-green-400/30 rounded-lg text-green-300 text-sm font-bold">
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-500/20 border border-green-200 dark:border-green-400/30 rounded-lg text-green-600 dark:text-green-300 text-sm font-bold">
                                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                                                     </svg>
@@ -878,7 +884,7 @@ const CoursePage = () => {
                                                 </span>
                                             )}
                                         </h3>
-                                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                                             <span className="flex items-center gap-2">
                                                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                                                 الدرس {activeLesson + 1} من {courseVideoChapters[activeChapter]?.lessons.length || 0}
@@ -895,12 +901,12 @@ const CoursePage = () => {
                                                 {/* Main File */}
                                                 {currentLesson.fileUrl && (
                                                     <div>
-                                                        <h4 className="text-white/70 text-sm mb-2 font-medium">ملفات الدرس:</h4>
+                                                        <h4 className="text-gray-700 dark:text-white/70 text-sm mb-2 font-medium">ملفات الدرس:</h4>
                                                         <a
                                                             href={currentLesson.fileUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300 transition-all duration-300 text-sm font-medium"
+                                                            className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-green-100/70 hover:bg-green-100 dark:bg-green-500/10 dark:hover:bg-green-500/20 border border-green-200 hover:border-green-300 dark:border-green-500/20 dark:hover:border-green-500/40 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-all duration-300 text-sm font-medium shadow-sm"
                                                         >
                                                             <File className="w-5 h-5" />
                                                             <span>{currentLesson.fileName || "ملف الدرس"}</span>
@@ -914,7 +920,7 @@ const CoursePage = () => {
                                                 {/* Additional Files */}
                                                 {currentLesson.files && currentLesson.files.length > 0 && (
                                                     <div>
-                                                        {!currentLesson.fileUrl && <h4 className="text-white/70 text-sm mb-2 font-medium">ملفات الدرس:</h4>}
+                                                        {!currentLesson.fileUrl && <h4 className="text-gray-700 dark:text-white/70 text-sm mb-2 font-medium">ملفات الدرس:</h4>}
                                                         <div className="flex flex-wrap gap-3">
                                                             {currentLesson.files.map((file, index) => (
                                                                 <a
@@ -922,7 +928,7 @@ const CoursePage = () => {
                                                                     href={file.fileUrl}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 hover:text-blue-300 transition-all duration-300 text-sm font-medium"
+                                                                    className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-100/70 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 border border-blue-200 hover:border-blue-300 dark:border-blue-500/20 dark:hover:border-blue-500/40 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 text-sm font-medium shadow-sm"
                                                                 >
                                                                     <File className="w-5 h-5" />
                                                                     <span>{file.fileName}</span>
@@ -945,25 +951,25 @@ const CoursePage = () => {
                         <div className="xl:col-span-1">
                             <div className="sticky top-8 space-y-6">
                                 {/* Course Navigation */}
-                                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+                                <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-xl overflow-hidden">
                                     {/* Header */}
-                                    <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 p-6 border-b border-white/10">
-                                        <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-600/20 dark:to-purple-600/20 p-6 border-b border-gray-200 dark:border-white/10">
+                                        <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-white/80 dark:bg-white/10 rounded-lg flex items-center justify-center shadow-sm">
+                                                <svg className="w-5 h-5 text-blue-600 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                                                 </svg>
                                             </div>
                                             محتويات الكورس
                                         </h3>
-                                        <div className="text-gray-300 text-sm mt-2">
+                                        <div className="text-gray-600 dark:text-gray-300 text-sm mt-2">
                                             <p>
                                                 {courseVideoChapters.length} فصل • {courseVideoChapters.reduce((total, chapter) => total + (chapter.lessons?.length || 0), 0)} درس
                                             </p>
                                             {!isEnrolled && courseVideoChapters.some(chapter =>
                                                 chapter.lessons?.some(lesson => lesson.isFree)
                                             ) && (
-                                                    <p className="text-green-300 mt-1">
+                                                    <p className="text-green-600 dark:text-green-300 mt-1">
                                                         <span className="inline-flex items-center gap-1">
                                                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
@@ -978,18 +984,18 @@ const CoursePage = () => {
                                     {/* Content */}
                                     <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-transparent">
                                         {courseVideoChapters.length > 0 ? (
-                                            <div className="divide-y divide-white/5">
+                                            <div className="divide-y divide-gray-200 dark:divide-white/5">
                                                 {courseVideoChapters.map((chapter, chapterIndex) => (
-                                                    <div key={chapter.id} className="p-6 hover:bg-white/5 transition-all duration-300">
+                                                    <div key={chapter.id} className="p-6 hover:bg-gray-100/70 dark:hover:bg-white/5 transition-all duration-300">
                                                         {/* Chapter Header */}
                                                         <div className="mb-4">
                                                             <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+                                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
                                                                     {chapterIndex + 1}
                                                                 </div>
                                                                 <div className="flex-1">
-                                                                    <h4 className="text-white font-semibold text-lg leading-tight">{chapter.nameofchapter}</h4>
-                                                                    <p className="text-gray-400 text-sm mt-1">{chapter.lessons.length} دروس</p>
+                                                                    <h4 className="text-gray-800 dark:text-white font-semibold text-lg leading-tight">{chapter.nameofchapter}</h4>
+                                                                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{chapter.lessons.length} دروس</p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1003,38 +1009,38 @@ const CoursePage = () => {
                                                                         onClick={() => (isEnrolled || lesson.isFree) && handleLessonClick(chapterIndex, lessonIndex)}
                                                                         className={`w-full p-4 flex items-center gap-4 rounded-xl transition-all duration-300 group
                                                                             ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                                                ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 shadow-lg shadow-blue-500/10'
-                                                                                : 'hover:bg-white/5 border border-transparent'}`}
+                                                                                ? 'bg-gradient-to-r from-blue-200/70 to-purple-200/70 dark:from-blue-500/20 dark:to-purple-500/20 border border-blue-300/50 dark:border-blue-400/30 shadow-lg shadow-blue-200/20 dark:shadow-blue-500/10'
+                                                                                : 'hover:bg-gray-100/70 dark:hover:bg-white/5 border border-transparent'}`}
                                                                         disabled={!isEnrolled && !lesson.isFree}
                                                                     >
                                                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300
                                                                             ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                                                ? 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg'
+                                                                                ? 'bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 shadow-lg'
                                                                                 : !isEnrolled && !lesson.isFree
-                                                                                    ? 'bg-gray-700/50'
-                                                                                    : 'bg-gray-600/50 group-hover:bg-blue-500/20'}`}
+                                                                                    ? 'bg-gray-300 dark:bg-gray-700/50'
+                                                                                    : 'bg-gray-200 dark:bg-gray-600/50 group-hover:bg-blue-200/30 dark:group-hover:bg-blue-500/20'}`}
                                                                         >
                                                                             {!isEnrolled && !lesson.isFree ? (
-                                                                                <FaLock className="text-gray-400 text-sm" />
+                                                                                <FaLock className="text-gray-500 dark:text-gray-400 text-sm" />
                                                                             ) : (
                                                                                 <FaPlay className={`text-sm transition-colors
                                                                                     ${activeChapter === chapterIndex && activeLesson === lessonIndex
                                                                                         ? 'text-white'
-                                                                                        : 'text-gray-400 group-hover:text-blue-400'}`} />
+                                                                                        : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`} />
                                                                             )}
                                                                         </div>
                                                                         <div className="text-right flex-1">
                                                                             <div className="flex items-center gap-2 justify-start">
                                                                                 <p className={`text-sm font-medium transition-colors leading-relaxed
                                                                                     ${activeChapter === chapterIndex && activeLesson === lessonIndex
-                                                                                        ? 'text-blue-300'
+                                                                                        ? 'text-blue-600 dark:text-blue-300'
                                                                                         : !isEnrolled && !lesson.isFree
-                                                                                            ? 'text-gray-500'
-                                                                                            : 'text-gray-300 group-hover:text-white'}`}>
+                                                                                            ? 'text-gray-400 dark:text-gray-500'
+                                                                                            : 'text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-white'}`}>
                                                                                     {lesson.name}
                                                                                 </p>
                                                                                 {lesson.isFree && !isEnrolled && (
-                                                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 border border-green-400/30 rounded-md text-green-300 text-xs font-bold">
+                                                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100/70 dark:bg-green-500/20 border border-green-200 dark:border-green-400/30 rounded-md text-green-600 dark:text-green-300 text-xs font-bold">
                                                                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                                                             <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                                                                                         </svg>
@@ -1053,12 +1059,12 @@ const CoursePage = () => {
                                                                                     href={lesson.fileUrl}
                                                                                     target="_blank"
                                                                                     rel="noopener noreferrer"
-                                                                                    className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300 transition-all duration-300 text-sm font-medium group"
+                                                                                    className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-green-100/70 hover:bg-green-100 dark:bg-green-500/10 dark:hover:bg-green-500/20 border border-green-200 hover:border-green-300 dark:border-green-500/20 dark:hover:border-green-500/40 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-all duration-300 text-sm font-medium group shadow-sm"
                                                                                 >
                                                                                     <File className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                                                                     <span>{lesson.fileName}</span>
                                                                                     {lesson.isFree && !isEnrolled && (
-                                                                                        <span className="px-2 py-1 bg-green-500/20 border border-green-400/30 rounded-md text-green-300 text-xs font-bold">
+                                                                                        <span className="px-2 py-1 bg-green-100/80 dark:bg-green-500/20 border border-green-200 dark:border-green-400/30 rounded-md text-green-600 dark:text-green-300 text-xs font-bold">
                                                                                             مجاني
                                                                                         </span>
                                                                                     )}
@@ -1067,7 +1073,7 @@ const CoursePage = () => {
                                                                                     </svg>
                                                                                 </a>
                                                                             ) : (
-                                                                                <div className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-700/30 border border-gray-600/30 text-gray-500 text-sm font-medium">
+                                                                                <div className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-200/80 dark:bg-gray-700/30 border border-gray-300/50 dark:border-gray-600/30 text-gray-500 text-sm font-medium">
                                                                                     <FaLock className="w-4 h-4" />
                                                                                     <span>{lesson.fileName}</span>
                                                                                 </div>
@@ -1085,12 +1091,12 @@ const CoursePage = () => {
                                                                                         href={file.fileUrl}
                                                                                         target="_blank"
                                                                                         rel="noopener noreferrer"
-                                                                                        className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 hover:text-blue-300 transition-all duration-300 text-sm font-medium group"
+                                                                                        className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-100/70 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 border border-blue-200 hover:border-blue-300 dark:border-blue-500/20 dark:hover:border-blue-500/40 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 text-sm font-medium group shadow-sm"
                                                                                     >
                                                                                         <File className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                                                                         <span>{file.fileName}</span>
                                                                                         {lesson.isFree && !isEnrolled && (
-                                                                                            <span className="px-2 py-1 bg-blue-500/20 border border-blue-400/30 rounded-md text-blue-300 text-xs font-bold">
+                                                                                            <span className="px-2 py-1 bg-blue-100/80 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-400/30 rounded-md text-blue-600 dark:text-blue-300 text-xs font-bold">
                                                                                                 مجاني
                                                                                             </span>
                                                                                         )}
@@ -1101,7 +1107,7 @@ const CoursePage = () => {
                                                                                 ) : (
                                                                                     <div
                                                                                         key={`file-${fileIndex}`}
-                                                                                        className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-700/30 border border-gray-600/30 text-gray-500 text-sm font-medium"
+                                                                                        className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-200/80 dark:bg-gray-700/30 border border-gray-300/50 dark:border-gray-600/30 text-gray-500 text-sm font-medium"
                                                                                     >
                                                                                         <FaLock className="w-4 h-4" />
                                                                                         <span>{file.fileName}</span>
@@ -1118,12 +1124,12 @@ const CoursePage = () => {
                                             </div>
                                         ) : (
                                             <div className="p-8 text-center">
-                                                <div className="w-16 h-16 mx-auto bg-gray-700/30 rounded-2xl flex items-center justify-center mb-4">
-                                                    <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <div className="w-16 h-16 mx-auto bg-gray-200/80 dark:bg-gray-700/30 rounded-2xl flex items-center justify-center mb-4">
+                                                    <svg className="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                                     </svg>
                                                 </div>
-                                                <p className="text-gray-400 font-medium">
+                                                <p className="text-gray-600 dark:text-gray-400 font-medium">
                                                     {isEnrolled
                                                         ? "لا توجد دروس متاحة حالياً"
                                                         : courseVideoChapters.some(chapter =>
@@ -1140,11 +1146,11 @@ const CoursePage = () => {
 
                                 {/* Course Link Section - Visible to all but URL only for enrolled */}
                                 {courseInfo.courseLink && courseInfo.courseLink.name && (
-                                    <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-                                        <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 p-6 border-b border-white/10">
-                                            <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                                                <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-xl overflow-hidden">
+                                        <div className="bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-600/20 dark:to-cyan-600/20 p-6 border-b border-gray-200 dark:border-white/10">
+                                            <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                                                <div className="w-8 h-8 bg-white dark:bg-white/10 rounded-lg flex items-center justify-center shadow-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                                     </svg>
                                                 </div>
@@ -1158,44 +1164,44 @@ const CoursePage = () => {
                                                     href={courseInfo.courseLink.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center gap-4 p-4 rounded-xl transition-all duration-300 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 hover:from-blue-500/20 hover:to-cyan-500/20 border border-blue-400/20 hover:border-blue-400/40"
+                                                    className="flex items-center gap-4 p-4 rounded-xl transition-all duration-300 bg-gradient-to-r from-blue-100/70 to-cyan-100/70 hover:from-blue-100 hover:to-cyan-100 dark:from-blue-500/10 dark:to-cyan-500/10 dark:hover:from-blue-500/20 dark:hover:to-cyan-500/20 border border-blue-200 hover:border-blue-300 dark:border-blue-400/20 dark:hover:border-blue-400/40 shadow-sm"
                                                 >
-                                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-500/20">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-200/70 dark:bg-blue-500/20">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                                         </svg>
                                                     </div>
                                                     <div className="flex-1">
-                                                        <h4 className="text-white font-semibold mb-1">{courseInfo.courseLink.name}</h4>
-                                                        <p className="text-blue-300 text-sm truncate">{courseInfo.courseLink.url}</p>
+                                                        <h4 className="text-gray-800 dark:text-white font-semibold mb-1">{courseInfo.courseLink.name}</h4>
+                                                        <p className="text-blue-600 dark:text-blue-300 text-sm truncate">{courseInfo.courseLink.url}</p>
                                                     </div>
                                                 </a>
                                             ) : (
                                                 // For non-enrolled users: Show non-clickable link with lock icon
-                                                <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/30">
-                                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-700/50">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-100/70 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600/30">
+                                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-200/80 dark:bg-gray-700/50">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                                         </svg>
                                                     </div>
                                                     <div className="flex-1">
-                                                        <h4 className="text-white font-semibold mb-1">{courseInfo.courseLink.name}</h4>
-                                                        <p className="text-gray-400 text-sm">اشترك في الكورس للوصول إلى الرابط</p>
+                                                        <h4 className="text-gray-800 dark:text-white font-semibold mb-1">{courseInfo.courseLink.name}</h4>
+                                                        <p className="text-gray-600 dark:text-gray-400 text-sm">اشترك في الكورس للوصول إلى الرابط</p>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 )}                                {/* Enhanced Quiz Section */}
-                                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-                                    <div className="bg-gradient-to-r from-orange-600/20 to-red-600/20 p-6 border-b border-white/10">
-                                        <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-                                                <BiSolidPencil className="text-white text-lg" />
+                                <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-xl overflow-hidden">
+                                    <div className="bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-600/20 dark:to-red-600/20 p-6 border-b border-gray-200 dark:border-white/10">
+                                        <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-white dark:bg-white/10 rounded-lg flex items-center justify-center shadow-sm">
+                                                <BiSolidPencil className="text-orange-600 dark:text-white text-lg" />
                                             </div>
                                             الاختبارات التفاعلية
                                         </h3>
-                                        <p className="text-gray-300 text-sm mt-2">{exams.length} اختبار متاح</p>
+                                        <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">{exams.length} اختبار متاح</p>
                                     </div>
                                     <div className="p-2">
                                         {exams?.length > 0 ? (
@@ -1204,34 +1210,34 @@ const CoursePage = () => {
                                                     href={isEnrolled ? `/quiz/${quiz.id}` : '#'}
                                                     key={index}
                                                     className={`block m-2 p-4 rounded-xl transition-all duration-300 group
-                                                        ${activeIndex2 === index ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30' : 'hover:bg-white/5'}
+                                                        ${activeIndex2 === index ? 'bg-gradient-to-r from-orange-200/70 to-red-200/70 dark:from-orange-500/20 dark:to-red-500/20 border border-orange-300/50 dark:border-orange-400/30' : 'hover:bg-gray-100/70 dark:hover:bg-white/5'}
                                                         ${!isEnrolled ? 'pointer-events-none opacity-50' : ''}`}
                                                 >
                                                     <div className="flex items-center gap-4">
                                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300
                                                             ${activeIndex2 === index
-                                                                ? 'bg-gradient-to-br from-orange-500 to-red-600 shadow-lg'
+                                                                ? 'bg-gradient-to-br from-orange-400 to-red-500 dark:from-orange-500 dark:to-red-600 shadow-lg'
                                                                 : isEnrolled
-                                                                    ? 'bg-gray-600/50 group-hover:bg-orange-500/20'
-                                                                    : 'bg-gray-700/50'}`}>
+                                                                    ? 'bg-gray-200 dark:bg-gray-600/50 group-hover:bg-orange-200/30 dark:group-hover:bg-orange-500/20'
+                                                                    : 'bg-gray-300 dark:bg-gray-700/50'}`}>
                                                             {isEnrolled ?
                                                                 <BiSolidPencil className="text-white text-lg" /> :
-                                                                <FaLock className="text-gray-400" />
+                                                                <FaLock className="text-gray-500 dark:text-gray-400" />
                                                             }
                                                         </div>
                                                         <div className="text-right flex-1">
-                                                            <p className="text-white font-semibold mb-1">{quiz.title}</p>
-                                                            <p className="text-sm text-gray-400">اختبار تفاعلي شامل</p>
+                                                            <p className="text-gray-800 dark:text-white font-semibold mb-1">{quiz.title}</p>
+                                                            <p className="text-sm text-gray-600 dark:text-gray-400">اختبار تفاعلي شامل</p>
                                                         </div>
                                                     </div>
                                                 </Link>
                                             ))
                                         ) : (
                                             <div className="p-6 text-center">
-                                                <div className="w-12 h-12 mx-auto bg-gray-700/30 rounded-xl flex items-center justify-center mb-3">
+                                                <div className="w-12 h-12 mx-auto bg-gray-200/80 dark:bg-gray-700/30 rounded-xl flex items-center justify-center mb-3">
                                                     <BiSolidPencil className="text-gray-500 text-lg" />
                                                 </div>
-                                                <p className="text-gray-400 text-sm">لا توجد اختبارات متاحة حالياً</p>
+                                                <p className="text-gray-600 dark:text-gray-400 text-sm">لا توجد اختبارات متاحة حالياً</p>
                                             </div>
                                         )}
                                     </div>
@@ -1244,16 +1250,16 @@ const CoursePage = () => {
                 {/* Enhanced User Action Prompts */}
                 {!user && !loading && (
                     <div className="fixed bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-50 w-full px-4 sm:px-0 sm:w-auto">
-                        <div className="bg-white/10 backdrop-blur-2xl rounded-2xl p-4 sm:p-6 md:p-8 border border-white/20 shadow-2xl max-w-sm sm:max-w-md w-full">
+                        <div className="bg-white/90 dark:bg-white/10 backdrop-blur-2xl rounded-2xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/20 shadow-2xl max-w-sm sm:max-w-md w-full">
                             <div className="text-center space-y-4 sm:space-y-6">
-                                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-blue-500/20 rounded-2xl flex items-center justify-center">
-                                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-blue-100 dark:bg-blue-500/20 rounded-2xl flex items-center justify-center">
+                                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 sm:mb-3">ابدأ رحلتك التعليمية</h2>
-                                    <p className="text-sm sm:text-base text-gray-300 leading-relaxed px-2">قم بتسجيل الدخول للوصول إلى المحتوى التعليمي الحصري ومتابعة تقدمك</p>
+                                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">ابدأ رحلتك التعليمية</h2>
+                                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed px-2">قم بتسجيل الدخول للوصول إلى المحتوى التعليمي الحصري ومتابعة تقدمك</p>
                                 </div>
                                 <Link href="/sign-in">
                                     <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-red-700 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 text-sm sm:text-base">
@@ -1267,16 +1273,16 @@ const CoursePage = () => {
 
                 {user && !isEnrolled && !loading && !courseInfo.isFree && (
                     <div className="fixed bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-50 w-full px-4 sm:px-0 sm:w-auto">
-                        <div className="bg-white/10 backdrop-blur-2xl rounded-2xl p-4 sm:p-6 md:p-8 border border-white/20 shadow-2xl max-w-sm sm:max-w-md w-full">
+                        <div className="bg-white/90 dark:bg-white/10 backdrop-blur-2xl rounded-2xl p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-white/20 shadow-2xl max-w-sm sm:max-w-md w-full">
                             <div className="text-center space-y-4 sm:space-y-6">
-                                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-orange-500/20 rounded-2xl flex items-center justify-center">
-                                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-orange-100 dark:bg-orange-500/20 rounded-2xl flex items-center justify-center">
+                                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 sm:mb-3">افتح جميع المميزات</h2>
-                                    <p className="text-sm sm:text-base text-gray-300 leading-relaxed px-2">اشترك الآن للحصول على وصول كامل لجميع الدروس والاختبارات والمواد التعليمية</p>
+                                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">افتح جميع المميزات</h2>
+                                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed px-2">اشترك الآن للحصول على وصول كامل لجميع الدروس والاختبارات والمواد التعليمية</p>
                                 </div>
                                 <Link href={`/payment/${courseInfo.nicknameforcourse || courseid}`}>
                                     <button className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 text-sm sm:text-base">
