@@ -241,7 +241,16 @@ const QuizData = ({ params }) => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    handleSubmitQuiz();
+                    // Show time up notification
+                    Swal.fire({
+                        title: 'انتهى الوقت!',
+                        text: 'سيتم تسليم الامتحان تلقائياً',
+                        icon: 'info',
+                        timer: 3000,
+                        showConfirmButton: false,
+                        timerProgressBar: true
+                    });
+                    handleSubmitQuiz(false, true); // isPartial = false, isTimeUp = true
                     return 0;
                 }
                 return prev - 1;
@@ -397,39 +406,31 @@ const QuizData = ({ params }) => {
     }, [quizComplete, loading, selectedAnswers, quiz, examInfo, timeLeft]);
 
     // Modified handleSubmitQuiz to support partial submit and show result
-    const handleSubmitQuiz = async (isPartial = false) => {
+    const handleSubmitQuiz = async (isPartial = false, isTimeUp = false) => {
         if (isSubmitting) return; // Prevent multiple submissions
-        setIsSubmitting(true);
-        // Check for unanswered questions
-        const totalQuestions = quiz.questions.length;
-        const answeredQuestions = Object.keys(selectedAnswers).length;
 
-        if (!isPartial && answeredQuestions < totalQuestions) {
-            const unansweredCount = totalQuestions - answeredQuestions;
-            await Swal.fire({
-                title: 'أسئلة غير مجابة',
-                html: `يرجى الإجابة على جميع الأسئلة.<br>عدد الأسئلة غير مجابة: ${unansweredCount}`,
+        // For time-up submissions, still show the confirmation for partial/navigation
+        if (isPartial && !isTimeUp) {
+            // This is navigation away - show confirmation
+            const result = await Swal.fire({
+                title: 'هل أنت متأكد من الخروج؟',
+                text: 'إذا خرجت الآن سيتم احتساب فقط الإجابات التي قمت بتسليمها حتى الآن.',
                 icon: 'warning',
-                confirmButtonText: 'حسناً'
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'نعم، أوافق بالخروج',
+                cancelButtonText: 'لا، ابق في الامتحان'
             });
-            return;
+
+            if (!result.isConfirmed) {
+                return;
+            }
         }
 
         try {
-            if (!isPartial) {
-                const result = await Swal.fire({
-                    title: 'هل أنت متأكد؟',
-                    text: 'بعد تسليم الاختبار لا يمكنك العودة للإجابات',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'نعم، سلم الاختبار',
-                    cancelButtonText: 'لا، عودة للاختبار'
-                });
-
-                if (!result.isConfirmed) return;
-            }
+            // Set submitting state
+            setIsSubmitting(true);
 
             const token = Cookies.get('token');
             if (!token) {
@@ -982,7 +983,43 @@ const QuizData = ({ params }) => {
 
                             {currentQuestion === quiz.questions.length - 1 ? (
                                 <button
-                                    onClick={handleSubmitQuiz}
+                                    onClick={async () => {
+                                        console.log('Submit button clicked');
+
+                                        // Check if all questions answered
+                                        const totalQuestions = quiz.questions.length;
+                                        const answeredQuestions = Object.keys(selectedAnswers).length;
+
+                                        if (answeredQuestions < totalQuestions) {
+                                            const unansweredCount = totalQuestions - answeredQuestions;
+                                            await Swal.fire({
+                                                title: 'أسئلة غير مجابة',
+                                                html: `يرجى الإجابة على جميع الأسئلة.<br>عدد الأسئلة غير مجابة: ${unansweredCount}`,
+                                                icon: 'warning',
+                                                confirmButtonText: 'حسناً'
+                                            });
+                                            return;
+                                        }
+
+                                        // Show confirmation dialog
+                                        const result = await Swal.fire({
+                                            title: 'هل أنت متأكد؟',
+                                            text: 'بعد تسليم الاختبار لا يمكنك العودة للإجابات',
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '#3085d6',
+                                            cancelButtonColor: '#d33',
+                                            confirmButtonText: 'نعم، سلم الاختبار',
+                                            cancelButtonText: 'لا، عودة للاختبار',
+                                            allowOutsideClick: false,
+                                            allowEscapeKey: false
+                                        });
+
+                                        if (result.isConfirmed) {
+                                            // Only call handleSubmitQuiz if confirmed
+                                            handleSubmitQuiz();
+                                        }
+                                    }}
                                     disabled={isSubmitting}
                                     className={`flex items-center gap-2 px-4 sm:px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
                                 >
