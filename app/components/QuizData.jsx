@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 const QuizData = ({ params }) => {
     const { quizid } = React.use(params);
@@ -27,6 +28,9 @@ const QuizData = ({ params }) => {
     const [showInstructions, setShowInstructions] = useState(false);
     const [remainingAttempts, setRemainingAttempts] = useState(null);
     const [examAvailability, setExamAvailability] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const router = useRouter();
 
     // Convert English letters to Arabic letters
     const convertToArabicLetter = (englishLetter) => {
@@ -313,12 +317,94 @@ const QuizData = ({ params }) => {
         };
     };
 
-    const handleSubmitQuiz = async () => {
+    // Prevent leaving the page during the exam
+    useEffect(() => {
+        if (quizComplete || loading) return;
+
+        // Handle browser/tab close or refresh
+        const handleBeforeUnload = (e) => {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        };
+
+        // Handle browser back/forward navigation
+        const handlePopState = async (e) => {
+            if (quizComplete) return;
+            e.preventDefault?.();
+            const result = await Swal.fire({
+                title: 'هل أنت متأكد من الخروج؟',
+                text: 'إذا خرجت الآن سيتم احتساب فقط الإجابات التي قمت بتسليمها حتى الآن.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'نعم، أوافق بالخروج',
+                cancelButtonText: 'لا، ابق في الامتحان'
+            });
+            if (result.isConfirmed) {
+                await handleSubmitQuiz(true);
+                // Do NOT navigate away, just show the result
+                // window.removeEventListener('beforeunload', handleBeforeUnload);
+                // window.history.go(-1);
+            } else {
+                // Stay on the page
+                window.history.pushState(null, '', window.location.pathname);
+            }
+        };
+
+        // Intercept link clicks (in-app navigation)
+        const handleClick = async (e) => {
+            const anchor = e.target.closest('a[href]');
+            if (!anchor) return;
+            if (anchor.href === window.location.href) return;
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            if (quizComplete) {
+                // window.location.href = anchor.href;
+                return;
+            }
+            const result = await Swal.fire({
+                title: 'هل أنت متأكد من الخروج؟',
+                text: 'إذا خرجت الآن سيتم احتساب فقط الإجابات التي قمت بتسليمها حتى الآن.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'نعم، أوافق بالخروج',
+                cancelButtonText: 'لا، ابق في الامتحان'
+            });
+            if (result.isConfirmed) {
+                await handleSubmitQuiz(true);
+                // Do NOT navigate away, just show the result
+                // window.removeEventListener('beforeunload', handleBeforeUnload);
+                // window.location.href = anchor.href;
+            }
+            // else: do nothing, stay on page
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('popstate', handlePopState);
+        document.addEventListener('click', handleClick, true);
+
+        window.history.pushState(null, '', window.location.pathname);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+            document.removeEventListener('click', handleClick, true);
+        };
+    }, [quizComplete, loading, selectedAnswers, quiz, examInfo, timeLeft]);
+
+    // Modified handleSubmitQuiz to support partial submit and show result
+    const handleSubmitQuiz = async (isPartial = false) => {
+        if (isSubmitting) return; // Prevent multiple submissions
+        setIsSubmitting(true);
         // Check for unanswered questions
         const totalQuestions = quiz.questions.length;
         const answeredQuestions = Object.keys(selectedAnswers).length;
 
-        if (answeredQuestions < totalQuestions) {
+        if (!isPartial && answeredQuestions < totalQuestions) {
             const unansweredCount = totalQuestions - answeredQuestions;
             await Swal.fire({
                 title: 'أسئلة غير مجابة',
@@ -330,18 +416,20 @@ const QuizData = ({ params }) => {
         }
 
         try {
-            const result = await Swal.fire({
-                title: 'هل أنت متأكد؟',
-                text: 'بعد تسليم الاختبار لا يمكنك العودة للإجابات',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'نعم، سلم الاختبار',
-                cancelButtonText: 'لا، عودة للاختبار'
-            });
+            if (!isPartial) {
+                const result = await Swal.fire({
+                    title: 'هل أنت متأكد؟',
+                    text: 'بعد تسليم الاختبار لا يمكنك العودة للإجابات',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'نعم، سلم الاختبار',
+                    cancelButtonText: 'لا، عودة للاختبار'
+                });
 
-            if (!result.isConfirmed) return;
+                if (!result.isConfirmed) return;
+            }
 
             const token = Cookies.get('token');
             if (!token) {
@@ -354,12 +442,35 @@ const QuizData = ({ params }) => {
             // Submit exam using new endpoint
             const submitResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/student-exam/submit/${quizid}`, {
                 answers: selectedAnswers,
-                timeSpent: timeSpent
+                timeSpent: timeSpent,
+                isPartial: !!isPartial
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
+
+            if (isPartial) {
+                // Show result page, do NOT redirect
+                const serverResults = submitResponse.data;
+                const clientResults = calculateResults();
+                setResults({
+                    ...clientResults,
+                    score: serverResults.results?.score || 0,
+                    percentage: serverResults.results?.percentage || 0,
+                    passed: serverResults.passed,
+                    showResults: examInfo?.showResultsImmediately !== false,
+                    serverMessage: serverResults.message,
+                    questionResults: serverResults.results?.questionResults || [],
+                    timeSpent: serverResults.results?.timeSpent || serverResults.timeSpent || null,
+                    examId: serverResults.results?.examId || serverResults.examId || quizid
+                });
+                setQuizComplete(true);
+                localStorage.removeItem(`quiz_${quizid}_answers`);
+                setIsSubmitting(false); // <-- Add this after successful submit
+
+                return;
+            }
 
             const serverResults = submitResponse.data;
 
@@ -384,6 +495,7 @@ const QuizData = ({ params }) => {
             console.error('Error submitting quiz:', error);
 
             let errorMessage = 'حدث خطأ أثناء حفظ النتائج';
+            setIsSubmitting(false); // <-- Add this in error case
 
             if (error.response) {
                 if (error.response.status === 401) {
@@ -477,7 +589,7 @@ const QuizData = ({ params }) => {
                             </div>
                         )}
 
-                        <div className="text-slate-300 leading-relaxed whitespace-pre-wrap">
+                        <div dir='rtl' className="text-slate-300 leading-relaxed whitespace-pre-wrap">
                             {examInfo.instructions}
                         </div>
                     </div>
@@ -867,12 +979,18 @@ const QuizData = ({ params }) => {
                                 ))}
                             </div>
 
+
                             {currentQuestion === quiz.questions.length - 1 ? (
                                 <button
                                     onClick={handleSubmitQuiz}
-                                    className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300"
+                                    disabled={isSubmitting}
+                                    className={`flex items-center gap-2 px-4 sm:px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
                                 >
-                                    <BsBookmarkCheck size={16} />
+                                    {isSubmitting ? (
+                                        <span className="animate-spin mr-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                                    ) : (
+                                        <BsBookmarkCheck size={16} />
+                                    )}
                                     تسليم الاختبار
                                 </button>
                             ) : (
