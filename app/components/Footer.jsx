@@ -109,7 +109,7 @@ const Footer = () => {
                         © {new Date().getFullYear()} منصة حسام ميرة للرياضيات - جميع الحقوق محفوظة
                     </p>
 
-                    <a href="https://kerlos.site/"
+                    <a href="https://kerlos.dev"
                         className="group flex items-center gap-2 px-4 py-1 rounded-full 
                                    bg-gradient-to-r from-green-600/20 to-blue-600/20 
                                    border border-green-600/30 backdrop-blur-sm
