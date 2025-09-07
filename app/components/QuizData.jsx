@@ -164,10 +164,10 @@ const QuizData = ({ params }) => {
             // Convert questions data to the required format
             let questionsToShow = examData.questions.map((q) => ({
                 qus: q.title,
-                opationA: q.options.a,
-                opationB: q.options.b,
-                opationC: q.options.c,
-                opationD: q.options.d,
+                opationa: q.options.a,
+                opationb: q.options.b,
+                opationc: q.options.c,
+                opationd: q.options.d,
                 imageUrl: q.imageUrl,
                 questionId: q._id // Store question ID for submission
             }));
@@ -312,10 +312,16 @@ const QuizData = ({ params }) => {
             // Note: We can't calculate correct/incorrect here since we don't have correct answers
             // This will be handled by the server
             return {
-                question: q.qus,
-                userAnswer: selectedAnswer,
-                userAnswerText: selectedAnswer ? q[`opation${selectedAnswer.toUpperCase()}`] : 'لم يتم الإجابة',
-                questionId: questionId
+                questionId: questionId,
+                questionTitle: q.qus,
+                questionOptions: {
+                    a: q.opationa,
+                    b: q.opationb,
+                    c: q.opationc,
+                    d: q.opationd
+                },
+                studentAnswer: selectedAnswer,
+                studentAnswerText: selectedAnswer ? q[`opation${selectedAnswer.toUpperCase()}`] : 'لم يتم الإجابة'
             };
         });
 
@@ -460,11 +466,12 @@ const QuizData = ({ params }) => {
                     score: serverResults.results?.score || 0,
                     percentage: serverResults.results?.percentage || 0,
                     passed: serverResults.passed,
-                    showResults: examInfo?.showResultsImmediately !== false,
+                    showResults: serverResults.results ? true : false,
                     serverMessage: serverResults.message,
                     questionResults: serverResults.results?.questionResults || [],
                     timeSpent: serverResults.results?.timeSpent || serverResults.timeSpent || null,
-                    examId: serverResults.results?.examId || serverResults.examId || quizid
+                    examId: serverResults.results?.examId || serverResults.examId || quizid,
+                    resultsRevealDate: serverResults.resultsRevealDate
                 });
                 setQuizComplete(true);
                 localStorage.removeItem(`quiz_${quizid}_answers`);
@@ -482,11 +489,12 @@ const QuizData = ({ params }) => {
                 score: serverResults.results?.score || 0,
                 percentage: serverResults.results?.percentage || 0,
                 passed: serverResults.passed,
-                showResults: examInfo?.showResultsImmediately !== false,
+                showResults: serverResults.results ? true : false,
                 serverMessage: serverResults.message,
                 questionResults: serverResults.results?.questionResults || [],
                 timeSpent: serverResults.results?.timeSpent || serverResults.timeSpent || null,
-                examId: serverResults.results?.examId || serverResults.examId || quizid
+                examId: serverResults.results?.examId || serverResults.examId || quizid,
+                resultsRevealDate: serverResults.resultsRevealDate
             });
 
             setQuizComplete(true);
@@ -717,11 +725,63 @@ const QuizData = ({ params }) => {
                                                                 )}
 
                                                                 <div className="grid grid-cols-1 gap-4">
+                                                                    {/* Show all answer choices */}
+                                                                    {result.questionOptions && (
+                                                                        <div className="mb-4">
+                                                                            <h4 className="text-sm font-medium text-slate-400 mb-2">الخيارات:</h4>
+                                                                            <div className="grid grid-cols-1 gap-2">
+                                                                                {Object.entries(result.questionOptions).map(([key, value]) => {
+                                                                                    const isStudentAnswer = result.studentAnswer === key;
+                                                                                    const isCorrectAnswer = result.correctAnswer === key;
+
+                                                                                    let bgColor = 'bg-slate-700/30';
+                                                                                    let textColor = 'text-slate-300';
+                                                                                    let borderColor = 'border-slate-600/50';
+
+                                                                                    if (isCorrectAnswer) {
+                                                                                        bgColor = 'bg-emerald-500/20';
+                                                                                        textColor = 'text-emerald-300';
+                                                                                        borderColor = 'border-emerald-500/40';
+                                                                                    }
+
+                                                                                    if (isStudentAnswer && !isCorrectAnswer) {
+                                                                                        bgColor = 'bg-red-500/20';
+                                                                                        textColor = 'text-red-300';
+                                                                                        borderColor = 'border-red-500/40';
+                                                                                    }
+
+                                                                                    return (
+                                                                                        <div key={key} className={`p-3 rounded-lg border-2 ${bgColor} ${borderColor} flex items-center gap-3`}>
+                                                                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isCorrectAnswer ? 'bg-emerald-500 text-white' :
+                                                                                                isStudentAnswer ? 'bg-red-500 text-white' :
+                                                                                                    'bg-slate-600 text-slate-300'
+                                                                                                }`}>
+                                                                                                {convertToArabicLetter(key)}
+                                                                                            </div>
+                                                                                            <span className={`flex-1 ${textColor}`}>{value}</span>
+                                                                                            {isStudentAnswer && (
+                                                                                                <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">
+                                                                                                    اختيارك
+                                                                                                </span>
+                                                                                            )}
+                                                                                            {isCorrectAnswer && (
+                                                                                                <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">
+                                                                                                    صحيح
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+
+                                                                    {/* Summary of student answer */}
                                                                     <div className={`p-3 sm:p-4 rounded-lg ${result.isCorrect ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
                                                                         <div className="text-sm text-slate-400 mb-1">
                                                                             <span className="font-medium">إجابتك: </span>
                                                                             <span className="text-slate-300">
-                                                                                {convertToArabicLetter(result.studentAnswer)} - {getAnswerText(result, result.studentAnswer)}
+                                                                                {result.studentAnswer ? convertToArabicLetter(result.studentAnswer) : 'لم يتم الإجابة'} - {result.studentAnswerText || getAnswerText(result, result.studentAnswer)}
                                                                             </span>
                                                                         </div>
                                                                     </div>
@@ -730,7 +790,7 @@ const QuizData = ({ params }) => {
                                                                             <div className="text-sm text-slate-400 mb-1">
                                                                                 <span className="font-medium">الإجابة الصحيحة: </span>
                                                                                 <span className="text-emerald-300">
-                                                                                    {convertToArabicLetter(result.correctAnswer)} - {getAnswerText(result, result.correctAnswer)}
+                                                                                    {convertToArabicLetter(result.correctAnswer)} - {result.correctAnswerText || getAnswerText(result, result.correctAnswer)}
                                                                                 </span>
                                                                             </div>
                                                                         </div>
@@ -749,7 +809,16 @@ const QuizData = ({ params }) => {
                                     <div className="text-6xl mb-4">✅</div>
                                     <h3 className="text-2xl font-bold text-emerald-400 mb-4">تم تسليم الامتحان بنجاح</h3>
                                     <p className="text-slate-400 mb-6">
-                                        سيتم إعلان النتائج لاحقاً من قبل المدرس
+                                        {results?.resultsRevealDate
+                                            ? `ستظهر النتائج التفصيلية في ${new Date(results.resultsRevealDate).toLocaleDateString('ar-EG', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}`
+                                            : "سيتم إعلان النتائج لاحقاً من قبل المدرس"
+                                        }
                                     </p>
                                 </div>
                             )}
@@ -924,7 +993,7 @@ const QuizData = ({ params }) => {
                                                 {option}
                                             </div>
                                             <span className="text-base sm:text-lg leading-relaxed">
-                                                {quiz.questions[currentQuestion][`opation${englishOption.toUpperCase()}`]}
+                                                {quiz.questions[currentQuestion][`opation${englishOption}`]}
                                             </span>
                                         </div>
                                     </motion.button>

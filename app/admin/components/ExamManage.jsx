@@ -15,26 +15,26 @@ import Cookies from 'js-cookie';
 // Date conversion utility functions for Egypt timezone (UTC+2)
 const convertUTCToLocalDateTimeInput = (utcDate) => {
     if (!utcDate) return '';
-    
+
     // Create a new date object and adjust for Egypt timezone (UTC+2)
     const localDate = new Date(utcDate);
-    
+
     // Format for datetime-local input (YYYY-MM-DDThh:mm)
     const year = localDate.getFullYear();
     const month = String(localDate.getMonth() + 1).padStart(2, '0');
     const day = String(localDate.getDate()).padStart(2, '0');
     const hours = String(localDate.getHours()).padStart(2, '0');
     const minutes = String(localDate.getMinutes()).padStart(2, '0');
-    
+
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 const convertLocalToUTCDate = (localDateString) => {
     if (!localDateString) return '';
-    
+
     // Create Date object from the local datetime-local input
     const localDate = new Date(localDateString);
-    
+
     // Convert to ISO string for server storage (will be in UTC)
     return localDate.toISOString();
 };
@@ -311,6 +311,7 @@ const ExamManage = () => {
         maxAttempts: -1,
         isUnlimitedAttempts: true,
         showResultsImmediately: true,
+        resultsRevealDate: '',
         shuffleQuestions: false,
         isActive: true,
         startDate: '',
@@ -533,64 +534,65 @@ const ExamManage = () => {
         });
     };
 
-   const handleEditExam = async (exam) => {
-    try {
-        // Fetch the full exam data first
-        const response = await api.get(`/exam/${exam._id}`);
-        const fullExam = response.data;
+    const handleEditExam = async (exam) => {
+        try {
+            // Fetch the full exam data first
+            const response = await api.get(`/exam/${exam._id}`);
+            const fullExam = response.data;
 
-        setIsEditing(true);
-        setEditingExamId(exam._id);
-        setActiveTab('create'); // Switch to create tab for editing
+            setIsEditing(true);
+            setEditingExamId(exam._id);
+            setActiveTab('create'); // Switch to create tab for editing
 
-        // Handle courseId properly - check if it's an object or string
-        let courseId = '';
-        if (fullExam.courseId) {
-            if (typeof fullExam.courseId === 'object' && fullExam.courseId._id) {
-                courseId = fullExam.courseId._id;
-            } else if (typeof fullExam.courseId === 'string') {
-                courseId = fullExam.courseId;
+            // Handle courseId properly - check if it's an object or string
+            let courseId = '';
+            if (fullExam.courseId) {
+                if (typeof fullExam.courseId === 'object' && fullExam.courseId._id) {
+                    courseId = fullExam.courseId._id;
+                } else if (typeof fullExam.courseId === 'string') {
+                    courseId = fullExam.courseId;
+                }
             }
+
+            // Set the form data
+            setNewExam({
+                title: fullExam.title,
+                duration: fullExam.duration,
+                visibility: fullExam.visibility || 'public',
+                courseId: courseId,
+                passingScore: fullExam.passingScore || 60,
+                maxAttempts: fullExam.maxAttempts || -1,
+                isUnlimitedAttempts: fullExam.isUnlimitedAttempts !== false,
+                showResultsImmediately: fullExam.showResultsImmediately !== false,
+                resultsRevealDate: fullExam.resultsRevealDate ? convertUTCToLocalDateTimeInput(new Date(fullExam.resultsRevealDate)) : '',
+                shuffleQuestions: fullExam.shuffleQuestions || false,
+                isActive: fullExam.isActive !== false,
+                // Convert UTC dates to Egypt local time for display in the form
+                startDate: fullExam.startDate ? convertUTCToLocalDateTimeInput(new Date(fullExam.startDate)) : '',
+                endDate: fullExam.endDate ? convertUTCToLocalDateTimeInput(new Date(fullExam.endDate)) : '',
+                instructions: fullExam.instructions || '',
+                questions: fullExam.questions.map(q => ({
+                    title: q.title,
+                    options: {
+                        a: q.options.a || '',
+                        b: q.options.b || '',
+                        c: q.options.c || '',
+                        d: q.options.d || ''
+                    },
+                    correctAnswer: q.correctAnswer,
+                    imageUrl: q.imageUrl,
+                    imageFile: null,
+                    imagePreview: q.imageUrl
+                }))
+            });
+
+            // Debug log to see what courseId we're setting
+            console.log('Setting courseId:', courseId, 'from fullExam.courseId:', fullExam.courseId);
+        } catch (error) {
+            console.error('Error fetching exam details:', error);
+            toast.error('حدث خطأ في تحميل بيانات الامتحان');
         }
-
-        // Set the form data
-        setNewExam({
-            title: fullExam.title,
-            duration: fullExam.duration,
-            visibility: fullExam.visibility || 'public',
-            courseId: courseId,
-            passingScore: fullExam.passingScore || 60,
-            maxAttempts: fullExam.maxAttempts || -1,
-            isUnlimitedAttempts: fullExam.isUnlimitedAttempts !== false,
-            showResultsImmediately: fullExam.showResultsImmediately !== false,
-            shuffleQuestions: fullExam.shuffleQuestions || false,
-            isActive: fullExam.isActive !== false,
-            // Convert UTC dates to Egypt local time for display in the form
-            startDate: fullExam.startDate ? convertUTCToLocalDateTimeInput(new Date(fullExam.startDate)) : '',
-            endDate: fullExam.endDate ? convertUTCToLocalDateTimeInput(new Date(fullExam.endDate)) : '',
-            instructions: fullExam.instructions || '',
-            questions: fullExam.questions.map(q => ({
-                title: q.title,
-                options: {
-                    a: q.options.a || '',
-                    b: q.options.b || '',
-                    c: q.options.c || '',
-                    d: q.options.d || ''
-                },
-                correctAnswer: q.correctAnswer,
-                imageUrl: q.imageUrl,
-                imageFile: null,
-                imagePreview: q.imageUrl
-            }))
-        });
-
-        // Debug log to see what courseId we're setting
-        console.log('Setting courseId:', courseId, 'from fullExam.courseId:', fullExam.courseId);
-    } catch (error) {
-        console.error('Error fetching exam details:', error);
-        toast.error('حدث خطأ في تحميل بيانات الامتحان');
-    }
-};
+    };
     const handleDeleteExam = async (examId) => {
         if (window.confirm('هل أنت متأكد من حذف هذا الامتحان؟')) {
             try {
@@ -630,6 +632,9 @@ const ExamManage = () => {
             formData.append('maxAttempts', newExam.isUnlimitedAttempts ? -1 : newExam.maxAttempts);
             formData.append('isUnlimitedAttempts', newExam.isUnlimitedAttempts);
             formData.append('showResultsImmediately', newExam.showResultsImmediately);
+            if (newExam.resultsRevealDate && newExam.resultsRevealDate.trim() !== '') {
+                formData.append('resultsRevealDate', convertLocalToUTCDate(newExam.resultsRevealDate));
+            }
             formData.append('shuffleQuestions', newExam.shuffleQuestions);
             formData.append('isActive', newExam.isActive);
             if (newExam.startDate && newExam.startDate.trim() !== '') {
@@ -680,6 +685,7 @@ const ExamManage = () => {
                 maxAttempts: newExam.isUnlimitedAttempts ? -1 : newExam.maxAttempts,
                 isUnlimitedAttempts: newExam.isUnlimitedAttempts,
                 showResultsImmediately: newExam.showResultsImmediately,
+                resultsRevealDate: newExam.resultsRevealDate,
                 shuffleQuestions: newExam.shuffleQuestions,
                 isActive: newExam.isActive,
                 startDate: newExam.startDate,
@@ -710,6 +716,7 @@ const ExamManage = () => {
                 maxAttempts: -1,
                 isUnlimitedAttempts: true,
                 showResultsImmediately: true,
+                resultsRevealDate: '',
                 shuffleQuestions: false,
                 isActive: true,
                 startDate: '',
@@ -1076,11 +1083,11 @@ const QuestionManagement = ({
                                 })}
                                 className="w-full p-4 bg-white/80 border-2 border-gray-200 rounded-2xl text-gray-800 focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
                             >
-                                 <option className=' text-black' value="">اختر الإجابة الصحيحة</option>
+                                <option className=' text-black' value="">اختر الإجابة الصحيحة</option>
                                 {Object.keys(currentQuestion.options).map((key, idx) => {
                                     const arabicOptions = ['أ', 'ب', 'ج', 'د'];
                                     return (
-                                         <option className=' text-black' key={key} value={key}>
+                                        <option className=' text-black' key={key} value={key}>
                                             الخيار {arabicOptions[idx]}
                                         </option>
                                     );
@@ -1242,9 +1249,9 @@ const ExamCreationForm = ({
                                 onChange={(e) => setNewExam({ ...newExam, visibility: e.target.value })}
                                 className="w-full p-4 bg-white/80 border-2 border-gray-200 rounded-2xl text-gray-800 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white dark:focus:border-blue-500/50"
                             >
-                                 <option className=' text-black' value="public">عام - متاح للجميع</option>
-                                 <option className=' text-black' value="course_only">خاص بكورس - للمشتركين فقط</option>
-                                 <option className=' text-black' value="both">مختلط - متاح في الكورس وعام</option>
+                                <option className=' text-black' value="public">عام - متاح للجميع</option>
+                                <option className=' text-black' value="course_only">خاص بكورس - للمشتركين فقط</option>
+                                <option className=' text-black' value="both">مختلط - متاح في الكورس وعام</option>
                             </select>
                         </div>
                     </div>
@@ -1266,9 +1273,9 @@ const ExamCreationForm = ({
                                 className="w-full p-4 bg-white/80 border-2 border-gray-200 rounded-2xl text-gray-800 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white dark:focus:border-blue-500/50"
                                 required={newExam.visibility === 'course_only'}
                             >
-                                 <option className=' text-black' value="">اختر كورس...</option>
+                                <option className=' text-black' value="">اختر كورس...</option>
                                 {courses.map(course => (
-                                     <option className=' text-black' key={course._id} value={course._id}>
+                                    <option className=' text-black' key={course._id} value={course._id}>
                                         {course.name} - {course.level}
                                     </option>
                                 ))}
@@ -1423,6 +1430,25 @@ const ExamCreationForm = ({
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">تفعيل الامتحان</span>
                     </label>
                 </div>
+
+                {/* Results Reveal Date - Only show if results are not shown immediately */}
+                {!newExam.showResultsImmediately && (
+                    <div className="mt-6">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">
+                            تاريخ إظهار النتائج التفصيلية
+                        </label>
+                        <input
+                            type="datetime-local"
+                            value={newExam.resultsRevealDate}
+                            onChange={(e) => setNewExam({ ...newExam, resultsRevealDate: e.target.value })}
+                            className="w-full p-4 bg-white/80 border-2 border-gray-200 rounded-2xl text-gray-800 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
+                            placeholder="اختر تاريخ ووقت إظهار النتائج"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            إذا تم تحديد تاريخ، ستظهر النتائج التفصيلية للطلاب في هذا التوقيت حتى لو كان "إظهار النتائج فوراً" مغلق
+                        </p>
+                    </div>
+                )}
             </motion.div>
 
             {/* Questions Section */}
