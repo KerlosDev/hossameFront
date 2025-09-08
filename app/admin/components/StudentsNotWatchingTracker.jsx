@@ -559,7 +559,7 @@ export default function StudentsNotWatchingTracker() {
     }, []);
 
     const openStudentProfile = useCallback((studentId) => {
-        const url = `http://localhost:3000/admin/${studentId}`;
+        const url = `https://www.hossammirah.com/admin/${studentId}`;
         window.open(url, '_blank');
     }, []);
 
