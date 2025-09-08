@@ -60,14 +60,21 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
             label: "احصائيات الامتحانات",
             icon: <IoIosAnalytics size={20} />,
             tab: 'exam',
-            roles: ['admin','follow'] // Only admin can see exam analytics
+            roles: ['admin', 'follow'] // Only admin can see exam analytics
         },
         {
             id: 8,
             label: " متابعة الطلاب",
             icon: <User size={20} />,
             tab: 'followup',
-            roles: ['admin','follow'] // Only admin can follow up students
+            roles: ['admin', 'follow'] // Only admin can follow up students
+        },
+        {
+            id: 14,
+            label: "الطلاب المتراكمين",
+            icon: <AlertTriangle size={20} />,
+            tab: 'studentsNotWatching',
+            roles: ['admin'] // Only admin can track students not watching
         },
         {
             id: 9,

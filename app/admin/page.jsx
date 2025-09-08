@@ -19,6 +19,7 @@ import AdminBooks from '../components/AdminBooks';
 import NotificationManagement from './components/NotificationManagement';
 import CoursesAnalyses from './components/CoursesAnalyses';
 import WalletSettings from './components/WalletSettings';
+import StudentsNotWatchingTracker from './components/StudentsNotWatchingTracker';
 
 
 export default function MathLMSAdmin() {
@@ -26,11 +27,7 @@ export default function MathLMSAdmin() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState(null); // Start as null, set after role check
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [currentSection, setCurrentSection] = useState('overview');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
+    const [isLoading, setIsLoading] = useState(true); 
 
     // Admin profile data
     const [adminData, setAdminData] = useState({
@@ -92,9 +89,9 @@ export default function MathLMSAdmin() {
         if (savedTab && adminData.userRole) {
             // Check if the saved tab is allowed for the user's role
             const allowedTabs = {
-                admin: ['dashboard', 'students', 'courses', 'examMangae', 'payments', 'analyses', 'exam', 'followup', 'offers', 'books', 'notifications', 'settings'],
+                admin: ['dashboard', 'students', 'courses', 'examMangae','studentsNotWatching', 'payments', 'analyses', 'exam', 'followup', 'offers', 'books', 'notifications', 'settings'],
                 instructor: ['examMangae'],
-                follow: ['followup']
+                follow: ['followup','studentsNotWatching']
             };
 
             if (allowedTabs[adminData.userRole]?.includes(savedTab)) {
@@ -234,6 +231,11 @@ export default function MathLMSAdmin() {
 
                             {activeTab === 'settings' && adminData.userRole === 'admin' && (
                                 <WalletSettings />
+                            )}
+                            {activeTab === 'studentsNotWatching' && (adminData.userRole === 'admin' || adminData.userRole === 'follow') && (
+                                <div className="space-y-6">
+                                    <StudentsNotWatchingTracker />
+                                </div>
                             )}
                         </main>
                     </div>
