@@ -767,7 +767,7 @@ export default function StudentsNotWatchingTracker() {
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                عدد الدروس الأخيرة
+                                عدد الدروس 
                             </label>
                             <select
                                 value={lessonCount}
