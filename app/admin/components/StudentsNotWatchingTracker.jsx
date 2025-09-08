@@ -774,14 +774,14 @@ export default function StudentsNotWatchingTracker() {
                                 onChange={(e) => setLessonCount(parseInt(e.target.value))}
                                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                             >
-                                <option value={2}>آخر درسين</option>
-                                <option value={3}>آخر 3 دروس</option>
-                                <option value={5}>آخر 5 دروس</option>
-                                <option value={10}>آخر 10 دروس</option>
-                                <option value={15}>آخر 15 درس</option>
-                                <option value={20}>آخر 20 درس</option>
-                                <option value={25}>آخر 25 درس</option>
-                                <option value={30}>آخر 30 درس</option>
+                                <option value={2}>اول درسين</option>
+                                <option value={3}>اول 3 دروس</option>
+                                <option value={5}>اول 5 دروس</option>
+                                <option value={10}>اول 10 دروس</option>
+                                <option value={15}>اول 15 درس</option>
+                                <option value={20}>اول 20 درس</option>
+                                <option value={25}>اول 25 درس</option>
+                                <option value={30}>اول 30 درس</option>
                             </select>
                         </div>
 
@@ -961,7 +961,7 @@ export default function StudentsNotWatchingTracker() {
                                                             </span>
                                                         </div>
                                                         <p className="text-white/90">
-                                                            {course.studentsNotWatchingCount || 0} من {course.totalEnrolledStudents || 0} طالب لم يشاهد آخر {course.lastLessonsCount || 0} دروس
+                                                            {course.studentsNotWatchingCount || 0} من {course.totalEnrolledStudents || 0} طالب لم يشاهد اول {course.lastLessonsCount || 0} دروس
                                                             {course.averageProgressPercentage !== undefined && (
                                                                 <span className="ml-2">• متوسط التقدم: {course.averageProgressPercentage}%</span>
                                                             )}
