@@ -74,7 +74,9 @@ export default function AdminSidebar({ activeTab, setActiveTab, adminData, showL
             label: "الطلاب المتراكمين",
             icon: <AlertTriangle size={20} />,
             tab: 'studentsNotWatching',
-            roles: ['admin'] // Only admin can track students not watching
+            roles: ['admin', 'follow'
+                   
+                   ] // Only admin can track students not watching
         },
         {
             id: 9,
